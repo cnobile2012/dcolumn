@@ -1,0 +1,25 @@
+# *** IMPORTANT ***
+# numpy needs to be installed by hand before running this file.
+# Be in your virtualenv then run:
+# $ pip install numpy
+#
+# Also found issues with compiling two other packages on OSX Mavericks...
+# On Linux it just works no muss no fuss.
+#
+# CPPFLAGS=-I/opt/X11/include/freetype2 pip install matplotlib
+# CPPFLAGS=-I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/include/sasl pip install python-ldap
+#
+# MUST DO ABOVE BEFORE RUNNING THIS FILE WITH:
+# pip install -r requirements/...
+
+# Dugh
+django
+
+# Provides Django admin documentation support.
+docutils
+
+# Postgres
+psycopg2
+
+# Python shell
+ipython

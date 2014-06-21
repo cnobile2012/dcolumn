@@ -1,0 +1,3 @@
+# Include the bare minimum.
+-r base.txt
+

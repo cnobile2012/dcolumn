@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load url from future %}
+{% load autodisplay %}
+{% block title %}Test Dynamic Columns{% endblock %}
+{% block content %}
+  <h2>Test Dynamic Columns</h2>
+  <div class="wrapper">
+      <div class="actions">
+{% spaceless %}
+{% if actions %}
+        <ul>
+{% for action in actions %}
+          <li><a href="{{ action.url }}">{{ action.name }}</a></li>
+{% if not forloop.last %}
+          <li><span>,&nbsp;&nbsp;</span></li>
+{% endif %}
+{% endfor %}
+        </ul>        
+{% endif %}
+{% endspaceless %}
+      </div>
+      <div class="container">
+        <div class="message">
+{% if info_message.created %}
+          <div>The record has been created and is displayed below.</div>
+{% elif info_message.updated %}
+          <div>The record has been updated and is displayed below.</div>
+{% endif %}
+        </div>
+        <div class="mutate-input top-left">
+          <ul>
+{% for relation in relations.values %}
+{% if relation.location == dynamicColumn.DISPLAY_LOCATION_MAP.0 %}
+            <li>
+              <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
+              {% auto_display relation options=dynamicColumns display=True %}
+            </li>
+{% endif %}
+{% endfor %}
+          </ul>
+        </div>
+        <div class="mutate-input middle-left">
+          <ul>
+{% for relation in relations.values %}
+{% if relation.location == dynamicColumn.DISPLAY_LOCATION_MAP.2 %}
+            <li>
+              <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
+              {% auto_display relation options=dynamicColumns display=True %}
+            </li>
+{% endif %}
+{% endfor %}
+          </ul>
+        </div>
+        <div class="mutate-input bottom-left">
+          <ul>
+{% for relation in relations.values %}
+{% if relation.location == dynamicColumn.DISPLAY_LOCATION_MAP.4 %}
+            <li>
+              <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
+              {% auto_display relation options=dynamicColumns display=True %}
+            </li>
+{% endif %}
+{% endfor %}
+          </ul>
+        </div>
+      </div> <!-- div.container -->
+  </div> <!-- div.wrapper -->
+{% endblock %}

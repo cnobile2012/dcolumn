@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load url from future %}
+{% load autodisplay %}
+{% block title %}Test Dynamic Columns{% endblock %}
+{% block head_extras %}
+    <!--
+    <script src="{{ STATIC_URL }}js/inheritance.js"></script>
+    <script src="{{ STATIC_URL }}js/ajaxbase.js"></script>
+    -->
+{% endblock %}
+{% block content %}
+  <h2>Test Dynamic Columns</h2>
+  <div class="wrapper">
+{% if object %}
+    <form name="parent-update" method="post"
+          action="{% url 'parent-update' object.pk %}">
+{% else %}
+    <form name="parent-update" method="post"
+          action="{% url 'parent-create' %}">
+{% endif %}
+      <div class="container">
+        {% csrf_token %}
+        <div id="message">
+{% if form.errors %}
+          <ul class="errorlist">
+            <li>Invalid data, please see below for details.</li>
+          </ul>
+{% endif %}
+        </div>
+        <div class="dynamic-container top-container">
+          <ul>
+{% for relation in relations.values %}
+{% if relation.location == dynamicColumn.DISPLAY_LOCATION_MAP.0 %}
+            <li>
+              <label for="id-{{ relation.slug }}">
+                {{ relation.name }}
+              </label>
+              {% auto_display relation options=dynamicColumns %}
+              {% combine_contexts form.errors relation.slug %}
+            </li>
+{% endif %}
+{% endfor %}
+          </ul>
+        </div>
+        <div class="dynamic-container center-container">
+          <ul>
+{% for relation in relations.values %}
+{% if relation.location == dynamicColumn.DISPLAY_LOCATION_MAP.1 %}
+            <li>
+              <label for="id-{{ relation.slug }}">
+                {{ relation.name }}
+              </label>
+              {% auto_display relation options=dynamicColumns %}
+              {% combine_contexts form.errors relation.slug %}
+            </li>
+{% endif %}
+{% endfor %}
+          </ul>
+        </div>
+        <div class="dynamic-container bottom-container">
+          <ul>
+{% for relation in relations.values %}
+{% if relation.location == dynamicColumn.DISPLAY_LOCATION_MAP.2 %}
+            <li>
+              <label for="id-{{ relation.slug }}">
+                {{ relation.name }}
+              </label>
+              {% auto_display relation options=dynamicColumns %}
+              {% combine_contexts form.errors relation.slug %}
+            </li>
+{% endif %}
+{% endfor %}
+          </ul>
+        </div>
+      </div> <!-- div.container -->
+      <div id="submit">
+{% if object %}
+        <button type="submit"
+                class="parent-submit"
+                uri="{% url 'parent-update' object.pk %}">Update</button>
+{% else %}
+        <button type="submit"
+                class="parent-submit"
+                uri="{% url 'parent-create' %}">Save</button>
+{% endif %}
+      </div> <!-- div#submit -->
+    </form>
+  </div> <!-- div.wrapper -->
+{% endblock %}

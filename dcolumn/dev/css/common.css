@@ -1,0 +1,153 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  padding-bottom: 3em;
+  background-color: #f5f0f0;
+  font-size: medium;
+}
+
+h2 {
+  display: block;
+  margin: 10px auto;
+  width: 270px;
+}
+
+.wrapper {
+  width: 80%;
+  margin: 0 auto;
+  padding: .25em .75em;
+}
+
+.wrapper .actions {
+  width: 96%;
+  margin: 5px auto;
+  padding: .25em .75em;
+  font-size: 100%;
+  border: 1px solid #999;
+  -moz-border-radius: 10px 10px 10px 10px;
+  -webkit-border-radius: 10px 10px 10px 10px;
+  -khtml-border-radius: 10px 10px 10px 10px;
+  border-radius: 10px 10px 10px 10px;
+  background-color: #eeefd0;
+}
+
+.actions ul {
+  margin: 5px 0;
+  padding: 0;
+  text-align: center;
+}
+
+.actions ul li {
+  display: inline-block;
+}
+
+.actions span,
+.actions a {
+  margin: 0;
+  text-align: center;
+  font-weight: bold;
+  color: rgb(146, 113, 28);
+  text-decoration: none;
+}
+
+.actions a:hover {
+  color: blue;
+}
+
+.container {
+  display: block;
+  border: 1px solid #999;
+  padding: .25em .75em;
+  /* Negative margin tucks the table beneath the faux tab. */
+  margin: 0 auto;
+  width: 96%;
+  background-color: white;
+  -moz-border-radius: 10px 10px 10px 10px;
+  -webkit-border-radius: 10px 10px 10px 10px;
+  -khtml-border-radius: 10px 10px 10px 10px;
+  border-radius: 10px 10px 10px 10px;
+  background-color: #eeefd0;
+}
+
+.container .message div {
+  width: 100%;
+  margin: 5px 0;
+  text-align: center;
+  color: deeppink;
+}
+
+ul.errorlist {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.errorlist li {
+  height: 14px;
+  font-style: italic;
+  font-size: 80%;
+  list-style-type: none;
+  border: 4px double red;
+  padding: .25em;
+  background-color: #ffcfcf;
+}
+
+.dynamic-container {
+  display: block;
+  margin: 5px 0;
+  padding-right: 40px;
+  border: 1px solid #999;
+}
+
+.dynamic-container ul {
+  list-style-type: none;
+}
+
+.dynamic-container ul li {
+  margin: 6px 0;
+  min-height: 20px;
+  clear: left;
+}
+
+.dynamic-container label {
+  display: block;
+  float: left;
+  width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.dynamic-container label:after {
+  content: " ............................................................"
+}
+
+.dynamic-container select,
+.dynamic-container textarea,
+.dynamic-container input {
+  margin-left: 5px;
+}
+
+.dynamic-container span {
+  float: left;
+  min-height: 18px;
+  margin-top: 3px;
+  margin-left: 5px;
+  font-size: 80%
+}
+
+.large-text-field {
+  width: 610px
+}
+
+#submit button {
+  display: block;
+  width: 12em;
+  margin: 10px auto 0 auto;
+}
+
+button {
+  background-color: #eeefd0;
+  font-size: 80%;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+}
