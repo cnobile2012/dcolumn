@@ -24,7 +24,7 @@ var DynamicColumn = Class.extend({
   ADMIN_KEYVALUE_CLASS: "td.field-dynamic_column select",
 
   init: function(msg, uri) {
-    this._super();
+    //this._super();
     this.uri = uri;
     this.data = null;
     this._initFlag = false;
@@ -61,12 +61,29 @@ var DynamicColumn = Class.extend({
     }
   },
 
+  _csrfSafeMethod: function(method) {
+    // These HTTP methods do not require CSRF protection.
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+  },
+
+  _setHeader: function() {
+    $.ajaxSetup({
+      crossDomain: false,
+      beforeSend: function(xhr, settings) {
+        if (!this._csrfSafeMethod(settings.type)) {
+          xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
+        }
+      }.bindObj(this)
+    });
+  },
+
   /* Get the dynamic columns */
   _sendDynamicColumnRequest: function() {
+    this._setHeader();
     var options = {
       url: this._assembleURI(this.uri),
       cache: false,
-      type: 'POST',
+      type: 'GET',
       contentType: 'json',
       //processData: false,
       timeout: 20000, // 20 seconds

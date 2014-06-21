@@ -55,8 +55,8 @@ class KeyValueInline(admin.TabularInline):
     ordering = ('parent',)
 
     class Media:
-        js = ('js/jquery-2.0.3.min.js', 'js/inheritance.js', 'js/ajaxbase.js',
-              'js/dynamic-column.js',)
+        js = ('js/jquery-2.0.3.min.js', 'js/jquery.cookie.js',
+              'js/inheritance.js', 'js/dynamic-column.js',)
 
 
 #
