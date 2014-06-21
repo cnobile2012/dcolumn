@@ -83,9 +83,9 @@ class DynamicColumnForm(forms.ModelForm):
         value_type = cleaned_data.get(u'value_type')
         relation = cleaned_data.get(u'relation')
 
-        if value_type == DynamicColumn.FORIEGN_KEY:
+        if value_type == DynamicColumn.CHOICE:
             if relation is None:
-                msg = (u"If the Value Type is a Foreign Key then a relation "
+                msg = (u"If the Value Type is a Choice then a relation "
                        u"must be entered.")
                 raise forms.ValidationError(msg)
         else:
@@ -99,14 +99,14 @@ class DynamicColumnForm(forms.ModelForm):
 #
 class ParentForm(forms.ModelForm):
     SPECIAL_CASE_MAP = {DynamicColumn.BOOLEAN: u'1',
-                        DynamicColumn.FORIEGN_KEY: u'0'}
-    MAX_LENGTH_MAP = {DynamicColumn.INTEGER: 20,
-                      DynamicColumn.CHARACTER: 250,
-                      DynamicColumn.TEXT: 2000,
+                        DynamicColumn.CHOICE: u'0'}
+    MAX_LENGTH_MAP = {DynamicColumn.NUMBER: 20,
+                      DynamicColumn.TEXT: 250,
+                      DynamicColumn.TEXT_BLOCK: 2000,
                       DynamicColumn.DATE: 20,
                       DynamicColumn.BOOLEAN: 1,
                       DynamicColumn.FLOAT: 305,
-                      DynamicColumn.FORIEGN_KEY: 12}
+                      DynamicColumn.CHOICE: 12}
 
     class Meta:
         model = Parent
@@ -170,7 +170,7 @@ class ParentForm(forms.ModelForm):
     def validate_value_type(self, relation, error_class, key, value):
         value_type = relation.get(u'value_type')
 
-        if value_type == DynamicColumn.INTEGER:
+        if value_type == DynamicColumn.NUMBER:
             if value and not value.isdigit():
                 self._errors[key] = self.error_class(
                     [u"{} field is not a number.".format(

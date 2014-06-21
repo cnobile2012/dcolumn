@@ -4,7 +4,7 @@
 
 """
 The objects in this module mimic database models, so they will work using
-the same code as Foreign Keys.
+the same code as Choices.
 """
 
 

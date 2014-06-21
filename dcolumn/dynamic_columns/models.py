@@ -61,39 +61,39 @@ class DynamicColumnManager(StatusModelManagerMixin):
         result = {}
 
         for record in self.active():
-            if record.value_type == self.model.FORIEGN_KEY:
-                name = self.model.FORIEGN_KEY_RELATION_MAP.get(record.relation)
+            if record.value_type == self.model.CHOICE:
+                name = self.model.CHOICE_RELATION_MAP.get(record.relation)
                 result[name] = record.slug
 
         return result
 
 
 class DynamicColumn(UserModelMixin, TimeModelMixin, StatusModelMixin):
-    INTEGER = 0
-    CHARACTER = 1
-    TEXT = 2
+    BOOLEAN = 1
+    CHOICE = 2
     DATE = 3
-    BOOLEAN = 4
-    FLOAT = 5
-    FORIEGN_KEY = 6
+    FLOAT = 4
+    NUMBER = 5
+    TEXT = 6
+    TEXT_BLOCK = 7
     VALUE_TYPES = (
         (BOOLEAN, _("Boolean")),
-        (CHARACTER, _("Character")),
+        (CHOICE, _("Choice")),
         (DATE, _("Date")),
-        (FLOAT, _("Float")),
-        (FORIEGN_KEY, _("Foriegn Key")),
-        (INTEGER, _("Integer")),
+        (FLOAT, _("Floating Point")),
+        (NUMBER, _("Number")),
         (TEXT, _("Text")),
+        (TEXT_BLOCK, _("Text Block")),
         )
     VALUE_TYPES_MAP = dict(VALUE_TYPES)
     BOOK = 1
     LANGUAGE = 2
-    FORIEGN_KEY_RELATION = (
+    CHOICE_RELATION = (
         (BOOK, Book.__name__),
         (LANGUAGE, Language.__name__)
         )
-    FORIEGN_KEY_RELATION_MAP = dict(FORIEGN_KEY_RELATION)
-    # This object is used in the AJAX View to determine Foriegn Key relations.
+    CHOICE_RELATION_MAP = dict(CHOICE_RELATION)
+    # This object is used in the AJAX View to determine Choice relations.
     MODEL_MAP = {
         Book.__name__: (Book, u'title'),
         Language.__name__: (Language, u'name')
@@ -113,13 +113,13 @@ class DynamicColumn(UserModelMixin, TimeModelMixin, StatusModelMixin):
         verbose_name=_("Name"), help_text=_("Enter a column name."))
     slug = models.SlugField(verbose_name=_("Slug"), editable=False)
     value_type = models.IntegerField(
-        verbose_name=_("Value Type"), choices=VALUE_TYPES, default=CHARACTER,
+        verbose_name=_("Value Type"), choices=VALUE_TYPES, default=TEXT,
         help_text=_("Choose the value type."))
     relation = models.IntegerField(
-        verbose_name=_("Foriegn Key Relation"), choices=FORIEGN_KEY_RELATION,
+        verbose_name=_("Choice Relation"), choices=CHOICE_RELATION,
         null=True, blank=True,
-        help_text=_("Choose the Foriegn Key Relation type."))
-    required = models.BooleanField(verbose_name=_("Value Required"))
+        help_text=_("Choose the Choice Relation type."))
+    required = models.BooleanField(verbose_name=_("Required Field"))
     location = models.IntegerField(
         verbose_name=_("Display Location"), choices=DISPLAY_LOCATION,
         help_text=_("Choose a display location."))
@@ -143,7 +143,7 @@ class DynamicColumn(UserModelMixin, TimeModelMixin, StatusModelMixin):
         result = ''
 
         if self.relation is not None:
-            result = dict(self.FORIEGN_KEY_RELATION).get(self.relation, '')
+            result = dict(self.CHOICE_RELATION).get(self.relation, '')
 
         return result
     _relation_producer.short_description = _("Relation")
@@ -187,7 +187,7 @@ class DynamicColumnItemManager(StatusModelManagerMixin):
 
     def get_active_relation_items(self):
         records = self.get_dynamic_columns(DYNAMIC_COLUMN_ITEM_NAME)
-        return [DynamicColumn.FORIEGN_KEY_RELATION_MAP.get(record.relation)
+        return [DynamicColumn.CHOICE_RELATION_MAP.get(record.relation)
                 for record in records if record.relation]
 
 

@@ -118,29 +118,14 @@ var DynamicColumn = Class.extend({
     var id = $input.attr('id');
     var name = $input.attr('name');
     var $obj = null;
-    var value_type = 1; // This is the default type.
+    var value_type = 6; // This is the default type.
 
     if(relation !== undefined) {
       value_type = relation.value_type;
     }
 
     switch(value_type) {
-      case 0: // Integer
-        $obj = $('<input id="' + id + '" name="' + name + '" type="number">');
-        break;
-      case 1: // Character
-        $obj = $('<input id="' + id + '" name="' + name + '" size="50"' +
-          ' type="text">');
-        break;
-      case 2: // Text
-        $obj = $('<textarea class="vLargeTextField" id="' + id +
-          '" name="' + name + '" cols="40" rows="10"></textarea>');
-        break;
-      case 3: // Date
-        $obj = $('<input class="vDateField" id="' + id + '" name="' + name +
-          '" size="12" type="text">');
-        break;
-      case 4: // Boolean
+      case 1: // Boolean
         $obj = $('<select id="' + id +'" name="' + name + '"></select>');
         var data = [[1, "Unknown"], [2, "Yes"], [3, "No"]];
         var option = "<option></option>";
@@ -154,10 +139,7 @@ var DynamicColumn = Class.extend({
         }
 
         break;
-      case 5: // Float
-        $obj = $('<input id="' + id + '" name="' + name + '" type="text">');
-        break;
-      case 6: // Foriegn Key
+      case 2: // Choice
         $obj = $('<select id="' + id +'" name="' + name + '"></select>');
 
         /*
@@ -183,6 +165,24 @@ var DynamicColumn = Class.extend({
           }
         }
 
+        break;
+      case 3: // Date
+        $obj = $('<input class="vDateField" id="' + id + '" name="' + name +
+          '" size="12" type="text">');
+        break;
+      case 4: // Float
+        $obj = $('<input id="' + id + '" name="' + name + '" type="text">');
+        break;
+      case 5: // Number
+        $obj = $('<input id="' + id + '" name="' + name + '" type="number">');
+        break;
+      case 6: // Text
+        $obj = $('<input id="' + id + '" name="' + name + '" size="50"' +
+          ' type="text">');
+        break;
+      case 7: // Text Block
+        $obj = $('<textarea class="vLargeTextField" id="' + id +
+          '" name="' + name + '" cols="40" rows="10"></textarea>');
         break;
       default:
         $obj = $('<input id="' + id + '" name="' + name + '" size="50"' +

@@ -113,18 +113,19 @@ class AutoDisplayNode(template.Node):
                  u"led to this error and file a bug report.")
     YES_NO = ((1, u'Unknown'), (2, u'Yes'), (3, u'No'),)
     ELEMENT_TYPES = {
-        DynamicColumn.INTEGER: (u'<input id="{}" name="{}" type="number" '
-                                 u'value="{}" />'),
-        DynamicColumn.CHARACTER: (u'<input id="{}" name="{}" size="50" '
-                                   u'type="text" value="{}" />'),
-        DynamicColumn.TEXT: (u'<textarea class="large-text-field" id="{}" '
-                              u'name="{}" cols="40" rows="10">{}</textarea>\n'),
+        DynamicColumn.NUMBER: (u'<input id="{}" name="{}" type="number" '
+                               u'value="{}" />'),
+        DynamicColumn.TEXT: (u'<input id="{}" name="{}" size="50" type="text" '
+                             u'value="{}" />'),
+        DynamicColumn.TEXT_BLOCK: (u'<textarea class="large-text-field" '
+                                   u'id="{}" name="{}" cols="40" rows="10"'
+                                   u'>{}</textarea>\n'),
         DynamicColumn.DATE: (u'<input id="{}" class="wants_datepicker" '
                               u'name="{}" size="12" type="text" value="{}" />'),
         DynamicColumn.BOOLEAN: u'<select id="{}" name="{}">\n',
         DynamicColumn.FLOAT: (u'<input id="{}" name="{}" type="text" '
                                'value="{}" />'),
-        DynamicColumn.FORIEGN_KEY: u'<select id="{}" name="{}">\n',
+        DynamicColumn.CHOICE: u'<select id="{}" name="{}">\n',
         }
 
     def __init__(self, tag_name, relation, prefix=u'', options=None,
@@ -154,9 +155,9 @@ class AutoDisplayNode(template.Node):
 
             attr = u"{}{}".format(self.prefix, relation.get(u'slug'))
 
-            # Foriegn Keys are a special case since we need to determine
+            # Choices are a special case since we need to determine
             # what the options will be.
-            if value_type == DynamicColumn.FORIEGN_KEY:
+            if value_type == DynamicColumn.CHOICE:
                 try:
                     fk_options = self.fk_options.resolve(context)
                 except Exception:
@@ -277,7 +278,7 @@ if __name__ == '__main__':
         relation = context.get(u'relation')
         relation[u'value_type'] = i
 
-        if i == DynamicColumn.FORIEGN_KEY:
+        if i == DynamicColumn.CHOICE:
             rel = context.get(u'relation')
             rel[u'key'] = u'book'
             cmd = (u"{% auto_display relation prefix=test- "
