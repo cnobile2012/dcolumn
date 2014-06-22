@@ -108,6 +108,11 @@ STATICFILES_DIRS = (
 # new Parent Objects.
 DYNAMIC_COLUMN_ITEM_NAME = u'Current'
 
+# Change the URL below to your login path.
+LOGIN_URL = u"/admin/"
+# To allow anybody to access the API set to True.
+INACTIVATE_API = False
+
 # A sample logging configuration. The only tangible logging performed by this
 # configuration is to send an email to the site admins on every HTTP 500 error
 # when DEBUG=False. See http://docs.djangoproject.com/en/dev/topics/logging for

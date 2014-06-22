@@ -9,8 +9,10 @@ from django.views.generic import TemplateView
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django.core.urlresolvers import reverse
+from django.utils.decorators import method_decorator
 
 from dcolumn.common.view_mixins import JSONResponseMixin
+from dcolumn.common.decorators import dcolumn_login_required
 from .models import DynamicColumn, DynamicColumnItem, Parent
 from .forms import ParentForm
 
@@ -50,6 +52,10 @@ class ContextDataMixin(object):
 #
 class DynamicColumnAJAXView(JSONResponseMixin, TemplateView, ContextDataMixin):
     http_method_names = ('get',)
+
+    @method_decorator(dcolumn_login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(DynamicColumnAJAXView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         """
