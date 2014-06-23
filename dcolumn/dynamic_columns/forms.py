@@ -154,16 +154,18 @@ class ParentForm(forms.ModelForm):
                     relation[u'value'] = value
                     self.validate_required(relation, error_class, key, value)
                     self.validate_value_type(relation, error_class, key, value)
-                    self.validate_value_length(
-                        relation, error_class, key, value)
+                    self.validate_value_length(relation, error_class, key,
+                                               value)
+
+        log.error("form.errors: %s", self._errors)
 
     def validate_required(self, relation, error_class, key, value):
         if relation.get(u'required', False):
             value_type = relation.get(u'value_type')
 
-            if (not value or
-                value_type in self.SPECIAL_CASE_MAP and
+            if (not value or value_type in self.SPECIAL_CASE_MAP and
                 self.SPECIAL_CASE_MAP.get(value_type) == value):
+
                 self._errors[key] = self.error_class(
                     [u"{} field is required.".format(relation.get(u'name'))])
 

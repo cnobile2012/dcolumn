@@ -15,6 +15,7 @@ from dcolumn.settings import DYNAMIC_COLUMN_ITEM_NAME
 from dcolumn.common.model_mixins import (
     UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin)
 from .choices import Language
+from .manage import choice_manager
 
 log = logging.getLogger('dcolumn.models')
 
@@ -51,6 +52,8 @@ class Book(UserModelMixin, TimeModelMixin, StatusModelMixin):
     def __unicode__(self):
         return self.title
 
+choice_manager.register_choice(Book, 2, u'title')
+
 
 #
 # DynamicColumn
@@ -62,7 +65,7 @@ class DynamicColumnManager(StatusModelManagerMixin):
 
         for record in self.active():
             if record.value_type == self.model.CHOICE:
-                name = self.model.CHOICE_RELATION_MAP.get(record.relation)
+                name = choice_manager.choice_relation_map.get(record.relation)
                 result[name] = record.slug
 
         return result
@@ -86,42 +89,21 @@ class DynamicColumn(UserModelMixin, TimeModelMixin, StatusModelMixin):
         (TEXT_BLOCK, _("Text Block")),
         )
     VALUE_TYPES_MAP = dict(VALUE_TYPES)
-    BOOK = 1
-    LANGUAGE = 2
-    CHOICE_RELATION = (
-        (BOOK, Book.__name__),
-        (LANGUAGE, Language.__name__)
-        )
-    CHOICE_RELATION_MAP = dict(CHOICE_RELATION)
-    # This object is used in the AJAX View to determine Choice relations.
-    MODEL_MAP = {
-        Book.__name__: (Book, u'title'),
-        Language.__name__: (Language, u'name')
-        }
-    TOP_CONTAINER = 0
-    CENTER_CONTAINER = 1
-    BOTTOM_CONTAINER = 2
-    DISPLAY_LOCATION = (
-        #(location ID, CSS class)
-        (TOP_CONTAINER, u'top-container'),
-        (CENTER_CONTAINER, u'center-container'),
-        (BOTTOM_CONTAINER, u'bottom-container'),
-        )
-    DISPLAY_LOCATION_MAP = dict(DISPLAY_LOCATION)
 
     name = models.TextField(
         verbose_name=_("Name"), help_text=_("Enter a column name."))
     slug = models.SlugField(verbose_name=_("Slug"), editable=False)
     value_type = models.IntegerField(
-        verbose_name=_("Value Type"), choices=VALUE_TYPES, default=TEXT,
+        verbose_name=_("Value Type"), choices=VALUE_TYPES,
         help_text=_("Choose the value type."))
     relation = models.IntegerField(
-        verbose_name=_("Choice Relation"), choices=CHOICE_RELATION,
-        null=True, blank=True,
-        help_text=_("Choose the Choice Relation type."))
+        verbose_name=_("Choice Relation"),
+        choices=choice_manager.choice_relation,
+        null=True, blank=True, help_text=_("Choose the Choice Relation type."))
     required = models.BooleanField(verbose_name=_("Required Field"))
     location = models.IntegerField(
-        verbose_name=_("Display Location"), choices=DISPLAY_LOCATION,
+        verbose_name=_("Display Location"),
+        choices=choice_manager.css_containers,
         help_text=_("Choose a display location."))
     order = models.PositiveSmallIntegerField(verbose_name='Display Order')
 
@@ -143,7 +125,7 @@ class DynamicColumn(UserModelMixin, TimeModelMixin, StatusModelMixin):
         result = ''
 
         if self.relation is not None:
-            result = dict(self.CHOICE_RELATION).get(self.relation, '')
+            result = choice_manager.choice_relation_map.get(self.relation, '')
 
         return result
     _relation_producer.short_description = _("Relation")
@@ -178,7 +160,7 @@ class DynamicColumnItemManager(StatusModelManagerMixin):
             rec[u'value_type'] = record.value_type
             rec[u'relation'] = record.relation
             rec[u'required'] = record.required
-            rec[u'location'] = DynamicColumn.DISPLAY_LOCATION_MAP.get(
+            rec[u'location'] = choice_manager.css_container_map.get(
                 record.location, u'')
             rec[u'order'] = record.order
             if obj: rec[u'value'] = key_value_map.get(record.pk, u'')
@@ -187,7 +169,7 @@ class DynamicColumnItemManager(StatusModelManagerMixin):
 
     def get_active_relation_items(self):
         records = self.get_dynamic_columns(DYNAMIC_COLUMN_ITEM_NAME)
-        return [DynamicColumn.CHOICE_RELATION_MAP.get(record.relation)
+        return [choice_manager.choice_relation_map.get(record.relation)
                 for record in records if record.relation]
 
 

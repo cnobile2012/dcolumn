@@ -2,12 +2,7 @@
 {% load url from future %}
 {% load autodisplay %}
 {% block title %}Test Dynamic Columns{% endblock %}
-{% block head_extras %}
-    <!--
-    <script src="{{ STATIC_URL }}js/inheritance.js"></script>
-    <script src="{{ STATIC_URL }}js/ajaxbase.js"></script>
-    -->
-{% endblock %}
+{% block head_extras %}{% endblock %}
 {% block content %}
   <h2>Test Dynamic Columns</h2>
   <div class="wrapper">
@@ -29,12 +24,15 @@
         </div>
         <div class="dynamic-container top-container">
           <ul>
-{% for relation in relations.values %}
-{% if relation.location == dynamicColumn.DISPLAY_LOCATION_MAP.0 %}
             <li>
-              <label for="id-{{ relation.slug }}">
-                {{ relation.name }}
-              </label>
+              {{ form.name.label_tag }}
+              {{ form.name.as_widget }}
+              {{ form.name.errors }}
+            </li>
+{% for relation in relations.values %}
+{% if relation.location == css.0 %}
+            <li>
+              <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
               {% auto_display relation options=dynamicColumns %}
               {% combine_contexts form.errors relation.slug %}
             </li>
@@ -45,11 +43,9 @@
         <div class="dynamic-container center-container">
           <ul>
 {% for relation in relations.values %}
-{% if relation.location == dynamicColumn.DISPLAY_LOCATION_MAP.1 %}
+{% if relation.location == css.1 %}
             <li>
-              <label for="id-{{ relation.slug }}">
-                {{ relation.name }}
-              </label>
+              <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
               {% auto_display relation options=dynamicColumns %}
               {% combine_contexts form.errors relation.slug %}
             </li>
@@ -60,11 +56,9 @@
         <div class="dynamic-container bottom-container">
           <ul>
 {% for relation in relations.values %}
-{% if relation.location == dynamicColumn.DISPLAY_LOCATION_MAP.2 %}
+{% if relation.location == css.2 %}
             <li>
-              <label for="id-{{ relation.slug }}">
-                {{ relation.name }}
-              </label>
+              <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
               {% auto_display relation options=dynamicColumns %}
               {% combine_contexts form.errors relation.slug %}
             </li>

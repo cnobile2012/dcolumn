@@ -10,6 +10,8 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from dcolumn.dynamic_columns.manage import choice_manager
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # Where is the 'website' directory with settings dir, apps, urls.py, etc. are.
@@ -112,6 +114,9 @@ DYNAMIC_COLUMN_ITEM_NAME = u'Current'
 LOGIN_URL = u"/admin/"
 # To allow anybody to access the API set to True.
 INACTIVATE_API = False
+
+choice_manager.register_css_containers(
+    (u'top-container', u'center-container', u'bottom-container'))
 
 # A sample logging configuration. The only tangible logging performed by this
 # configuration is to send an email to the site admins on every HTTP 500 error
