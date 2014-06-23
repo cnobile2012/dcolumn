@@ -18,6 +18,24 @@ class ChoiceManager(object):
         self._css_container_map = {}
 
     def register_choice(self, choice, relation_num, field):
+        """
+        Register choice field types. These can be Foreign Key or
+        multiple-choice columns.
+
+        :Parameters:
+          choice : `ClassType`
+            This can be either a Django model or choice object. A choice object
+            mimics a model class so that this manager can work with them
+            as if they were Django models.
+
+          relation_num : `int`
+            A numeric identifier for the `choice` used as the HTML select
+            option value.
+
+          field : `str`
+            A field from the model or choice object used as the HTML select
+            option text.
+        """
         if relation_num in self._relation_numbers:
             msg = u"Invalid 'relation_num' {} is already used.".format(
                 relation_num)
@@ -47,10 +65,22 @@ class ChoiceManager(object):
 
     @property
     def choice_relation(self):
+        """
+        A property that returns the HTML select choices.
+
+        :Returns:
+          A list of the choices.
+        """
         return self._relation
 
     @property
     def choice_relation_map(self):
+        """
+        A property that returns a dict (map) of the choices.
+
+        :Returns:
+          A dict of the choices.
+        """
         if not self._relation_map:
             self._relation_map = dict(self._relation)
 
@@ -58,9 +88,26 @@ class ChoiceManager(object):
 
     @property
     def choice_map(self):
+        """
+        A property that returns a dict (map). This property is used internally
+        by `dcolumn`.
+
+        :Returns:
+          A dict where the key is the choice name (model or choice type) and
+          the value is a tuple of the model/choice object and the field.
+        """
         return self._choice_map
 
     def register_css_containers(self, container_list):
+        """
+        Register the CSS container objects. This method is usually called in
+        the settings file.
+
+        :Parameters:
+          container_list : `list` or `tuple`
+            A list of the CSS classes or ids that will determine the location
+            on the page of the various dynamic columns.
+        """
         if isinstance(container_list, (list, tuple)):
             if len(container_list) <= 0:
                 msg = (u"Must supply at least one CSS container. The format "
@@ -84,10 +131,25 @@ class ChoiceManager(object):
 
     @property
     def css_containers(self):
+        """
+        A property that returns the CSS container classes or ids and is used
+        internally as a choice to location in the DynamicColumn model.
+
+        :Returns:
+          A list of tuples where the tuple is (num, text)
+        """
         return self._css_containers
 
     @property
     def css_container_map(self):
+        """
+        A property that returns a dict where the key is the CSS container
+        number and the value is the CSS class or id. This property should be
+        used in templates to desgnate location in the HTML.
+
+        :Returns:
+          A dict of the CSS containers.
+        """
         return self._css_container_map
 
 choice_manager = ChoiceManager()
