@@ -2,7 +2,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
-from dcolumn import settings
+from .settings import DEBUG, STATIC_URL
 
 
 urlpatterns = patterns('',
@@ -11,17 +11,15 @@ urlpatterns = patterns('',
     url(r'^parent/', include('dcolumn.dynamic_columns.urls')),
     )
 
-if settings.DEBUG:
+if DEBUG:
     urlpatterns += patterns(
         '',
         url(r'^dev/(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': settings.STATIC_URL, 'show_indexes': True}),
-        #url(r'^media/(?P<path>.*)$', 'django.views.static.serve',
-        #    {'document_root': settings.MEDIA_ROOT}),
+            {'document_root': STATIC_URL, 'show_indexes': True}),
         )
 else:
     urlpatterns += patterns(
         '',
         url(r'^static/(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': settings.STATIC_URL, 'show_indexes': True}),
+            {'document_root': STATIC_URL, 'show_indexes': True}),
         )

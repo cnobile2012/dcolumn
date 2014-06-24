@@ -5,13 +5,13 @@
 import logging
 from collections import OrderedDict
 
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 
-from dcolumn.settings import DYNAMIC_COLUMN_ITEM_NAME
 from dcolumn.common.model_mixins import (
     UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin)
 from .choices import Language
@@ -147,7 +147,7 @@ class DynamicColumnItemManager(StatusModelManagerMixin):
             raise self.model.DoesNotExist(msg)
 
     def serialize_columns(self, obj=None):
-        records = self.get_dynamic_columns(DYNAMIC_COLUMN_ITEM_NAME)
+        records = self.get_dynamic_columns(settings.DYNAMIC_COLUMN_ITEM_NAME)
         result = OrderedDict()
 
         if obj:
@@ -170,7 +170,7 @@ class DynamicColumnItemManager(StatusModelManagerMixin):
         return result
 
     def get_active_relation_items(self):
-        records = self.get_dynamic_columns(DYNAMIC_COLUMN_ITEM_NAME)
+        records = self.get_dynamic_columns(settings.DYNAMIC_COLUMN_ITEM_NAME)
         return [choice_manager.choice_relation_map.get(record.relation)
                 for record in records if record.relation]
 

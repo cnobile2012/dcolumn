@@ -1,5 +1,5 @@
 """
-Django settings for dcolumn project.
+Django settings for example_site project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/1.6/topics/settings/
@@ -52,7 +52,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admindocs',
-    'dcolumn.common',
     'dcolumn.dynamic_columns',
     ]
 
@@ -65,9 +64,9 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     ]
 
-ROOT_URLCONF = 'dcolumn.urls'
+ROOT_URLCONF = 'example_site.urls'
 
-WSGI_APPLICATION = 'dcolumn.wsgi.application'
+WSGI_APPLICATION = 'example_site.wsgi.application'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
@@ -160,7 +159,7 @@ LOGGING = {
             'formatter': 'simple'
             },
         'views_file': {
-            'class': 'dcolumn.common.loghandlers.DeferredRotatingFileHandler',
+            'class': 'example_site.common.loghandlers.DeferredRotatingFileHandler',
             'level': 'DEBUG',
             'formatter': 'verbose',
             'filename': '/dev/null',
@@ -168,7 +167,7 @@ LOGGING = {
             'backupCount': 5,
             },
         'models_file': {
-            'class': 'dcolumn.common.loghandlers.DeferredRotatingFileHandler',
+            'class': 'example_site.common.loghandlers.DeferredRotatingFileHandler',
             'level': 'DEBUG',
             'formatter': 'verbose',
             'filename': '/dev/null',
@@ -176,7 +175,7 @@ LOGGING = {
             'backupCount': 5,
             },
         'templates_file': {
-            'class': 'dcolumn.common.loghandlers.DeferredRotatingFileHandler',
+            'class': 'example_site.common.loghandlers.DeferredRotatingFileHandler',
             'level': 'DEBUG',
             'formatter': 'verbose',
             'filename': '/dev/null',
@@ -190,17 +189,17 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
             },
-        'dcolumn.views': {
+        'example_site.views': {
             'handlers': ('views_file', 'console', 'mail_admins',),
             'level': 'ERROR',
             'propagate': True,
             },
-        'dcolumn.models': {
+        'example_site.models': {
             'handlers': ('models_file', 'console', 'mail_admins',),
             'level': 'ERROR',
             'propagate': True,
             },
-        'dcolumn.templates': {
+        'example_site.templates': {
             'handlers': ('templates_file', 'console', 'mail_admins',),
             'level': 'ERROR',
             'propagate': True,

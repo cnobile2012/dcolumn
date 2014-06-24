@@ -5,8 +5,8 @@
 import logging
 
 from django import forms
+from django.conf import settings
 
-from dcolumn.settings import DYNAMIC_COLUMN_ITEM_NAME
 from .models import Book, Parent, DynamicColumn, KeyValue, DynamicColumnItem
 
 log = logging.getLogger('dcolumn.views')
@@ -135,7 +135,7 @@ class ParentForm(forms.ModelForm):
 
     def clean_dynamic_column_item(self):
         return DynamicColumnItem.objects.active().get(
-            name=DYNAMIC_COLUMN_ITEM_NAME)
+            name=settings.DYNAMIC_COLUMN_ITEM_NAME)
 
     def clean(self):
         cleaned_data = super(ParentForm, self).clean()
