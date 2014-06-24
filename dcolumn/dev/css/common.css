@@ -78,17 +78,16 @@ h2 {
 }
 
 ul.errorlist {
-  margin-left: 0;
   padding-left: 0;
 }
 
-.errorlist li {
-  height: 14px;
+ul.errorlist li {
+  min-height: 12px !important;
+  padding: 0 0 2px 6px;
   font-style: italic;
   font-size: 80%;
   list-style-type: none;
-  border: 4px double red;
-  padding: .25em;
+  border: 3px double red;
   background-color: #ffcfcf;
 }
 
