@@ -115,8 +115,13 @@ LOGIN_URL = u"/admin/"
 # To allow anybody to access the API set to True.
 INACTIVATE_API = False
 
+#choice_manager.register_css_containers(
+#    (u'top-container', u'center-container', u'bottom-container'))
+
 choice_manager.register_css_containers(
-    (u'top-container', u'center-container', u'bottom-container'))
+    ((u'top', u'top-container'),
+     (u'center', u'center-container'),
+     (u'bottom', u'bottom-container')))
 
 # A sample logging configuration. The only tangible logging performed by this
 # configuration is to send an email to the site admins on every HTTP 500 error

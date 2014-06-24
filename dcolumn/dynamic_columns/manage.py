@@ -118,6 +118,8 @@ class ChoiceManager(object):
                 log.critical(msg)
                 raise TypeError(msg)
 
+            self._css_container_map.clear()
+
             if isinstance(container_list[0], (list, tuple)):
                 self._css_container_map.update(dict(container_list))
                 self._css_containers[:] = [

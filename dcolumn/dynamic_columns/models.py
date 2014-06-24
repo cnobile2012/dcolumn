@@ -160,7 +160,9 @@ class DynamicColumnItemManager(StatusModelManagerMixin):
             rec[u'value_type'] = record.value_type
             rec[u'relation'] = record.relation
             rec[u'required'] = record.required
-            rec[u'location'] = choice_manager.css_container_map.get(
+            # We convert the list to a dict because css_container_map may
+            # not be keyed with integers.
+            rec[u'location'] = dict(choice_manager.css_containers).get(
                 record.location, u'')
             rec[u'order'] = record.order
             if obj: rec[u'value'] = key_value_map.get(record.pk, u'')
