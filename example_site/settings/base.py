@@ -8,11 +8,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 from dcolumn.dynamic_columns.manage import choice_manager
-
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # Where is the 'website' directory with settings dir, apps, urls.py, etc. are.
 SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -105,6 +102,7 @@ STATICFILES_DIRS = (
     os.path.abspath(os.path.join(SITE_ROOT, 'dev')),
     )
 
+# Start DCOLUMN config
 # The default name for the DynamicColumn Item object to use for all
 # new Parent Objects.
 DYNAMIC_COLUMN_ITEM_NAME = u'Current'
@@ -116,6 +114,7 @@ INACTIVATE_API = False
 
 #choice_manager.register_css_containers(
 #    (u'top-container', u'center-container', u'bottom-container'))
+# End DCOLUMN config
 
 choice_manager.register_css_containers(
     ((u'top', u'top-container'),
