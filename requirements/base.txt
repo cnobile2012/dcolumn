@@ -23,3 +23,6 @@ psycopg2
 
 # Python shell
 ipython
+
+# Date utils
+dateutils
