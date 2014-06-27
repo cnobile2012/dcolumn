@@ -102,24 +102,28 @@ STATICFILES_DIRS = (
     os.path.abspath(os.path.join(SITE_ROOT, 'dev')),
     )
 
+
 # Start DCOLUMN config
+DYNAMIC_COLUMNS = {
+    u'PARENT_ITEM_NAME': u'Current',
+    u'LOGIN_URL': u'/admin/',
+    u'INACTIVATE_API': False,
+    }
+
 # The default name for the DynamicColumn Item object to use for all
 # new Parent Objects.
 DYNAMIC_COLUMN_ITEM_NAME = u'Current'
-
 # Change the URL below to your login path.
 LOGIN_URL = u"/admin/"
 # To allow anybody to access the API set to True.
 INACTIVATE_API = False
-
 #choice_manager.register_css_containers(
 #    (u'top-container', u'center-container', u'bottom-container'))
-# End DCOLUMN config
-
 choice_manager.register_css_containers(
     ((u'top', u'top-container'),
      (u'center', u'center-container'),
      (u'bottom', u'bottom-container')))
+# End DCOLUMN config
 
 # A sample logging configuration. The only tangible logging performed by this
 # configuration is to send an email to the site admins on every HTTP 500 error
