@@ -110,7 +110,7 @@ class ParentForm(forms.ModelForm):
 
     class Meta:
         model = Parent
-        exclude = ('creator', 'user',)
+        exclude = ('creator', 'user', 'ctime', 'mtime',)
 
     def __init__(self, *args, **kwargs):
         super(ParentForm, self).__init__(*args, **kwargs)

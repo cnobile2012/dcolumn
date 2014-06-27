@@ -34,7 +34,7 @@
               <span>{{ object.name }}</span>
             </li>
 {% for relation in relations.values %}
-{% if relation.location == css.0 %}
+{% if relation.location == css.top %}
             <li>
               <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
               {% auto_display relation options=dynamicColumns display=True %}
@@ -46,7 +46,7 @@
         <div class="dynamic-container center-container">
           <ul>
 {% for relation in relations.values %}
-{% if relation.location == css.1 %}
+{% if relation.location == css.center %}
             <li>
               <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
               {% auto_display relation options=dynamicColumns display=True %}
@@ -58,7 +58,7 @@
         <div class="dynamic-container bottom-container">
           <ul>
 {% for relation in relations.values %}
-{% if relation.location == css.2 %}
+{% if relation.location == css.bottom %}
             <li>
               <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
               {% auto_display relation options=dynamicColumns display=True %}

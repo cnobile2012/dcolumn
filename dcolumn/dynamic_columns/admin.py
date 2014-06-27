@@ -56,7 +56,7 @@ class KeyValueInline(admin.TabularInline):
 
     class Media:
         js = ('js/jquery-2.0.3.min.js', 'js/jquery.cookie.js',
-              'js/inheritance.js', 'js/dynamic-column.js',)
+              'dcolumn/js/inheritance.js', 'dcolumn/js/dynamic-column.js',)
 
 
 #

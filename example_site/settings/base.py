@@ -203,5 +203,20 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
             },
+        'dcolumn.views': {
+            'handlers': ('views_file', 'console', 'mail_admins',),
+            'level': 'ERROR',
+            'propagate': True,
+            },
+        'dcolumn.models': {
+            'handlers': ('models_file', 'console', 'mail_admins',),
+            'level': 'ERROR',
+            'propagate': True,
+            },
+        'dcolumn.templates': {
+            'handlers': ('templates_file', 'console', 'mail_admins',),
+            'level': 'ERROR',
+            'propagate': True,
+            },
         },
     }

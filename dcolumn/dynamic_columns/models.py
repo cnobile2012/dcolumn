@@ -200,7 +200,7 @@ class ParentManager(StatusModelManagerMixin):
     pass
 
 
-class Parent(UserModelMixin, TimeModelMixin, StatusModelMixin):
+class Parent(TimeModelMixin, UserModelMixin, StatusModelMixin):
     name = models.TextField(
         verbose_name=_("Name"), unique=True,
         help_text=_("Enter a unique name for this record."))
@@ -214,6 +214,9 @@ class Parent(UserModelMixin, TimeModelMixin, StatusModelMixin):
     class Meta:
         verbose_name = _("Parent")
         verbose_name_plural = _("Parents")
+
+    def save(self, *args, **kwargs):
+        super(Parent, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return unicode("{}".format(self.name))

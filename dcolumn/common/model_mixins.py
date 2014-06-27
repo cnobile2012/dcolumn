@@ -4,6 +4,8 @@
 
 import re
 import logging
+from datetime import datetime
+from dateutil.tz import tzutc
 
 from django.db import models
 from django.db.models import Q
@@ -29,20 +31,40 @@ class UserModelMixin(models.Model):
     class Meta:
         abstract = True
 
+    def save(self, *args, **kwargs):
+        super(UserModelMixin, self).save(*args, **kwargs)
+
+    def _user_producer(self):
+        return self.user.get_full_name()
+    _user_producer.short_description = _("Updater")
+
+    def _creator_producer(self):
+        return self.creator.get_full_name()
+    _creator_producer.short_description = _("Creator")
+
 
 #
 # TimeModel
 #
 class TimeModelMixin(models.Model):
     ctime = models.DateTimeField(
-        verbose_name=_("Date Created"), auto_now_add=True,
+        verbose_name=_("Date Created"),
         help_text=_("The date and time of creation."))
     mtime = models.DateTimeField(
-        verbose_name=_("Last Modified"), auto_now=True,
+        verbose_name=_("Last Modified"),
         help_text=_("The date and time last modified."))
 
     class Meta:
         abstract = True
+
+    def save(self, *args, **kwargs):
+        if not kwargs.pop(u'disable_ctime', False) and self.ctime is None:
+            self.ctime = datetime.now(tzutc())
+
+        if not kwargs.pop(u'disable_mtime', False):
+            self.mtime = datetime.now(tzutc())
+
+        super(TimeModelMixin, self).save(*args, **kwargs)
 
 
 #
@@ -61,3 +83,6 @@ class StatusModelMixin(models.Model):
 
     class Meta:
         abstract = True
+
+    def save(self, *args, **kwargs):
+        super(StatusModelMixin, self).save(*args, **kwargs)
