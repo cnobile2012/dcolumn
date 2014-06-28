@@ -20,7 +20,7 @@ log = logging.getLogger('dcolumn.models')
 #
 class UserModelMixin(models.Model):
     user = models.ForeignKey(
-        User, verbose_name=_("Updater"), db_index=True, editable=False,
+        User, verbose_name=_("Modifier"), db_index=True, editable=False,
         related_name="%(app_label)s_%(class)s_updater_related",
         help_text=_("The last user to modify this record."))
     creator = models.ForeignKey(
