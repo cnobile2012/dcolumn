@@ -89,6 +89,12 @@ class DynamicColumn(UserModelMixin, TimeModelMixin, StatusModelMixin):
         (TEXT_BLOCK, _("Text Block")),
         )
     VALUE_TYPES_MAP = dict(VALUE_TYPES)
+    NO = False
+    YES = True
+    YES_NO = (
+        (NO, _("No")),
+        (YES, _("Yes"))
+        )
 
     name = models.TextField(
         verbose_name=_("Name"), help_text=_("Enter a column name."))
@@ -100,7 +106,15 @@ class DynamicColumn(UserModelMixin, TimeModelMixin, StatusModelMixin):
         verbose_name=_("Choice Relation"),
         choices=choice_manager.choice_relation,
         null=True, blank=True, help_text=_("Choose the Choice Relation type."))
-    required = models.BooleanField(verbose_name=_("Required Field"))
+    required = models.BooleanField(
+        verbose_name=_("Required Field"), choices=YES_NO, default=NO,
+        help_text=_("If this field is required based on business rules then "
+                    "choose 'Yes'."))
+    store_relation = models.BooleanField(
+        verbose_name=_("Store Relation Value"), choices=YES_NO, default=NO,
+        help_text=_("Store the literal value not the primary key of the "
+                    "relation (used when choices change often). The most "
+                    "common usage is the default 'No', to not store."))
     location = models.IntegerField(
         verbose_name=_("Display Location"),
         choices=choice_manager.css_containers,
@@ -159,6 +173,7 @@ class DynamicColumnItemManager(StatusModelManagerMixin):
             rec[u'slug'] = record.slug
             rec[u'value_type'] = record.value_type
             rec[u'relation'] = record.relation
+            rec[u'store_relation'] = record.store_relation
             rec[u'required'] = record.required
             # We convert the list to a dict because css_container_map may
             # not be keyed with integers.

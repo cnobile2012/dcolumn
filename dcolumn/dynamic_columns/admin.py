@@ -64,16 +64,18 @@ class KeyValueInline(admin.TabularInline):
 #
 class DynamicColumnAdmin(UserAdminMixin):
     fieldsets = (
-        (None, {'fields': ('name', 'value_type', 'relation', 'required',)}),
+        (None, {'fields': ('name', 'value_type', 'relation', 'store_relation',
+                           'required',)}),
         (_('Screen Location'), {'fields': ('location', 'order',)}),
         (_('Status'), {'classes': ('collapse',),
-                       'fields': ('slug', 'active', 'creator', 'user', 'ctime',
+                       'fields': ('slug', 'active', 'creator', 'ctime', 'user',
                                   'mtime',)}),
         )
     readonly_fields = ('creator', 'slug', 'user', 'ctime', 'mtime',)
-    list_display = ('name', 'value_type', '_relation_producer', 'required',
-                    'location', 'order', 'mtime', 'active',)
-    list_editable = ('location', 'order', 'required', 'active',)
+    list_display = ('name', 'value_type', '_relation_producer',
+                    'store_relation', 'required', 'location', 'order',
+                    'mtime', 'active',)
+    list_editable = ('location', 'order', 'active',)
     ordering = ('location', 'order', 'name',)
     form = DynamicColumnForm
 
