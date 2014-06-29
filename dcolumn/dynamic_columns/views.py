@@ -15,7 +15,7 @@ from dcolumn.common.view_mixins import JSONResponseMixin
 from dcolumn.common.decorators import dcolumn_login_required
 from .models import DynamicColumn, DynamicColumnItem, Parent
 from .forms import ParentForm
-from .manage import dcolumn_manager
+from .manager import dcolumn_manager
 
 log = logging.getLogger('dcolumn.views')
 

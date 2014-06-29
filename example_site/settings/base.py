@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
 import os
-from dcolumn.dynamic_columns.manage import dcolumn_manager
+from dcolumn.dynamic_columns.manager import dcolumn_manager
 
 # Where is the 'website' directory with settings dir, apps, urls.py, etc. are.
 SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

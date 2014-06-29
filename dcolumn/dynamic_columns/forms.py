@@ -7,7 +7,7 @@ import logging
 from django import forms
 from django.conf import settings
 
-from .manage import dcolumn_manager
+from .manager import dcolumn_manager
 from .models import Book, Parent, DynamicColumn, KeyValue, DynamicColumnItem
 
 log = logging.getLogger('dcolumn.views')

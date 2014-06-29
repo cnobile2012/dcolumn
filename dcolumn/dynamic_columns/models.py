@@ -15,7 +15,7 @@ from django.core.urlresolvers import reverse
 from dcolumn.common.model_mixins import (
     UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin)
 from .choices import Language
-from .manage import dcolumn_manager
+from .manager import dcolumn_manager
 
 log = logging.getLogger('dcolumn.models')
 
@@ -174,7 +174,7 @@ class DynamicColumnItemManager(StatusModelManagerMixin):
             rec[u'slug'] = record.slug
             rec[u'value_type'] = record.value_type
             rec[u'relation'] = record.relation
-            rec[u'store_relation'] = record.store_relation
+            if record.relation: rec[u'store_relation'] = record.store_relation
             rec[u'required'] = record.required
             # We convert the list to a dict because css_container_map may
             # not be keyed with integers.

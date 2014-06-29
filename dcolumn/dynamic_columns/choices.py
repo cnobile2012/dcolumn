@@ -7,7 +7,7 @@ The objects in this module mimic database models, so they will work in the
 ChoiceManager class.
 """
 
-from .manage import dcolumn_manager
+from .manager import dcolumn_manager
 
 
 #

@@ -1,11 +1,10 @@
 #
-# dcolumn/dynamic_columns/manage.py
+# dcolumn/dynamic_columns/manager.py
 #
 
 import logging
 
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
 
 log = logging.getLogger(u'dcolumn.manage')
 
