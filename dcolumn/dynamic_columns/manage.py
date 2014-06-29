@@ -4,10 +4,13 @@
 
 import logging
 
+from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
+
 log = logging.getLogger(u'dcolumn.manage')
 
 
-class ChoiceManager(object):
+class DynamicColumnManager(object):
 
     def __init__(self):
         self._relation = []
@@ -154,4 +157,11 @@ class ChoiceManager(object):
         """
         return self._css_container_map
 
-choice_manager = ChoiceManager()
+    def get_default_column_name(self, model_name):
+        return settings.DYNAMIC_COLUMNS.get(u'ITEM_NAMES',
+                                            {}).get(model_name, u'')
+
+    def get_api_auth_state(self):
+        return settings.DYNAMIC_COLUMNS.get(u'INACTIVATE_API_AUTH', False)
+
+dcolumn_manager = DynamicColumnManager()

@@ -7,6 +7,7 @@ import logging
 from django import forms
 from django.conf import settings
 
+from .manage import dcolumn_manager
 from .models import Book, Parent, DynamicColumn, KeyValue, DynamicColumnItem
 
 log = logging.getLogger('dcolumn.views')
@@ -135,7 +136,7 @@ class ParentForm(forms.ModelForm):
 
     def clean_dynamic_column_item(self):
         return DynamicColumnItem.objects.active().get(
-            name=settings.DYNAMIC_COLUMN_ITEM_NAME)
+            name=dcolumn_manager.get_default_column_name(u'Parent'))
 
     def clean(self):
         cleaned_data = super(ParentForm, self).clean()
@@ -151,6 +152,7 @@ class ParentForm(forms.ModelForm):
 
             for key, value in self.data.items():
                 if key == relation.get(u'slug'):
+                    self.validate_store_required(relation, value)
                     relation[u'value'] = value
                     self.validate_required(relation, error_class, key, value)
                     self.validate_value_type(relation, error_class, key, value)
@@ -158,6 +160,11 @@ class ParentForm(forms.ModelForm):
                                                value)
 
         log.error("form.errors: %s", self._errors)
+
+    def validate_store_required(self, relation, value):
+        if relation.get(u'store_related'):
+            print value
+
 
     def validate_required(self, relation, error_class, key, value):
         if relation.get(u'required', False):

@@ -15,7 +15,7 @@ from dcolumn.common.view_mixins import JSONResponseMixin
 from dcolumn.common.decorators import dcolumn_login_required
 from .models import DynamicColumn, DynamicColumnItem, Parent
 from .forms import ParentForm
-from .manage import choice_manager
+from .manage import dcolumn_manager
 
 log = logging.getLogger('dcolumn.views')
 
@@ -27,7 +27,7 @@ class ContextDataMixin(object):
         fk_slugs = DynamicColumn.objects.get_fk_slugs()
 
         for name in DynamicColumnItem.objects.get_active_relation_items():
-            model, field = choice_manager.choice_map.get(name)
+            model, field = dcolumn_manager.choice_map.get(name)
             objects = context.setdefault(u'dynamicColumns', {})
             values = [(r.pk, getattr(r, field))
                       for r in model.objects.dynamic_column()]
@@ -97,7 +97,7 @@ class ParentCreateView(CreateView, ContextDataMixin):
         context = super(ParentCreateView, self).get_context_data(**kwargs)
         context.update(self.get_dynamic_column_context_data())
         context.update(self.get_relation_context_data(**kwargs))
-        context.update({u'css': choice_manager.css_container_map})
+        context.update({u'css': dcolumn_manager.css_container_map})
         return context
 
     def get_success_url(self):
@@ -126,7 +126,7 @@ class ParentUpdateView(UpdateView, ContextDataMixin):
         context = super(ParentUpdateView, self).get_context_data(**kwargs)
         context.update(self.get_dynamic_column_context_data())
         context.update(self.get_relation_context_data(**kwargs))
-        context.update({u'css': choice_manager.css_container_map})
+        context.update({u'css': dcolumn_manager.css_container_map})
         return context
 
     def get_success_url(self):
@@ -152,7 +152,7 @@ class ParentDetailView(DetailView, ContextDataMixin):
         context.update(self.get_dynamic_column_context_data())
         context.update(self.get_relation_context_data(
             obj=self.object, **kwargs))
-        context.update({u'css': choice_manager.css_container_map})
+        context.update({u'css': dcolumn_manager.css_container_map})
         # Create actions if any.
         parent = kwargs.get(u'object')
         pk = parent and parent.id or 0

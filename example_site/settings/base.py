@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
 import os
-from dcolumn.dynamic_columns.manage import choice_manager
+from dcolumn.dynamic_columns.manage import dcolumn_manager
 
 # Where is the 'website' directory with settings dir, apps, urls.py, etc. are.
 SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -102,28 +102,26 @@ STATICFILES_DIRS = (
     os.path.abspath(os.path.join(SITE_ROOT, 'dev')),
     )
 
-
-# Start DCOLUMN config
+# DCOLUMN config
 DYNAMIC_COLUMNS = {
-    u'PARENT_ITEM_NAME': u'Current',
-    u'LOGIN_URL': u'/admin/',
-    u'INACTIVATE_API': False,
+    # The default key/value pairs for the DynamicColumnItem object to use for
+    # all tables that use dcolumn. The key is the table name and the value is
+    # the name used in the DynamicColumnItem record.
+    u'ITEM_NAMES': {
+        u'Parent': u'Current',
+        },
+    # To allow anybody to access the API set to True.
+    u'INACTIVATE_API_AUTH': False,
     }
-
-# The default name for the DynamicColumn Item object to use for all
-# new Parent Objects.
-DYNAMIC_COLUMN_ITEM_NAME = u'Current'
-# Change the URL below to your login path.
-LOGIN_URL = u"/admin/"
-# To allow anybody to access the API set to True.
-INACTIVATE_API = False
-#choice_manager.register_css_containers(
+#dcolumn_manager.register_css_containers(
 #    (u'top-container', u'center-container', u'bottom-container'))
-choice_manager.register_css_containers(
+dcolumn_manager.register_css_containers(
     ((u'top', u'top-container'),
      (u'center', u'center-container'),
      (u'bottom', u'bottom-container')))
-# End DCOLUMN config
+
+# Change the URL below to your login path.
+LOGIN_URL = u"/admin/"
 
 # A sample logging configuration. The only tangible logging performed by this
 # configuration is to send an email to the site admins on every HTTP 500 error

@@ -2,9 +2,10 @@
 # dcolumn/common/decorators.py
 #
 
-from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import login_required
+
+from dcolumn.dynamic_columns.manage import dcolumn_manager
 
 
 def dcolumn_login_required(function=None,
@@ -14,7 +15,7 @@ def dcolumn_login_required(function=None,
     Decorator for views that checks that the user is logged in, redirecting
     to the log-in page if necessary.
     """
-    if hasattr(settings, 'INACTIVATE_API') and settings.INACTIVATE_API:
+    if dcolumn_manager.get_api_auth_state():
         return function
 
     return login_required(function, redirect_field_name=redirect_field_name,

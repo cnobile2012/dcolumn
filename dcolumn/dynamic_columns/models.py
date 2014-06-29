@@ -15,7 +15,7 @@ from django.core.urlresolvers import reverse
 from dcolumn.common.model_mixins import (
     UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin)
 from .choices import Language
-from .manage import choice_manager
+from .manage import dcolumn_manager
 
 log = logging.getLogger('dcolumn.models')
 
@@ -52,7 +52,7 @@ class Book(UserModelMixin, TimeModelMixin, StatusModelMixin):
     def __unicode__(self):
         return self.title
 
-choice_manager.register_choice(Book, 2, u'title')
+dcolumn_manager.register_choice(Book, 2, u'title')
 
 
 #
@@ -65,7 +65,7 @@ class DynamicColumnManager(StatusModelManagerMixin):
 
         for record in self.active():
             if record.value_type == self.model.CHOICE:
-                name = choice_manager.choice_relation_map.get(record.relation)
+                name = dcolumn_manager.choice_relation_map.get(record.relation)
                 result[name] = record.slug
 
         return result
@@ -104,7 +104,7 @@ class DynamicColumn(UserModelMixin, TimeModelMixin, StatusModelMixin):
         help_text=_("Choose the value type."))
     relation = models.IntegerField(
         verbose_name=_("Choice Relation"),
-        choices=choice_manager.choice_relation,
+        choices=dcolumn_manager.choice_relation,
         null=True, blank=True, help_text=_("Choose the Choice Relation type."))
     required = models.BooleanField(
         verbose_name=_("Required Field"), choices=YES_NO, default=NO,
@@ -117,7 +117,7 @@ class DynamicColumn(UserModelMixin, TimeModelMixin, StatusModelMixin):
                     "common usage is the default 'No', to not store."))
     location = models.IntegerField(
         verbose_name=_("Display Location"),
-        choices=choice_manager.css_containers,
+        choices=dcolumn_manager.css_containers,
         help_text=_("Choose a display location."))
     order = models.PositiveSmallIntegerField(verbose_name='Display Order')
 
@@ -139,7 +139,7 @@ class DynamicColumn(UserModelMixin, TimeModelMixin, StatusModelMixin):
         result = ''
 
         if self.relation is not None:
-            result = choice_manager.choice_relation_map.get(self.relation, '')
+            result = dcolumn_manager.choice_relation_map.get(self.relation, '')
 
         return result
     _relation_producer.short_description = _("Relation")
@@ -161,7 +161,8 @@ class DynamicColumnItemManager(StatusModelManagerMixin):
             raise self.model.DoesNotExist(msg)
 
     def serialize_columns(self, obj=None):
-        records = self.get_dynamic_columns(settings.DYNAMIC_COLUMN_ITEM_NAME)
+        records = self.get_dynamic_columns(
+            dcolumn_manager.get_default_column_name(u'Parent'))
         result = OrderedDict()
 
         if obj:
@@ -177,7 +178,7 @@ class DynamicColumnItemManager(StatusModelManagerMixin):
             rec[u'required'] = record.required
             # We convert the list to a dict because css_container_map may
             # not be keyed with integers.
-            rec[u'location'] = dict(choice_manager.css_containers).get(
+            rec[u'location'] = dict(dcolumn_manager.css_containers).get(
                 record.location, u'')
             rec[u'order'] = record.order
             if obj: rec[u'value'] = key_value_map.get(record.pk, u'')
@@ -185,8 +186,9 @@ class DynamicColumnItemManager(StatusModelManagerMixin):
         return result
 
     def get_active_relation_items(self):
-        records = self.get_dynamic_columns(settings.DYNAMIC_COLUMN_ITEM_NAME)
-        return [choice_manager.choice_relation_map.get(record.relation)
+        records = self.get_dynamic_columns(
+            dcolumn_manager.get_default_column_name(u'Parent'))
+        return [dcolumn_manager.choice_relation_map.get(record.relation)
                 for record in records if record.relation]
 
 

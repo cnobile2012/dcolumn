@@ -7,7 +7,7 @@ The objects in this module mimic database models, so they will work in the
 ChoiceManager class.
 """
 
-from .manage import choice_manager
+from .manage import dcolumn_manager
 
 
 #
@@ -36,4 +36,4 @@ class Language(object):
 
     objects = LanguageManager()
 
-choice_manager.register_choice(Language, 1, u'name')
+dcolumn_manager.register_choice(Language, 1, u'name')
