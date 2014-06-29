@@ -1,16 +1,14 @@
 #
-# dcolumn/dynamic_columns/forms.py
+# example_site/books/forms.py
 #
 
 import logging
 
 from django import forms
-from django.conf import settings
 
-from .manager import dcolumn_manager
-from .models import Book, Parent, DynamicColumn, KeyValue, DynamicColumnItem
+from dcolumn.dcolumns.models import DynamicColumn
 
-log = logging.getLogger('dcolumn.views')
+from .models import Book, Parent
 
 
 #
@@ -36,66 +34,6 @@ class BookForm(forms.ModelForm):
 
 
 #
-# DynamicColumnItem
-#
-class DynamicColumnItemForm(forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(DynamicColumnItemForm, self).__init__(*args, **kwargs)
-        self.fields[u'name'].widget = forms.TextInput(
-            attrs={u'size': 50, u'maxlength': 50})
-        self.fields[
-            u'dynamic_column'].queryset = DynamicColumn.objects.active()
-
-    class Meta:
-        model = DynamicColumnItem
-
-
-#
-# KeyValue
-#
-class KeyValueForm(forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(KeyValueForm, self).__init__(*args, **kwargs)
-        # Default the value field to a TextInput, this save screen space.
-        self.fields[u'value'].widget = forms.TextInput(
-            attrs={u'size': 50, u'maxlength': 50})
-
-    class Meta:
-        model = KeyValue
-
-
-#
-# DynamicColumn
-#
-class DynamicColumnForm(forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(DynamicColumnForm, self).__init__(*args, **kwargs)
-        self.fields[u'name'].widget = forms.TextInput(
-            attrs={u'size': 50, u'maxlength': 50})
-
-    class Meta:
-        model = DynamicColumn
-
-    def clean(self):
-        cleaned_data = super(DynamicColumnForm, self).clean()
-        value_type = cleaned_data.get(u'value_type')
-        relation = cleaned_data.get(u'relation')
-
-        if value_type == DynamicColumn.CHOICE:
-            if relation is None:
-                msg = (u"If the Value Type is a Choice then a relation "
-                       u"must be entered.")
-                raise forms.ValidationError(msg)
-        else:
-            cleaned_data[u'relation'] = None
-
-        return cleaned_data
-
-
-#
 # Parent
 #
 class ParentForm(forms.ModelForm):
@@ -115,10 +53,10 @@ class ParentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ParentForm, self).__init__(*args, **kwargs)
-        self.relations = DynamicColumnItem.objects.serialize_columns()
+        self.relations = ColumnCollection.objects.serialize_columns()
         self.fields[u'name'].widget = forms.TextInput(
             attrs={u'size': 50, u'maxlength': 50})
-        self.fields[u'dynamic_column_item'].required = False
+        self.fields[u'column_collection'].required = False
         log.debug("args: %s, kwargs: %s", args, kwargs)
         log.debug("fields: %s, data: %s", self.fields, self.data)
         log.debug("parent_id: %s", self.instance.pk)
@@ -134,8 +72,8 @@ class ParentForm(forms.ModelForm):
 
         return self.relations
 
-    def clean_dynamic_column_item(self):
-        return DynamicColumnItem.objects.active().get(
+    def clean_column_collection(self):
+        return ColumnCollection.objects.active().get(
             name=dcolumn_manager.get_default_column_name(u'Parent'))
 
     def clean(self):

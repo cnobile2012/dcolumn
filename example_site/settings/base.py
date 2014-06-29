@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
 import os
-from dcolumn.dynamic_columns.manager import dcolumn_manager
+from dcolumn.dcolumns.manager import dcolumn_manager
 
 # Where is the 'website' directory with settings dir, apps, urls.py, etc. are.
 SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admindocs',
-    'dcolumn.dynamic_columns',
+    'dcolumn.dcolumns',
     ]
 
 MIDDLEWARE_CLASSES = [
@@ -104,9 +104,9 @@ STATICFILES_DIRS = (
 
 # DCOLUMN config
 DYNAMIC_COLUMNS = {
-    # The default key/value pairs for the DynamicColumnItem object to use for
+    # The default key/value pairs for the ColumnCollection object to use for
     # all tables that use dcolumn. The key is the table name and the value is
-    # the name used in the DynamicColumnItem record.
+    # the name used in the ColumnCollection record.
     u'ITEM_NAMES': {
         u'Parent': u'Current',
         },

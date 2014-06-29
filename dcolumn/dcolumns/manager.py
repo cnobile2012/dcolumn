@@ -1,5 +1,5 @@
 #
-# dcolumn/dynamic_columns/manager.py
+# dcolumn/dcolumns/manager.py
 #
 
 import logging

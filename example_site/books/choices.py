@@ -1,5 +1,5 @@
 #
-# dcolumn/dynamic_comumns/choices.py
+# example_site/books/choices.py
 #
 
 """
@@ -7,7 +7,7 @@ The objects in this module mimic database models, so they will work in the
 ChoiceManager class.
 """
 
-from .manager import dcolumn_manager
+from dcolumn.dcolumns.manager import dcolumn_manager
 
 
 #

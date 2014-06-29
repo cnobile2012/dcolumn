@@ -1,58 +1,20 @@
 #
-# dcolumn/dynamic_columns/models.py
+# dcolumn/dcolumns/models.py
 #
 
 import logging
 from collections import OrderedDict
 
-from django.conf import settings
 from django.db import models
-from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 
 from dcolumn.common.model_mixins import (
     UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin)
-from .choices import Language
 from .manager import dcolumn_manager
 
 log = logging.getLogger('dcolumn.models')
-
-
-#
-# Book
-#
-class BookManager(StatusModelManagerMixin):
-
-    def dynamic_column(self):
-        return self.active()
-
-
-class Book(UserModelMixin, TimeModelMixin, StatusModelMixin):
-    title = models.TextField(
-        verbose_name=_("Title"), help_text=_("Enter a book title."))
-    author = models.TextField(
-        verbose_name=_("Author"), help_text=_("Enter the author of this book."))
-    publisher = models.TextField(
-        verbose_name=_("Publisher"),
-        help_text=_("Enter the publisher of this book."))
-    isbn10 = models.TextField(
-        verbose_name=_("ISBN-10"), null=True, blank=True,
-        help_text=_("Enter the book ISBN-10 code."))
-    isbn13 = models.TextField(
-        verbose_name=_("ISBN-13"), help_text=_("Enter the book ISBN-13 code."))
-
-    objects = BookManager()
-
-    class Meta:
-        verbose_name = _("Book")
-        verbose_name_plural = _("Books")
-
-    def __unicode__(self):
-        return self.title
-
-dcolumn_manager.register_choice(Book, 2, u'title')
 
 
 #
@@ -96,8 +58,9 @@ class DynamicColumn(UserModelMixin, TimeModelMixin, StatusModelMixin):
         (YES, _("Yes"))
         )
 
-    name = models.TextField(
-        verbose_name=_("Name"), help_text=_("Enter a column name."))
+    name = models.CharField(
+        verbose_name=_("Name"), max_length=50,
+        help_text=_("Enter a column name."))
     slug = models.SlugField(verbose_name=_("Slug"), editable=False)
     value_type = models.IntegerField(
         verbose_name=_("Value Type"), choices=VALUE_TYPES,
@@ -146,9 +109,9 @@ class DynamicColumn(UserModelMixin, TimeModelMixin, StatusModelMixin):
 
 
 #
-# DynamicColumnItem
+# ColumnCollection
 #
-class DynamicColumnItemManager(StatusModelManagerMixin):
+class ColumnCollectionManager(StatusModelManagerMixin):
 
     def get_dynamic_columns(self, name):
         try:
@@ -156,7 +119,7 @@ class DynamicColumnItemManager(StatusModelManagerMixin):
                 ).order_by('location', 'order', 'name')
         except self.model.DoesNotExist:
             msg = ("No objects in database, please create initial objects "
-                   "for Dynamic Columns and Dynamic Column Items")
+                   "for Dynamic Columns and Column Collections")
             log.error(msg)
             raise self.model.DoesNotExist(msg)
 
@@ -192,54 +155,38 @@ class DynamicColumnItemManager(StatusModelManagerMixin):
                 for record in records if record.relation]
 
 
-class DynamicColumnItem(UserModelMixin, TimeModelMixin, StatusModelMixin):
+class ColumnCollection(UserModelMixin, TimeModelMixin, StatusModelMixin):
     name = models.TextField(
         verbose_name=_("Name"), unique=True,
         help_text=_("Enter a unique name for this record."))
     dynamic_column = models.ManyToManyField(
         DynamicColumn, verbose_name=_("Dynamic Column"),
-        related_name='dynamic_column_items')
+        related_name='column_collections')
 
-    objects = DynamicColumnItemManager()
+    objects = ColumnCollectionManager()
 
     class Meta:
-        verbose_name = _("Dynamic Column Item")
-        verbose_name_plural = _("Dynamic Column Items")
+        verbose_name = _("Column Collection")
+        verbose_name_plural = _("Column Collections")
 
     def __unicode__(self):
         return unicode("{}-{}".format(self.name, self.mtime.isoformat()))
 
 
 #
-# Parent (Any model you need to have predefined key/value pairs on.)
+# CollectionMixin
 #
-class ParentManager(StatusModelManagerMixin):
-    pass
-
-
-class Parent(TimeModelMixin, UserModelMixin, StatusModelMixin):
-    name = models.TextField(
-        verbose_name=_("Name"), unique=True,
-        help_text=_("Enter a unique name for this record."))
-    dynamic_column_item = models.ForeignKey(
-        DynamicColumnItem, verbose_name=_("Dynamic Column Item"),
+class CollectionMixin(models.Model):
+    column_collection = models.ForeignKey(
+        ColumnCollection, verbose_name=_("Column Collection"),
         help_text=_(u"Choose the version of the dynamic columns you want "
-                    u"for all Patents."))
-
-    objects = ParentManager()
+                    u"for all Collections."))
 
     class Meta:
-        verbose_name = _("Parent")
-        verbose_name_plural = _("Parents")
+        abstract = True
 
     def save(self, *args, **kwargs):
-        super(Parent, self).save(*args, **kwargs)
-
-    def __unicode__(self):
-        return unicode("{}".format(self.name))
-
-    def get_absolute_url(self):
-        return reverse('parent-detail', kwargs={'pk': self.pk})
+        super(CollectionMixin, self).save(*args, **kwargs)
 
     def serialize_key_value_pairs(self):
         result = {}
@@ -249,47 +196,41 @@ class Parent(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return result
 
-    def _detail_producer(self):
-        return u'<a href="{}">{}</a>'.format(self.get_absolute_url(), self)
-    _detail_producer.short_description = "View Detail"
-    _detail_producer.allow_tags = True
+    ## def find_key_value(self, name):
+    ##     # FIX ME -- This needs to find the model named with 'name' then return
+    ##     # the value of that object, not the hand edited name in the
+    ##     # dynamic_column.
+    ##     record = self.keyvalue_pairs.filter(dynamic_column__name=name)
+    ##     result = u''
 
-    def find_key_value(self, name):
-        # FIX ME -- This needs to find the model named with 'name' then return
-        # the value of that object, not the hand edited name in the
-        # dynamic_column.
-        record = self.keyvalue_pairs.filter(dynamic_column__name=name)
-        result = u''
+    ##     if len(record) > 0:
+    ##         result = record[0].value
 
-        if len(record) > 0:
-            result = record[0].value
-
-        return result
+    ##     return result
 
 
 #
 # KeyValue
 #
-class KeyValueManager(models.Manager):
+class KeyValueMixinManager(models.Manager):
 
     def set_parent_key_value_pairs(self, obj):
-        for item in obj.dynamic_column_item.dynamic_column.all():
+        for item in obj.column_collection.dynamic_column.all():
             self.create(parent=obj, dynamic_column=item)
 
 
-class KeyValue(models.Model):
-    parent = models.ForeignKey(
-        Parent, verbose_name=_("Parent"), related_name='keyvalue_pairs')
+class KeyValueMixin(models.Model):
     dynamic_column = models.ForeignKey(
         DynamicColumn, verbose_name=_("Dynamic Column"),
         related_name='keyvalue_pairs')
     value = models.TextField(verbose_name=_("Value"), null=True, blank=True)
 
-    objects = KeyValueManager()
+    objects = KeyValueMixinManager()
 
     class Meta:
         verbose_name = _("Key Value")
         verbose_name_plural = _("Key Values")
+        abstract = True
 
     def __unicode__(self):
-        return unicode(self.parent)
+        return unicode(self.dynamic_column.name)

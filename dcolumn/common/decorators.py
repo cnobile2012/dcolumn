@@ -5,7 +5,7 @@
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import login_required
 
-from dcolumn.dynamic_columns.manager import dcolumn_manager
+from dcolumn.dcolumns.manager import dcolumn_manager
 
 
 def dcolumn_login_required(function=None,

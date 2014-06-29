@@ -1,5 +1,5 @@
 #
-# dcolumn/common/templatetags/autodisplay.py
+# dcolumn/dcolumns/templatetags/autodisplay.py
 #
 
 import os, logging
@@ -8,7 +8,7 @@ from StringIO import StringIO
 from django import template
 from django.utils.safestring import mark_safe
 
-from dcolumn.dynamic_columns.models import DynamicColumn
+from dcolumn.dcolumns.models import DynamicColumn
 
 log = logging.getLogger(u'dcolumn.templates')
 register = template.Library()

@@ -8,7 +8,8 @@ from .settings import DEBUG, STATIC_URL
 urlpatterns = patterns('',
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^parent/', include('dcolumn.dynamic_columns.urls')),
+    url(r'^parent/', include('example_site.books.urls')),
+    url(r'^dcolumns/', include('dcolumn.dcolumns.urls')),
     )
 
 if DEBUG:
