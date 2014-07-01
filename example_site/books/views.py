@@ -10,54 +10,54 @@ from django.views.generic.edit import CreateView, UpdateView
 from dcolumn.dcolumns.views import (
     CollectionCreateUpdateViewMixin, CollectionDetailViewMixin)
 
-from .models import Parent
-from .forms import ParentForm
+from .models import Book
+from .forms import BookForm
 
 
 #
-# ParentCreateView
+# BookCreateView
 #
-class ParentCreateView(CreateView, CollectionCreateUpdateViewMixin):
-    template_name = u'dcolumns/parent_create_view.html'
-    form_class = ParentForm
-    model = Parent
+class BookCreateView(CreateView, CollectionCreateUpdateViewMixin):
+    template_name = u'books/book_create_view.html'
+    form_class = BookForm
+    model = Book
 
     def get_success_url(self):
         url = self.object.get_absolute_url()
         url += '?created=true'
         return url
 
-parent_create_view = ParentCreateView.as_view()
+book_create_view = BookCreateView.as_view()
 
 
 #
-# ParentUpdateView
+# BookUpdateView
 #
-class ParentUpdateView(UpdateView, CollectionCreateUpdateViewMixin):
-    template_name = u'dcolumns/parent_create_view.html'
-    form_class = ParentForm
-    model = Parent
+class BookUpdateView(UpdateView, CollectionCreateUpdateViewMixin):
+    template_name = u'books/book_create_view.html'
+    form_class = BookForm
+    model = Book
 
     def get_success_url(self):
         url = self.object.get_absolute_url()
         url += '?updated=true'
         return url
 
-parent_update_view = ParentUpdateView.as_view()
+book_update_view = BookUpdateView.as_view()
 
 
 #
-# ParentDetailView
+# BookDetailView
 #
-class ParentDetailView(DetailView, CollectionDetailViewMixin):
-    template_name = u'dcolumns/parent_detail_view.html'
-    model = Parent
+class BookDetailView(DetailView, CollectionDetailViewMixin):
+    template_name = u'books/book_detail_view.html'
+    model = Book
 
     def get_context_data(self, **kwargs):
         """
         Get context data for the Parent KeyValue objects.
         """
-        context = super(ParentDetailView, self).get_context_data(**kwargs)
+        context = super(BookDetailView, self).get_context_data(**kwargs)
         # Create actions if any.
         parent = kwargs.get(u'object')
         pk = parent and parent.id or 0
@@ -77,4 +77,4 @@ class ParentDetailView(DetailView, CollectionDetailViewMixin):
         context[u'info_message'] = info_message
         return context
 
-parent_detail_view = ParentDetailView.as_view()
+book_detail_view = BookDetailView.as_view()

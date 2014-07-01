@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admindocs',
     'dcolumn.dcolumns',
+    'example_site.books',
     ]
 
 MIDDLEWARE_CLASSES = [
@@ -108,7 +109,9 @@ DYNAMIC_COLUMNS = {
     # all tables that use dcolumn. The key is the table name and the value is
     # the name used in the ColumnCollection record.
     u'ITEM_NAMES': {
-        u'Parent': u'Current',
+        u'Book': u'Book',
+        u'Author': u'Author',
+        u'Publisher': u'Publisher',
         },
     # To allow anybody to access the API set to True.
     u'INACTIVATE_API_AUTH': False,

@@ -5,23 +5,43 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 
-from dcolumn.dcolumns.admin import KeyValueInlineMixin
 from dcolumn.common.admin_mixins import UserAdminMixin
+from dcolumn.dcolumns.admin import KeyValueInline
 
-from .forms import BookForm, ParentForm, KeyValueForm
+from .models import Book, Author, Publisher
+from .forms import BookForm, AuthorForm, PublisherForm
 
 
 #
-# KeyValue
+# Author
 #
-class KeyValueInline(KeyValueInlineMixin, admin.TabularInline):
-    model = KeyValue
-    extra = 0
+class AuthorAdmin(admin.ModelAdmin):
     fieldsets = (
-        (None, {'fields': ('dynamic_column', 'value',)}),
+        (None, {'fields': ('name',)}),
+        (_('Status'), {'classes': ('collapse',),
+                       'fields': ('column_collection', 'active', 'user',
+                                  'ctime', 'mtime',)}),
         )
-    form = KeyValueForm
-    ordering = ('parent',)
+    readonly_fields = ('user', 'ctime', 'mtime',)
+    list_display = ('name', 'column_collection', 'user', 'mtime',)
+    inlines = (KeyValueInline,)
+    form = AuthorForm
+
+
+#
+# Publisher
+#
+class PublisherAdmin(admin.ModelAdmin):
+    fieldsets = (
+        (None, {'fields': ('name',)}),
+        (_('Status'), {'classes': ('collapse',),
+                       'fields': ('column_collection', 'active', 'user',
+                                  'ctime', 'mtime',)}),
+        )
+    readonly_fields = ('user', 'ctime', 'mtime',)
+    list_display = ('name', 'column_collection', 'user', 'mtime',)
+    inlines = (KeyValueInline,)
+    form = PublisherForm
 
 
 #
@@ -29,35 +49,17 @@ class KeyValueInline(KeyValueInlineMixin, admin.TabularInline):
 #
 class BookAdmin(UserAdminMixin):
     fieldsets = (
-        (None, {'fields': ('title', 'author', 'publisher', 'isbn10',
-                           'isbn13')}),
+        (None, {'fields': ('title',)}),
         (_('Status'), {'classes': ('collapse',),
-                       'fields': ('active', 'user', 'ctime', 'mtime',)}),
+                       'fields': ('column_collection', 'active', 'user',
+                                  'ctime', 'mtime',)}),
         )
     readonly_fields = ('user', 'ctime', 'mtime',)
-    list_display = ('title', 'author', 'publisher', 'user', 'mtime',)
+    list_display = ('title', 'column_collection', 'user', 'mtime',)
+    inlines = (KeyValueInline,)
     form = BookForm
 
 
-#
-# Parent
-#
-class ParentAdmin(UserAdminMixin):
-    fieldsets = (
-        (None, {'fields': ('name', 'column_collection',)}),
-        (_('Status'), {'classes': ('collapse',),
-                       'fields': ('active', 'creator', 'user', 'ctime',
-                                  'mtime',)}),
-        )
-    readonly_fields = ('creator', 'user', 'ctime', 'mtime',)
-    list_display = ('name', 'column_collection', 'creator', 'ctime', 'mtime',
-                    'active', '_detail_producer',)
-    list_editable = ('active',)
-    ordering = ('name', 'creator__username', 'active',)
-    list_filter = ('active', 'name', 'creator',)
-    inlines = (KeyValueInline,)
-    form = ParentForm
-
-
 admin.site.register(Book, BookAdmin)
-admin.site.register(Parent, ParentAdmin)
+admin.site.register(Author, AuthorAdmin)
+admin.site.register(Publisher, PublisherAdmin)

@@ -5,24 +5,28 @@
 import logging
 
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 
 log = logging.getLogger(u'dcolumn.manage')
 
 
 class DynamicColumnManager(object):
+    __shared_state = {}
+    _relation = []#(0, _("Choose a relation"))]
+    _relation_map = None
+    _relation_numbers = set()
+    _choice_map = {}
+    _css_containers = []
+    _css_container_map = {}
 
     def __init__(self):
-        self._relation = []
-        self._relation_map = None
-        self._relation_numbers = set()
-        self._choice_map = {}
-        self._css_containers = []
-        self._css_container_map = {}
+        self.__dict__ = self.__shared_state
 
     def register_choice(self, choice, relation_num, field):
         """
         Register choice field types. These can be Foreign Key or
-        multiple-choice columns.
+        multiple-choice non-database columns. ManyToMany is not supported
+        at this time.
 
         :Parameters:
           choice : `ClassType`
@@ -39,8 +43,8 @@ class DynamicColumnManager(object):
             option text.
         """
         if relation_num in self._relation_numbers:
-            msg = u"Invalid 'relation_num' {} is already used.".format(
-                relation_num)
+            msg = (u"Invalid relation number {} is already used. [choice: {}, "
+                   u"field: {}]").format(relation_num, choice, field)
             log.critical(msg)
             raise ValueError(msg)
 
@@ -66,7 +70,7 @@ class DynamicColumnManager(object):
             raise AttributeError(msg)
 
     @property
-    def choice_relation(self):
+    def choice_relations(self):
         """
         A property that returns the HTML select choices.
 

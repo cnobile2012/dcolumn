@@ -5,9 +5,10 @@
 import logging
 
 from django import forms
+from django.utils.translation import ugettext_lazy as _
 
 from .manager import dcolumn_manager
-from .models import DynamicColumn, KeyValueMixin, ColumnCollection
+from .models import DynamicColumn, ColumnCollection
 
 log = logging.getLogger('dcolumn.views')
 
@@ -33,8 +34,9 @@ class DynamicColumnForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(DynamicColumnForm, self).__init__(*args, **kwargs)
-        self.fields[u'name'].widget = forms.TextInput(
-            attrs={u'size': 50, u'maxlength': 50})
+        #self.fields[u'relation'].widget = forms.TypedChoiceField()
+        #self.fields[u'relation'].empty_label = _("Choose a relation")
+        #self.fields[u'relation'].queryset = dcolumn_manager.choice_relations
 
     class Meta:
         model = DynamicColumn
@@ -68,6 +70,9 @@ class CollectionFormMixin(forms.ModelForm):
                       DynamicColumn.BOOLEAN: 1,
                       DynamicColumn.FLOAT: 305,
                       DynamicColumn.CHOICE: 12}
+
+    class Meta:
+        exclude = ('creator', 'user', 'ctime', 'mtime')
 
     def __init__(self, *args, **kwargs):
         super(CollectionFormMixin, self).__init__(*args, **kwargs)

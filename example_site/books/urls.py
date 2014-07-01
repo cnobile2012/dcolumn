@@ -7,10 +7,7 @@ from django.conf.urls import *
 
 urlpatterns = patterns(
     'example_site.books.views',
-    url(r'create/$', 'parent_create_view',
-        name='parent-create'),
-    url(r'update/(?P<pk>\d+)/$', 'parent_update_view',
-        name='parent-update'),
-    url(r'detail/(?P<pk>\d+)/$', 'parent_detail_view',
-        name='parent-detail'),
+    url(r'create/$', 'book_create_view', name='book-create'),
+    url(r'update/(?P<pk>\d+)/$', 'book_update_view', name='book-update'),
+    url(r'detail/(?P<pk>\d+)/$', 'book_detail_view', name='book-detail'),
     )

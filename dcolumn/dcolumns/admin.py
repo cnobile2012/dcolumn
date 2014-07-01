@@ -5,19 +5,22 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 
-from .models import DynamicColumn, KeyValueMixin, ColumnCollection
-from .forms import DynamicColumnForm, ColumnCollectionForm
 from dcolumn.common.admin_mixins import UserAdminMixin
 
+from .models import DynamicColumn, ColumnCollection, KeyValue
+from .forms import DynamicColumnForm, ColumnCollectionForm
 
 #
-# KeyValueInlineMixin
+# KeyValue
 #
-class KeyValueInlineMixin(object):
+class KeyValueInline(admin.TabularInline):
+    model = KeyValue
     extra = 0
+    ordering = ('dynamic_column__name',)
     fieldsets = (
         (None, {'fields': ('dynamic_column', 'value',)}),
         )
+    #form = KeyValueForm
 
     class Media:
         js = ('dcolumn/js/jquery-2.0.3.min.js', 'dcolumn/js/jquery.cookie.js',

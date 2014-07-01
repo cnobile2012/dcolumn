@@ -140,45 +140,50 @@ var DynamicColumn = Class.extend({
 
         break;
       case 2: // Choice
-        $obj = $('<select id="' + id +'" name="' + name + '"></select>');
-
-        /*
-         * Get options from self.data.dynamicColumn using 'relation.key' and
-         * add these options to the select.
-         */
-        var option = "<option></option>";
-        var options = self.data.dynamicColumns[relation.slug];
-        var $option = null;
-
-        if(options === undefined) {
-          var msg = "Invalid relationship make a note of the steps that " +
-              "led to this error and send them in a bug report.";
-          var data = {};
-          data[name] = [msg];
-          self._mimicDjangoErrors(data);
+        if(relation.store_relation) {
+          $obj = $('<span id="' + id + '" name="' + name + '">' + value +
+            '</span>');
         } else {
-          for(var i = 0; i < options.length; i++) {
-            $option = $(option);
-            $option.val(options[i][0]);
-            $option.text(options[i][1]);
-            $option.appendTo($obj);
+          $obj = $('<select id="' + id +'" name="' + name + '"></select>');
+
+          /*
+           * Get options from self.data.dynamicColumn using 'relation.key' and
+           * add these options to the select.
+           */
+          var option = "<option></option>";
+          var options = self.data.dynamicColumns[relation.slug];
+          var $option = null;
+
+          if(options === undefined) {
+            var msg = "Invalid relationship make a note of the steps that " +
+                "led to this error and send them in a bug report.";
+            var data = {};
+            data[name] = [msg];
+            self._mimicDjangoErrors(data);
+          } else {
+            for(var i = 0; i < options.length; i++) {
+              $option = $(option);
+              $option.val(options[i][0]);
+              $option.text(options[i][1]);
+              $option.appendTo($obj);
+            }
           }
         }
 
         break;
       case 3: // Date
         $obj = $('<input class="vDateField" id="' + id + '" name="' + name +
-          '" size="12" type="text">');
+          '" size="12" type="text" />');
         break;
       case 4: // Float
-        $obj = $('<input id="' + id + '" name="' + name + '" type="text">');
+        $obj = $('<input id="' + id + '" name="' + name + '" type="text" />');
         break;
       case 5: // Number
-        $obj = $('<input id="' + id + '" name="' + name + '" type="number">');
+        $obj = $('<input id="' + id + '" name="' + name + '" type="number" />');
         break;
       case 6: // Text
         $obj = $('<input id="' + id + '" name="' + name + '" size="50"' +
-          ' type="text">');
+          ' type="text" />');
         break;
       case 7: // Text Block
         $obj = $('<textarea class="vLargeTextField" id="' + id +
@@ -186,7 +191,7 @@ var DynamicColumn = Class.extend({
         break;
       default:
         $obj = $('<input id="' + id + '" name="' + name + '" size="50"' +
-          ' type="text">');
+          ' type="text" />');
         break;
     }
 

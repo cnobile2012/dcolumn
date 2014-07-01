@@ -66,9 +66,9 @@ class DynamicColumn(UserModelMixin, TimeModelMixin, StatusModelMixin):
         verbose_name=_("Value Type"), choices=VALUE_TYPES,
         help_text=_("Choose the value type."))
     relation = models.IntegerField(
-        verbose_name=_("Choice Relation"),
-        choices=dcolumn_manager.choice_relation,
-        null=True, blank=True, help_text=_("Choose the Choice Relation type."))
+        verbose_name=_("Choice Relation"), null=True, blank=True,
+        choices=dcolumn_manager.choice_relations,
+        help_text=_("Choose the Choice Relation type."))
     required = models.BooleanField(
         verbose_name=_("Required Field"), choices=YES_NO, default=NO,
         help_text=_("If this field is required based on business rules then "
@@ -156,8 +156,8 @@ class ColumnCollectionManager(StatusModelManagerMixin):
 
 
 class ColumnCollection(UserModelMixin, TimeModelMixin, StatusModelMixin):
-    name = models.TextField(
-        verbose_name=_("Name"), unique=True,
+    name = models.CharField(
+        verbose_name=_("Name"), unique=True, max_length=50,
         help_text=_("Enter a unique name for this record."))
     dynamic_column = models.ManyToManyField(
         DynamicColumn, verbose_name=_("Dynamic Column"),
@@ -174,16 +174,16 @@ class ColumnCollection(UserModelMixin, TimeModelMixin, StatusModelMixin):
 
 
 #
-# CollectionMixin
+# CollectionBase
 #
-class CollectionMixin(models.Model):
+class CollectionBase(models.Model):
     column_collection = models.ForeignKey(
         ColumnCollection, verbose_name=_("Column Collection"),
         help_text=_(u"Choose the version of the dynamic columns you want "
                     u"for all Collections."))
 
-    class Meta:
-        abstract = True
+#    class Meta:
+#        abstract = True
 
     def save(self, *args, **kwargs):
         super(CollectionMixin, self).save(*args, **kwargs)
@@ -212,25 +212,28 @@ class CollectionMixin(models.Model):
 #
 # KeyValue
 #
-class KeyValueMixinManager(models.Manager):
+class KeyValueManager(models.Manager):
+    pass
 
-    def set_parent_key_value_pairs(self, obj):
-        for item in obj.column_collection.dynamic_column.all():
-            self.create(parent=obj, dynamic_column=item)
+    ## def set_parent_key_value_pairs(self, obj):
+    ##     for item in obj.column_collection.dynamic_column.all():
+    ##         self.create(parent=obj, dynamic_column=item)
 
 
-class KeyValueMixin(models.Model):
+class KeyValue(models.Model):
+    collection = models.ForeignKey(
+        CollectionBase, verbose_name=_("Collection Type"),
+        related_name='keyvalue_pairs')
     dynamic_column = models.ForeignKey(
         DynamicColumn, verbose_name=_("Dynamic Column"),
         related_name='keyvalue_pairs')
     value = models.TextField(verbose_name=_("Value"), null=True, blank=True)
 
-    objects = KeyValueMixinManager()
+    objects = KeyValueManager()
 
     class Meta:
         verbose_name = _("Key Value")
         verbose_name_plural = _("Key Values")
-        abstract = True
 
     def __unicode__(self):
-        return unicode(self.dynamic_column.name)
+        return unicode(self.collection)
