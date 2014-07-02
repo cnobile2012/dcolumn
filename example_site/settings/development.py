@@ -48,6 +48,7 @@ LOG_ENV = 'development'
 VIEWS_LOG_FILE = '{}/{}-views.log'.format(LOG_DIR, LOG_ENV)
 MODELS_LOG_FILE = '{}/{}-models.log'.format(LOG_DIR, LOG_ENV)
 TEMPLATES_LOG_FILE = '{}/{}-templates.log'.format(LOG_DIR, LOG_ENV)
+MANAGER_LOG_FILE = '{}/{}-manager.log'.format(LOG_DIR, LOG_ENV)
 
 LOGGING.get('handlers', {}).get(
     'views_file', {})['filename'] = VIEWS_LOG_FILE
@@ -55,9 +56,12 @@ LOGGING.get('handlers', {}).get(
     'models_file', {})['filename'] = MODELS_LOG_FILE
 LOGGING.get('handlers', {}).get(
     'templates_file', {})['filename'] = TEMPLATES_LOG_FILE
+LOGGING.get('handlers', {}).get(
+    'manager_file', {})['filename'] = MANAGER_LOG_FILE
 
 
 LOGGING.get('loggers', {}).get('django.request', {})['level'] = 'DEBUG'
 LOGGING.get('loggers', {}).get('dcolumn.views', {})['level'] = 'DEBUG'
 LOGGING.get('loggers', {}).get('dcolumn.models', {})['level'] = 'DEBUG'
 LOGGING.get('loggers', {}).get('dcolumn.templates', {})['level'] = 'DEBUG'
+LOGGING.get('loggers', {}).get('dcolumn.manager', {})['level'] = 'DEBUG'

@@ -7,12 +7,12 @@ import logging
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
-log = logging.getLogger(u'dcolumn.manage')
+log = logging.getLogger(u'dcolumn.manager')
 
 
 class DynamicColumnManager(object):
     __shared_state = {}
-    _relation = []#(0, _("Choose a relation"))]
+    _relations = [(0, _("Choose a relation"))]
     _relation_map = None
     _relation_numbers = set()
     _choice_map = {}
@@ -57,7 +57,7 @@ class DynamicColumnManager(object):
 
         self._test_field(choice, field)
         self._relation_numbers.add(relation_num)
-        self._relation.append((relation_num, choice.__name__))
+        self._relations.append((relation_num, choice.__name__))
         self._choice_map[choice.__name__] = (choice, field)
 
     def _test_field(self, choice, field):
@@ -77,7 +77,7 @@ class DynamicColumnManager(object):
         :Returns:
           A list of the choices.
         """
-        return self._relation
+        return self._relations
 
     @property
     def choice_relation_map(self):
@@ -88,7 +88,7 @@ class DynamicColumnManager(object):
           A dict of the choices.
         """
         if not self._relation_map:
-            self._relation_map = dict(self._relation)
+            self._relation_map = dict(self._relations)
 
         return self._relation_map
 
@@ -160,7 +160,8 @@ class DynamicColumnManager(object):
         """
         return self._css_container_map
 
-    def get_default_column_name(self, model_name):
+    def get_collection_name(self, model_name):
+        log.debug("Model name: %s", model_name)
         return settings.DYNAMIC_COLUMNS.get(u'ITEM_NAMES',
                                             {}).get(model_name, u'')
 

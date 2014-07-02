@@ -55,7 +55,7 @@ class BookDetailView(DetailView, CollectionDetailViewMixin):
 
     def get_context_data(self, **kwargs):
         """
-        Get context data for the Parent KeyValue objects.
+        Get context data for the KeyValue objects.
         """
         context = super(BookDetailView, self).get_context_data(**kwargs)
         # Create actions if any.

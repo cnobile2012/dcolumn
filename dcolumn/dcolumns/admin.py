@@ -34,9 +34,10 @@ class ColumnCollectionAdmin(UserAdminMixin):
     fieldsets = (
         (None, {'fields': ('name', 'dynamic_column',)}),
         (_('Status'), {'classes': ('collapse',),
-                       'fields': ('active', 'user', 'ctime', 'mtime',)}),
+                       'fields': ('active', 'creator', 'ctime', 'user',
+                                  'mtime',)}),
         )
-    readonly_fields = ('user', 'ctime', 'mtime',)
+    readonly_fields = ('user', 'creator', 'ctime', 'mtime',)
     list_display = ('name', 'user', 'mtime',)
     filter_horizontal = ('dynamic_column',)
     form = ColumnCollectionForm
@@ -55,9 +56,9 @@ class DynamicColumnAdmin(UserAdminMixin):
                                   'mtime',)}),
         )
     readonly_fields = ('creator', 'slug', 'user', 'ctime', 'mtime',)
-    list_display = ('name', 'value_type', '_relation_producer',
-                    'store_relation', 'required', 'location', 'order',
-                    'mtime', 'active',)
+    list_display = ('name', '_collection_producer', 'value_type',
+                    '_relation_producer', 'store_relation', 'required',
+                    'location', 'order', 'mtime', 'active',)
     list_editable = ('location', 'order', 'active',)
     ordering = ('location', 'order', 'name',)
     form = DynamicColumnForm

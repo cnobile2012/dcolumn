@@ -141,33 +141,15 @@ var DynamicColumn = Class.extend({
         break;
       case 2: // Choice
         if(relation.store_relation) {
-          $obj = $('<span id="' + id + '" name="' + name + '">' + value +
-            '</span>');
-        } else {
-          $obj = $('<select id="' + id +'" name="' + name + '"></select>');
-
-          /*
-           * Get options from self.data.dynamicColumn using 'relation.key' and
-           * add these options to the select.
-           */
-          var option = "<option></option>";
-          var options = self.data.dynamicColumns[relation.slug];
-          var $option = null;
-
-          if(options === undefined) {
-            var msg = "Invalid relationship make a note of the steps that " +
-                "led to this error and send them in a bug report.";
-            var data = {};
-            data[name] = [msg];
-            self._mimicDjangoErrors(data);
+          if(value === "" || self._isInOptions(relation.slug, value)) {
+            $obj = self._choiceSelect(id, name, relation);
+            value = self._getOptionId(relation.slug, value);
           } else {
-            for(var i = 0; i < options.length; i++) {
-              $option = $(option);
-              $option.val(options[i][0]);
-              $option.text(options[i][1]);
-              $option.appendTo($obj);
-            }
+            $obj = $('<span id="' + id + '" name="' + name + '">' + value +
+              '</span>');
           }
+        } else {
+          $obj = self._choiceSelect(id, name, relation);
         }
 
         break;
@@ -189,7 +171,7 @@ var DynamicColumn = Class.extend({
         $obj = $('<textarea class="vLargeTextField" id="' + id +
           '" name="' + name + '" cols="40" rows="10"></textarea>');
         break;
-      default:
+      default: // Text
         $obj = $('<input id="' + id + '" name="' + name + '" size="50"' +
           ' type="text" />');
         break;
@@ -197,6 +179,65 @@ var DynamicColumn = Class.extend({
 
     $obj.val(value);
     $input.replaceWith($obj);
+  },
+
+  _getOptionId: function(slug, value) {
+    var options = this.data.dynamicColumns[slug];
+    var result = value;
+
+    for(var i = 0; i < options.length; i++) {
+      if(value == options[i][0]) {
+        break;
+      } else if (value == options[i][1]) {
+        result = options[i][0];
+        break;
+      }
+    }
+
+    return result;
+  },
+
+  _isInOptions: function(slug, value) {
+    var options = this.data.dynamicColumns[slug];
+    var result = false;
+
+    for(var i = 0; i < options.length; i++) {
+      if(value == options[i][0]) {
+        result = true;
+        break;
+      }
+    }
+
+    return result;
+  },
+
+  _choiceSelect: function(id, name, relation) {
+    $obj = $('<select id="' + id + '" name="' + name + '"></select>');
+
+    /*
+     * Get options from self.data.dynamicColumn using 'relation.slug' and
+     * add these options to the select.
+     */
+    var option = "<option></option>";
+    var options = this.data.dynamicColumns[relation.slug];
+    var $option = null;
+
+    if(options === undefined) {
+      var msg = "Invalid relationship make a note of the steps that " +
+          "led to this error and send them in a bug report.";
+      var data = {};
+      data[name] = [msg];
+      this._mimicDjangoErrors(data);
+    } else {
+      for(var i = 0; i < options.length; i++) {
+      $option = $(option);
+      $option.val(options[i][0]);
+      $option.text(options[i][1]);
+      $option.appendTo($obj);
+      }
+    }
+
+    return $obj;
   },
 
   _mimicDjangoErrors: function(data) {
@@ -225,12 +266,11 @@ var DynamicColumn = Class.extend({
   _assembleURI: function(path) {
     return location.protocol + '//' + location.host + path;
   }
-  
 });
 
 
 $(document).ready(function() {
   var msg = '';
-  var uri = '/parent/api/dynamic-column/';
+  var uri = '/dcolumns/api/collections/';
   new DynamicColumn(msg, uri);
 });

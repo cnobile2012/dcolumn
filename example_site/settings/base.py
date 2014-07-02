@@ -109,9 +109,9 @@ DYNAMIC_COLUMNS = {
     # all tables that use dcolumn. The key is the table name and the value is
     # the name used in the ColumnCollection record.
     u'ITEM_NAMES': {
-        u'Book': u'Book',
-        u'Author': u'Author',
-        u'Publisher': u'Publisher',
+        u'Book': u'Book Current',
+        u'Author': u'Author Current',
+        u'Publisher': u'Publisher Current',
         },
     # To allow anybody to access the API set to True.
     u'INACTIVATE_API_AUTH': False,
@@ -186,6 +186,14 @@ LOGGING = {
             'maxBytes': 50000000, # 50 Meg bytes
             'backupCount': 5,
             },
+        'manager_file': {
+            'class': 'example_site.common.loghandlers.DeferredRotatingFileHandler',
+            'level': 'DEBUG',
+            'formatter': 'verbose',
+            'filename': '/dev/null',
+            'maxBytes': 50000000, # 50 Meg bytes
+            'backupCount': 5,
+            },
         },
     'loggers': {
         'django.request': {
@@ -220,6 +228,11 @@ LOGGING = {
             },
         'dcolumn.templates': {
             'handlers': ('templates_file', 'console', 'mail_admins',),
+            'level': 'ERROR',
+            'propagate': True,
+            },
+        'dcolumn.manager': {
+            'handlers': ('manager_file', 'console', 'mail_admins',),
             'level': 'ERROR',
             'propagate': True,
             },

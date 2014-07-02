@@ -26,7 +26,7 @@ class AuthorManager(StatusModelManagerMixin):
         return self.active()
 
 
-class Author(CollectionBase, UserModelMixin, TimeModelMixin, StatusModelMixin):
+class Author(CollectionBase):
     name = models.CharField(
         verbose_name=_("Author's Name"), max_length=250,
         help_text=_("Enter the name of the author."))
@@ -43,8 +43,7 @@ class PublisherManager(StatusModelManagerMixin):
         return self.active()
 
 
-class Publisher(CollectionBase, UserModelMixin, TimeModelMixin,
-                StatusModelMixin):
+class Publisher(CollectionBase):
     name = models.CharField(
         verbose_name=_("Publisher's Name"), max_length=250,
         help_text=_("Enter the name of the publisher."))
@@ -61,7 +60,7 @@ class BookManager(StatusModelManagerMixin):
         return self.active()
 
 
-class Book(CollectionBase, UserModelMixin, TimeModelMixin, StatusModelMixin):
+class Book(CollectionBase):
     title = models.CharField(
         verbose_name=_("Title"), max_length=250,
         help_text=_("Enter a book title."))

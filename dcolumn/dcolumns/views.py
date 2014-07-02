@@ -22,8 +22,9 @@ class ContextDataMixin(object):
     def get_dynamic_column_context_data(self, obj=None):
         context = {}
         fk_slugs = DynamicColumn.objects.get_fk_slugs()
+        name = dcolumn_manager.get_collection_name(self.__class__.__name__)
 
-        for name in ColumnCollection.objects.get_active_relation_items():
+        for name in ColumnCollection.objects.get_active_relation_items(name):
             model, field = dcolumn_manager.choice_map.get(name)
             objects = context.setdefault(u'dynamicColumns', {})
             values = [(r.pk, getattr(r, field))
@@ -39,7 +40,9 @@ class ContextDataMixin(object):
         if form:
             relations = form.get_display_data()
         else:
-            relations = ColumnCollection.objects.serialize_columns(obj=obj)
+            name = dcolumn_manager.get_collection_name(self.__class__.__name__)
+            relations = ColumnCollection.objects.serialize_columns(
+                name, obj=obj)
 
         log.debug("relations: %s", relations)
         return {u'relations': relations}
@@ -57,7 +60,7 @@ class CollectionAJAXView(JSONResponseMixin, TemplateView, ContextDataMixin):
 
     def get_context_data(self, **kwargs):
         """
-        Get context data for the Parent KeyValue objects.
+        Get context data for the KeyValue objects.
 
         Do not call super on get_context_data, it puts self into the context
         which is not valid JSON.
@@ -86,9 +89,10 @@ class CollectionCreateUpdateViewMixin(ContextDataMixin):
 
     def get_context_data(self, **kwargs):
         """
-        Get context data for the Parent KeyValue objects.
+        Get context data for the KeyValue objects.
         """
-        context = super(ParentCreateView, self).get_context_data(**kwargs)
+        context = super(CollectionCreateUpdateViewMixin,
+                        self).get_context_data(**kwargs)
         context.update(self.get_dynamic_column_context_data())
         context.update(self.get_relation_context_data(**kwargs))
         context.update({u'css': dcolumn_manager.css_container_map})

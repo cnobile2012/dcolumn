@@ -15,14 +15,14 @@ from .forms import BookForm, AuthorForm, PublisherForm
 #
 # Author
 #
-class AuthorAdmin(admin.ModelAdmin):
+class AuthorAdmin(UserAdminMixin):
     fieldsets = (
         (None, {'fields': ('name',)}),
         (_('Status'), {'classes': ('collapse',),
-                       'fields': ('column_collection', 'active', 'user',
-                                  'ctime', 'mtime',)}),
+                       'fields': ('column_collection', 'active', 'creator',
+                                  'ctime', 'user', 'mtime',)}),
         )
-    readonly_fields = ('user', 'ctime', 'mtime',)
+    readonly_fields = ('creator', 'user', 'ctime', 'mtime',)
     list_display = ('name', 'column_collection', 'user', 'mtime',)
     inlines = (KeyValueInline,)
     form = AuthorForm
@@ -31,7 +31,7 @@ class AuthorAdmin(admin.ModelAdmin):
 #
 # Publisher
 #
-class PublisherAdmin(admin.ModelAdmin):
+class PublisherAdmin(UserAdminMixin):
     fieldsets = (
         (None, {'fields': ('name',)}),
         (_('Status'), {'classes': ('collapse',),

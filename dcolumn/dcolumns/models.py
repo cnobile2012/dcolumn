@@ -67,8 +67,8 @@ class DynamicColumn(UserModelMixin, TimeModelMixin, StatusModelMixin):
         help_text=_("Choose the value type."))
     relation = models.IntegerField(
         verbose_name=_("Choice Relation"), null=True, blank=True,
-        choices=dcolumn_manager.choice_relations,
-        help_text=_("Choose the Choice Relation type."))
+        #choices=dcolumn_manager.choice_relations,
+        help_text=_("Choose the Choice Relation Type."))
     required = models.BooleanField(
         verbose_name=_("Required Field"), choices=YES_NO, default=NO,
         help_text=_("If this field is required based on business rules then "
@@ -107,13 +107,25 @@ class DynamicColumn(UserModelMixin, TimeModelMixin, StatusModelMixin):
         return result
     _relation_producer.short_description = _("Relation")
 
+    def _collection_producer(self):
+        result = []
+
+        for collection in self.column_collections.all():
+            result.append('<span>{}</span>'.format(collection.name))
+
+        return ", ".join(result)
+    _collection_producer.short_description = _("Collections")
+    _collection_producer.allow_tags = True
+
 
 #
 # ColumnCollection
 #
 class ColumnCollectionManager(StatusModelManagerMixin):
 
-    def get_dynamic_columns(self, name):
+    def get_column_collection(self, name):
+        log.debug("Collection name: %s", name)
+
         try:
             return self.active().get(name=name).dynamic_column.active(
                 ).order_by('location', 'order', 'name')
@@ -123,9 +135,8 @@ class ColumnCollectionManager(StatusModelManagerMixin):
             log.error(msg)
             raise self.model.DoesNotExist(msg)
 
-    def serialize_columns(self, obj=None):
-        records = self.get_dynamic_columns(
-            dcolumn_manager.get_default_column_name(u'Parent'))
+    def serialize_columns(self, name, obj=None):
+        records = self.get_column_collection(name)
         result = OrderedDict()
 
         if obj:
@@ -136,8 +147,11 @@ class ColumnCollectionManager(StatusModelManagerMixin):
             rec[u'name'] = record.name
             rec[u'slug'] = record.slug
             rec[u'value_type'] = record.value_type
-            rec[u'relation'] = record.relation
-            if record.relation: rec[u'store_relation'] = record.store_relation
+
+            if record.relation:
+                rec[u'relation'] = record.relation
+                rec[u'store_relation'] = record.store_relation
+
             rec[u'required'] = record.required
             # We convert the list to a dict because css_container_map may
             # not be keyed with integers.
@@ -148,9 +162,8 @@ class ColumnCollectionManager(StatusModelManagerMixin):
 
         return result
 
-    def get_active_relation_items(self):
-        records = self.get_dynamic_columns(
-            dcolumn_manager.get_default_column_name(u'Parent'))
+    def get_active_relation_items(self, name):
+        records = self.get_column_collection(name)
         return [dcolumn_manager.choice_relation_map.get(record.relation)
                 for record in records if record.relation]
 
@@ -176,17 +189,14 @@ class ColumnCollection(UserModelMixin, TimeModelMixin, StatusModelMixin):
 #
 # CollectionBase
 #
-class CollectionBase(models.Model):
+class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
     column_collection = models.ForeignKey(
         ColumnCollection, verbose_name=_("Column Collection"),
         help_text=_(u"Choose the version of the dynamic columns you want "
                     u"for all Collections."))
 
-#    class Meta:
-#        abstract = True
-
     def save(self, *args, **kwargs):
-        super(CollectionMixin, self).save(*args, **kwargs)
+        super(CollectionBase, self).save(*args, **kwargs)
 
     def serialize_key_value_pairs(self):
         result = {}

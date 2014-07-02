@@ -27,7 +27,7 @@ def auto_display(parser, token):
       option   -- A keyword argument that is in the 'dynamicColumns' context.
                   The entire 'dynamicColumns' context can be supplied or just
                   the object for this relation.
-      display  -- True use <span> for all tags else False use various tag types.
+      display  -- True use <span> for all tags else False use default tag types.
 
     Assume data structures below for examples::
 
@@ -121,10 +121,10 @@ class AutoDisplayNode(template.Node):
                                    u'id="{}" name="{}" cols="40" rows="10"'
                                    u'>{}</textarea>\n'),
         DynamicColumn.DATE: (u'<input id="{}" class="wants_datepicker" '
-                              u'name="{}" size="12" type="text" value="{}" />'),
+                             u'name="{}" size="12" type="text" value="{}" />'),
         DynamicColumn.BOOLEAN: u'<select id="{}" name="{}">\n',
         DynamicColumn.FLOAT: (u'<input id="{}" name="{}" type="text" '
-                               'value="{}" />'),
+                              u'value="{}" />'),
         DynamicColumn.CHOICE: u'<select id="{}" name="{}">\n',
         }
 
@@ -213,9 +213,16 @@ class AutoDisplayNode(template.Node):
         return elem
 
     def _find_value(self, elem, attr, options, relation):
-        key = relation.get(u'value', u'')
-        key = key.isdigit() and int(key) or key
-        value = dict(options).get(key, u'')
+        value = relation.get(u'value', u'')
+        default = u''
+
+        # Get the value is the ID then get the value.
+        if relation.get(u'store_relation', False):
+            log.debug("value: %s", value)
+            default = value
+
+        key = value.isdigit() and int(value) or value
+        value = dict(options).get(key, default)
         elem = elem.format("id-" + attr, attr, value)
         return elem
 

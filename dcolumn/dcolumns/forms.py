@@ -34,9 +34,9 @@ class DynamicColumnForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(DynamicColumnForm, self).__init__(*args, **kwargs)
-        #self.fields[u'relation'].widget = forms.TypedChoiceField()
-        #self.fields[u'relation'].empty_label = _("Choose a relation")
-        #self.fields[u'relation'].queryset = dcolumn_manager.choice_relations
+        self.fields[u'relation'] = forms.ChoiceField(
+            widget=forms.Select, choices=dcolumn_manager.choice_relations)
+        self.fields[u'relation'].required = False
 
     class Meta:
         model = DynamicColumn
@@ -76,7 +76,10 @@ class CollectionFormMixin(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(CollectionFormMixin, self).__init__(*args, **kwargs)
-        self.relations = ColumnCollection.objects.serialize_columns()
+        self.coll_name = dcolumn_manager.get_collection_name(
+            self.Meta.model.__name__)
+        self.relations = ColumnCollection.objects.serialize_columns(
+            self.coll_name)
         self.fields[u'column_collection'].required = False
         log.debug("args: %s, kwargs: %s", args, kwargs)
         log.debug("fields: %s, data: %s", self.fields, self.data)
@@ -93,11 +96,10 @@ class CollectionFormMixin(forms.ModelForm):
         return self.relations
 
     def clean_column_collection(self):
-        return ColumnCollection.objects.active().get(
-            name=dcolumn_manager.get_default_column_name(u'Parent'))
+        return ColumnCollection.objects.active().get(name=self.coll_name)
 
     def clean(self):
-        cleaned_data = super(ParentForm, self).clean()
+        cleaned_data = super(CollectionFormMixin, self).clean()
         self.validate_dynamic_fields()
         log.debug("cleaned_data: %s", cleaned_data)
         return cleaned_data
@@ -110,19 +112,39 @@ class CollectionFormMixin(forms.ModelForm):
 
             for key, value in self.data.items():
                 if key == relation.get(u'slug'):
-                    self.validate_store_required(relation, value)
+                    value = self.validate_store_relation(relation, value)
                     relation[u'value'] = value
                     self.validate_required(relation, error_class, key, value)
                     self.validate_value_type(relation, error_class, key, value)
                     self.validate_value_length(relation, error_class, key,
                                                value)
 
-        log.error("form.errors: %s", self._errors)
+        log.debug("form.errors: %s", self._errors)
 
-    def validate_store_required(self, relation, value):
-        if relation.get(u'store_related'):
-            print value
+    def validate_store_relation(self, relation, value):
+        """
+        If 'store_relation' is False then return the value as is, should be a
+        PK. If 'store_relation' is True then lookup in the choices using the
+        PK and return the actual value.
+        """
+        if relation.get(u'store_related', False):
+            log.debug("value: %s, relation: %s", value, relation)
+            name = DynamicColumn.CHOICE_RELATION_MAP.get(
+                relation.get('relation', u''))
+            data = DynamicColumn.MODEL_MAP.get(name)
 
+            if len(data) == 2:
+                model, field = data
+                old_value = value
+                value = value.isdigit() and int(value) or 0
+                value = [getattr(r, field)
+                         for r in model.objects.dynamic_column()
+                         if value == r.pk]
+                value = len(value) >= 1 and value[0] or old_value
+                log.debug("value: %s, field: %s, model: %s",
+                          value, field, model)
+
+        return value
 
     def validate_required(self, relation, error_class, key, value):
         if relation.get(u'required', False):
@@ -151,7 +173,7 @@ class CollectionFormMixin(forms.ModelForm):
                     [u"{} field is too long.".format(relation.get(u'name'))])
 
     def save(self, commit=True):
-        inst = super(ParentForm, self).save(commit=False)
+        inst = super(CollectionFormMixin, self).save(commit=False)
         request = self.initial.get('request')
         log.debug("request: %s, inst: %s, instance: %s",
                   request, inst, self.instance)
@@ -171,9 +193,6 @@ class CollectionFormMixin(forms.ModelForm):
         return inst
 
     def _save_keyvalue_pairs(self):
-
-        # TODO See if the pk can be an int from the beginning.
-
         for pk, relation in self.get_display_data().items():
             required = relation.get(u'required', False)
             value = relation.get(u'value', u'')
@@ -185,12 +204,12 @@ class CollectionFormMixin(forms.ModelForm):
 
             try:
                 obj, created = self.instance.keyvalue_pairs.get_or_create(
-                    parent=self.instance, dynamic_column_id=int(pk),
+                    collection=self.instance, dynamic_column_id=int(pk),
                     defaults={u'value': value})
-            except Parent.MultipleObjectsReturned, e:
+            except self.instance.MultipleObjectsReturned, e:
                 log.error("Multiple records found for parent: %s, "
-                          "dynamic_column_id: %s",
-                          self.instance, dynamic_column_id=cc_id)
+                          "dynamic_column_id: %s", self.instance,
+                          dynamic_column_id=cc_id)
                 raise e
 
             if not created:
