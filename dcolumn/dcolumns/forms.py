@@ -37,6 +37,7 @@ class DynamicColumnForm(forms.ModelForm):
         self.fields[u'relation'] = forms.ChoiceField(
             widget=forms.Select, choices=dcolumn_manager.choice_relations)
         self.fields[u'relation'].required = False
+        #self.fields[u'relation'].empty_label = 'Choose a Relation'
 
     class Meta:
         model = DynamicColumn
@@ -45,6 +46,7 @@ class DynamicColumnForm(forms.ModelForm):
         cleaned_data = super(DynamicColumnForm, self).clean()
         value_type = cleaned_data.get(u'value_type')
         relation = cleaned_data.get(u'relation')
+        # TO DO need o check for the "Choose a relation" object and not save it.
 
         if value_type == DynamicColumn.CHOICE:
             if relation is None:
@@ -105,19 +107,17 @@ class CollectionFormMixin(forms.ModelForm):
         return cleaned_data
 
     def validate_dynamic_fields(self):
-        error_class = []
-
         for relation in  self.relations.values():
             log.debug("relation: %s", relation)
 
             for key, value in self.data.items():
                 if key == relation.get(u'slug'):
                     value = self.validate_store_relation(relation, value)
+                    value = self.validate_date_types(relation, key, value)
                     relation[u'value'] = value
-                    self.validate_required(relation, error_class, key, value)
-                    self.validate_value_type(relation, error_class, key, value)
-                    self.validate_value_length(relation, error_class, key,
-                                               value)
+                    self.validate_required(relation, key, value)
+                    self.validate_value_type(relation, key, value)
+                    self.validate_value_length(relation, key, value)
 
         log.debug("form.errors: %s", self._errors)
 
@@ -146,7 +146,30 @@ class CollectionFormMixin(forms.ModelForm):
 
         return value
 
-    def validate_required(self, relation, error_class, key, value):
+    _MONTHS = {u'january': 1, u'february': 2, u'march': 3, u'april': 4,
+               u'may': 5, u'june': 6, u'july': 7, u'august': 8,
+               u'september': 9, u'october': 10, u'november': 11,
+               u'december': 12}
+
+    def validate_date_types(self, relation, key, value):
+        if relation.get(u'value_type') == DynamicColumn.DATE:
+            if value:
+                day_month, delim, year = value.partition(', ')
+                day, delim, month = day_month.partition(' ')
+                month = self._MONTHS.get(month.lower(), 0)
+                log.debug("year: %s, month: %s, day: %s", year, month, day)
+
+                if not year.isdigit() or not month or not day.isdigit():
+                    self._errors[key] = self.error_class(
+                        [u"Invalid year, month, or day, found: {}".format(
+                            value)])
+                else:
+                    value = datetime.date(int(year), month, int(day)).strftime(
+                        u'%Y-%m-%d')
+
+        return value
+
+    def validate_required(self, relation, key, value):
         if relation.get(u'required', False):
             value_type = relation.get(u'value_type')
 
@@ -156,7 +179,7 @@ class CollectionFormMixin(forms.ModelForm):
                 self._errors[key] = self.error_class(
                     [u"{} field is required.".format(relation.get(u'name'))])
 
-    def validate_value_type(self, relation, error_class, key, value):
+    def validate_value_type(self, relation, key, value):
         value_type = relation.get(u'value_type')
 
         if value_type == DynamicColumn.NUMBER:
@@ -165,7 +188,7 @@ class CollectionFormMixin(forms.ModelForm):
                     [u"{} field is not a number.".format(
                         relation.get(u'name'))])
 
-    def validate_value_length(self, relation, error_class, key, value):
+    def validate_value_length(self, relation, key, value):
         value_type = relation.get(u'value_type')
 
         if len(value) > self.MAX_LENGTH_MAP.get(value_type):
