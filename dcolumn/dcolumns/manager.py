@@ -12,7 +12,7 @@ log = logging.getLogger(u'dcolumn.manager')
 
 class DynamicColumnManager(object):
     __shared_state = {}
-    _relations = [(0, _("Choose a relation"))]
+    _relations = [(0, _("---------"))]
     _relation_map = None
     _relation_numbers = set()
     _choice_map = {}

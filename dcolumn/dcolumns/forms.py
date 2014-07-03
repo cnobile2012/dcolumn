@@ -37,7 +37,6 @@ class DynamicColumnForm(forms.ModelForm):
         self.fields[u'relation'] = forms.ChoiceField(
             widget=forms.Select, choices=dcolumn_manager.choice_relations)
         self.fields[u'relation'].required = False
-        #self.fields[u'relation'].empty_label = 'Choose a Relation'
 
     class Meta:
         model = DynamicColumn
@@ -45,14 +44,15 @@ class DynamicColumnForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super(DynamicColumnForm, self).clean()
         value_type = cleaned_data.get(u'value_type')
-        relation = cleaned_data.get(u'relation')
-        # TO DO need o check for the "Choose a relation" object and not save it.
+        relation = cleaned_data.get(u'relation', u'0')
+        relation = int(relation)
+        log.debug("value_type: %s, relation: %s", value_type, relation)
 
         if value_type == DynamicColumn.CHOICE:
-            if relation is None:
-                msg = (u"If the Value Type is a Choice then a relation "
-                       u"must be entered.")
-                raise forms.ValidationError(msg)
+            if not relation:
+                self._errors[u'relation'] = self.error_class(
+                        [_(u"If the Value Type is a Choice then a relation "
+                           u"must be entered.")])
         else:
             cleaned_data[u'relation'] = None
 
@@ -82,7 +82,7 @@ class CollectionFormMixin(forms.ModelForm):
             self.Meta.model.__name__)
         self.relations = ColumnCollection.objects.serialize_columns(
             self.coll_name)
-        self.fields[u'column_collection'].required = False
+        #self.fields[u'column_collection'].required = False
         log.debug("args: %s, kwargs: %s", args, kwargs)
         log.debug("fields: %s, data: %s", self.fields, self.data)
 
