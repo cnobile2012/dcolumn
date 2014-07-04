@@ -23,7 +23,7 @@ class KeyValueInline(admin.TabularInline):
     #form = KeyValueForm
 
     class Media:
-        js = ('dcolumn/js/jquery-2.0.3.min.js', 'dcolumn/js/jquery.cookie.js',
+        js = ('dcolumn/js/jquery-1.11.1.min.js', 'dcolumn/js/jquery.cookie.js',
               'dcolumn/js/inheritance.js', 'dcolumn/js/dynamic-column.js',)
 
 
