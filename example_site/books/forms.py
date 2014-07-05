@@ -47,6 +47,8 @@ class BookForm(CollectionFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(BookForm, self).__init__(*args, **kwargs)
+        self.fields[u'title'].widget = forms.TextInput(
+            attrs={u'size': 50, u'maxlength': 250})
 
     class Meta:
         model = Book
