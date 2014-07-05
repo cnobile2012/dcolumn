@@ -33,6 +33,13 @@ class Author(CollectionBase):
 
     objects = AuthorManager()
 
+    class Meta:
+        verbose_name = _("Author")
+        verbose_name_plural = _("Authors")
+
+    def __unicode__(self):
+        return unicode("{}".format(self.name))
+
 
 #
 # Publisher
@@ -49,6 +56,13 @@ class Publisher(CollectionBase):
         help_text=_("Enter the name of the publisher."))
 
     objects = PublisherManager()
+
+    class Meta:
+        verbose_name = _("Publisher")
+        verbose_name_plural = _("Publishers")
+
+    def __unicode__(self):
+        return unicode("{}".format(self.name))
 
 
 #

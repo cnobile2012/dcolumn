@@ -19,10 +19,10 @@ log = logging.getLogger('dcolumn.views')
 
 class ContextDataMixin(object):
 
-    def get_dynamic_column_context_data(self, obj=None):
+    def get_dynamic_column_context_data(self, class_name=u'', obj=None):
         context = {}
         fk_slugs = DynamicColumn.objects.get_fk_slugs()
-        name = dcolumn_manager.get_collection_name(self.__class__.__name__)
+        name = dcolumn_manager.get_collection_name(class_name)
 
         for name in ColumnCollection.objects.get_active_relation_items(name):
             model, field = dcolumn_manager.choice_map.get(name)
@@ -34,13 +34,13 @@ class ContextDataMixin(object):
 
         return context
 
-    def get_relation_context_data(self, obj=None, **kwargs):
+    def get_relation_context_data(self, class_name=u'', obj=None, **kwargs):
         form = kwargs.get(u'form')
 
         if form:
             relations = form.get_display_data()
         else:
-            name = dcolumn_manager.get_collection_name(self.__class__.__name__)
+            name = dcolumn_manager.get_collection_name(class_name)
             relations = ColumnCollection.objects.serialize_columns(
                 name, obj=obj)
 
@@ -65,10 +65,11 @@ class CollectionAJAXView(JSONResponseMixin, TemplateView, ContextDataMixin):
         Do not call super on get_context_data, it puts self into the context
         which is not valid JSON.
         """
+        log.debug("kwargs: %s", kwargs)
         context = {u'valid': True}
 
         try:
-            context.update(self.get_dynamic_column_context_data())
+            context.update(self.get_dynamic_column_context_data(**kwargs))
             context.update(self.get_relation_context_data(**kwargs))
         except Exception, e:
             context[u'valid'] = False
@@ -93,7 +94,7 @@ class CollectionCreateUpdateViewMixin(ContextDataMixin):
         """
         context = super(CollectionCreateUpdateViewMixin,
                         self).get_context_data(**kwargs)
-        context.update(self.get_dynamic_column_context_data())
+        context.update(self.get_dynamic_column_context_data(**kwargs))
         context.update(self.get_relation_context_data(**kwargs))
         context.update({u'css': dcolumn_manager.css_container_map})
         return context
@@ -109,7 +110,7 @@ class CollectionDetailViewMixin(ContextDataMixin):
         Get context data for the KeyValue objects.
         """
         context = super(CollectionViewMixin, self).get_context_data(**kwargs)
-        context.update(self.get_dynamic_column_context_data())
+        context.update(self.get_dynamic_column_context_data(**kwargs))
         context.update(self.get_relation_context_data(
             obj=self.object, **kwargs))
         context.update({u'css': dcolumn_manager.css_container_map})

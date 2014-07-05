@@ -33,7 +33,7 @@ class DynamicColumnManager(StatusModelManagerMixin):
         return result
 
 
-class DynamicColumn(UserModelMixin, TimeModelMixin, StatusModelMixin):
+class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
     BOOLEAN = 1
     CHOICE = 2
     DATE = 3
@@ -168,7 +168,7 @@ class ColumnCollectionManager(StatusModelManagerMixin):
                 for record in records if record.relation]
 
 
-class ColumnCollection(UserModelMixin, TimeModelMixin, StatusModelMixin):
+class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin):
     name = models.CharField(
         verbose_name=_("Name"), unique=True, max_length=50,
         help_text=_("Enter a unique name for this record."))

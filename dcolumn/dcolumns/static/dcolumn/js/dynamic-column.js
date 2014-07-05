@@ -7,6 +7,9 @@
  *
  * This class will detect what type of field is needed and mutate the current
  * input tag to the correct type. It is designed for a Django admin only.
+ *
+ * Thanks to: Aurelio De Rosa for trim functions
+ *            (http://www.sitepoint.com/trimming-strings-in-javascript/)
  */
 
 Function.prototype.bindObj = function(object) {
@@ -19,12 +22,29 @@ Function.prototype.bindObj = function(object) {
   return temp;
 };
 
+String.prototype.trimLeft = function(charlist) {
+  if (charlist === undefined)
+    charlist = "\s";
+ 
+  return this.replace(new RegExp("^[" + charlist + "]+"), "");
+};
+
+String.prototype.trimRight = function(charlist) {
+  if (charlist === undefined)
+    charlist = "\s";
+ 
+  return this.replace(new RegExp("[" + charlist + "]+$"), "");
+};
+
+String.prototype.trim = function(charlist) {
+  return this.trimLeft(charlist).trimRight(charlist);
+};
+
 
 var DynamicColumn = Class.extend({
   ADMIN_KEYVALUE_CLASS: "td.field-dynamic_column select",
 
   init: function(msg, uri) {
-    //this._super();
     this.uri = uri;
     this.data = null;
     this._initFlag = false;
@@ -79,9 +99,12 @@ var DynamicColumn = Class.extend({
 
   /* Get the dynamic columns */
   _sendDynamicColumnRequest: function() {
+    var className = $('div.breadcrumbs').children().last().attr('href')
+        .trim('/').split(/[\/]/);
+    className = className[className.length-1];
     this._setHeader();
     var options = {
-      url: this._assembleURI(this.uri),
+      url: this._assembleURI(this.uri + className + "/"),
       cache: false,
       type: 'GET',
       contentType: 'json',
@@ -91,7 +114,7 @@ var DynamicColumn = Class.extend({
       success: this._dynamicColumnCB.bindObj(this),
       statusCode: {400: this._dynamicColumnCB.bindObj(this)}
     }
-  $.ajax(options);
+    $.ajax(options);
   },
 
   _dynamicColumnCB: function(json, status) {
@@ -230,10 +253,10 @@ var DynamicColumn = Class.extend({
       this._mimicDjangoErrors(data);
     } else {
       for(var i = 0; i < options.length; i++) {
-      $option = $(option);
-      $option.val(options[i][0]);
-      $option.text(options[i][1]);
-      $option.appendTo($obj);
+        $option = $(option);
+        $option.val(options[i][0]);
+        $option.text(options[i][1]);
+        $option.appendTo($obj);
       }
     }
 

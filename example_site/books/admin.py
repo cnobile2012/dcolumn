@@ -22,7 +22,7 @@ class AuthorAdmin(UserAdminMixin):
                        'fields': ('column_collection', 'active', 'creator',
                                   'ctime', 'user', 'mtime',)}),
         )
-    readonly_fields = ('creator', 'user', 'ctime', 'mtime',)
+    readonly_fields = ('creator', 'ctime', 'user', 'mtime',)
     list_display = ('name', 'column_collection', 'user', 'mtime',)
     inlines = (KeyValueInline,)
     form = AuthorForm
@@ -35,10 +35,10 @@ class PublisherAdmin(UserAdminMixin):
     fieldsets = (
         (None, {'fields': ('name',)}),
         (_('Status'), {'classes': ('collapse',),
-                       'fields': ('column_collection', 'active', 'user',
-                                  'ctime', 'mtime',)}),
+                       'fields': ('column_collection', 'active', 'creator',
+                                  'ctime', 'user', 'mtime',)}),
         )
-    readonly_fields = ('user', 'ctime', 'mtime',)
+    readonly_fields = ('creator', 'ctime', 'user', 'mtime',)
     list_display = ('name', 'column_collection', 'user', 'mtime',)
     inlines = (KeyValueInline,)
     form = PublisherForm
@@ -51,10 +51,10 @@ class BookAdmin(UserAdminMixin):
     fieldsets = (
         (None, {'fields': ('title',)}),
         (_('Status'), {'classes': ('collapse',),
-                       'fields': ('column_collection', 'active', 'user',
-                                  'ctime', 'mtime',)}),
+                       'fields': ('column_collection', 'active', 'creator',
+                                  'ctime', 'user', 'mtime',)}),
         )
-    readonly_fields = ('user', 'ctime', 'mtime',)
+    readonly_fields = ('creator', 'ctime', 'user', 'mtime',)
     list_display = ('title', 'column_collection', 'user', 'mtime',)
     inlines = (KeyValueInline,)
     form = BookForm

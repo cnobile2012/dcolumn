@@ -162,8 +162,16 @@ class DynamicColumnManager(object):
 
     def get_collection_name(self, model_name):
         log.debug("Model name: %s", model_name)
-        return settings.DYNAMIC_COLUMNS.get(u'ITEM_NAMES',
-                                            {}).get(model_name, u'')
+        model_name = model_name.lower()
+        item_names = dict([
+            (k.lower(), v)
+            for k, v in settings.DYNAMIC_COLUMNS.get(u'ITEM_NAMES').items()])
+
+        if model_name not in item_names:
+            msg = _("Invalid model name: {}".format(model_name))
+            raise KeyError(msg)
+
+        return item_names.get(model_name, u'')
 
     def get_api_auth_state(self):
         return settings.DYNAMIC_COLUMNS.get(u'INACTIVATE_API_AUTH', False)

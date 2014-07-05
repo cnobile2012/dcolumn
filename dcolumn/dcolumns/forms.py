@@ -8,7 +8,7 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 from .manager import dcolumn_manager
-from .models import DynamicColumn, ColumnCollection
+from .models import DynamicColumn, ColumnCollection, KeyValue
 
 log = logging.getLogger('dcolumn.views')
 
@@ -20,8 +20,10 @@ class ColumnCollectionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ColumnCollectionForm, self).__init__(*args, **kwargs)
-        self.fields[
-            u'dynamic_column'].queryset = DynamicColumn.objects.active()
+        log.debug("args: %s, kwargs: %s", args, kwargs)
+        columns = ColumnCollection.objects.get_column_collection(
+            self.instance.name)
+        self.fields[u'dynamic_column'].queryset = columns
 
     class Meta:
         model = ColumnCollection
@@ -82,7 +84,7 @@ class CollectionFormMixin(forms.ModelForm):
             self.Meta.model.__name__)
         self.relations = ColumnCollection.objects.serialize_columns(
             self.coll_name)
-        #self.fields[u'column_collection'].required = False
+        self.fields[u'column_collection'].required = False
         log.debug("args: %s, kwargs: %s", args, kwargs)
         log.debug("fields: %s, data: %s", self.fields, self.data)
 
@@ -146,6 +148,7 @@ class CollectionFormMixin(forms.ModelForm):
 
         return value
 
+    # SHORT TERM FIX will only work with one data format type.
     _MONTHS = {u'january': 1, u'february': 2, u'march': 3, u'april': 4,
                u'may': 5, u'june': 6, u'july': 7, u'august': 8,
                u'september': 9, u'october': 10, u'november': 11,
@@ -238,3 +241,24 @@ class CollectionFormMixin(forms.ModelForm):
             if not created:
                 obj.value = value
                 obj.save()
+
+
+#
+# KeyValue
+#
+class KeyValueForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(KeyValueForm, self).__init__(*args, **kwargs)
+        log.debug("args: %s, kwargs: %s", args, kwargs)
+
+        if hasattr(self.instance, 'collection'):
+            coll_name = self.instance.collection.column_collection.name
+            columns = ColumnCollection.objects.get_column_collection(coll_name)
+            self.fields[u'dynamic_column'].queryset = columns
+        else:
+            log.debug("instance: %s", dir(self.instance))
+
+
+    class Meta:
+        model = KeyValue

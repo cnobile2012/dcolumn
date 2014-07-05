@@ -8,19 +8,19 @@ from django.utils.translation import ugettext_lazy as _
 from dcolumn.common.admin_mixins import UserAdminMixin
 
 from .models import DynamicColumn, ColumnCollection, KeyValue
-from .forms import DynamicColumnForm, ColumnCollectionForm
+from .forms import DynamicColumnForm, ColumnCollectionForm, KeyValueForm
 
 #
 # KeyValue
 #
 class KeyValueInline(admin.TabularInline):
-    model = KeyValue
-    extra = 0
-    ordering = ('dynamic_column__name',)
     fieldsets = (
-        (None, {'fields': ('dynamic_column', 'value',)}),
+        (None, {'fields': ('dynamic_column', 'value', 'collection',)}),
         )
-    #form = KeyValueForm
+    ordering = ('dynamic_column__location', 'dynamic_column__order',)
+    extra = 0
+    model = KeyValue
+    form = KeyValueForm
 
     class Media:
         js = ('dcolumn/js/jquery-1.11.1.min.js', 'dcolumn/js/jquery.cookie.js',
@@ -37,7 +37,7 @@ class ColumnCollectionAdmin(UserAdminMixin):
                        'fields': ('active', 'creator', 'ctime', 'user',
                                   'mtime',)}),
         )
-    readonly_fields = ('user', 'creator', 'ctime', 'mtime',)
+    readonly_fields = ('creator', 'ctime', 'user', 'mtime',)
     list_display = ('name', 'user', 'mtime',)
     filter_horizontal = ('dynamic_column',)
     form = ColumnCollectionForm
