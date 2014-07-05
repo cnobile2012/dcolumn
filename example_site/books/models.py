@@ -6,7 +6,7 @@ import logging
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 
 from dcolumn.common.model_mixins import (
     UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin)
@@ -45,7 +45,14 @@ class Author(CollectionBase):
         return unicode("{}".format(self.name))
 
     def get_absolute_url(self):
-        return reverse('author-detail', kwargs={'pk': self.pk})
+        result = u''
+
+        try:
+            result = reverse('author-detail', kwargs={'pk': self.pk})
+        except NoReverseMatch:
+            pass
+
+        return result
 
     def _detail_producer(self):
         return u'<a href="{}">View Page</a>'.format(self.get_absolute_url())
@@ -80,7 +87,14 @@ class Publisher(CollectionBase):
         return unicode("{}".format(self.name))
 
     def get_absolute_url(self):
-        return reverse('publisher-detail', kwargs={'pk': self.pk})
+        result = u''
+
+        try:
+            result = reverse('publisher-detail', kwargs={'pk': self.pk})
+        except NoReverseMatch:
+            pass
+
+        return result
 
     def _detail_producer(self):
         return u'<a href="{}">View Page</a>'.format(self.get_absolute_url())
@@ -114,7 +128,14 @@ class Book(CollectionBase):
         return unicode("{}".format(self.title))
 
     def get_absolute_url(self):
-        return reverse('book-detail', kwargs={'pk': self.pk})
+        result = u''
+
+        try:
+            result = reverse('book-detail', kwargs={'pk': self.pk})
+        except NoReverseMatch:
+            pass
+
+        return result
 
     def _detail_producer(self):
         return u'<a href="{}">View Page</a>'.format(self.get_absolute_url())
