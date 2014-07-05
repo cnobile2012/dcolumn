@@ -121,7 +121,7 @@ class AutoDisplayNode(template.Node):
                                    u'id="{}" name="{}" cols="40" rows="10"'
                                    u'>{}</textarea>\n'),
         DynamicColumn.DATE: (u'<input id="{}" class="wants_datepicker" '
-                             u'name="{}" size="12" type="text" value="{}" />'),
+                             u'name="{}" size="20" type="text" value="{}" />'),
         DynamicColumn.BOOLEAN: u'<select id="{}" name="{}">\n',
         DynamicColumn.FLOAT: (u'<input id="{}" name="{}" type="text" '
                               u'value="{}" />'),
