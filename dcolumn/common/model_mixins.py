@@ -64,6 +64,8 @@ class TimeModelMixin(models.Model):
         if not kwargs.pop(u'disable_mtime', False):
             self.mtime = datetime.now(tzutc())
 
+        log.debug("kwargs: %s, ctime: %s, mtime: %s",
+                  kwargs, self.ctime, self.mtime)
         super(TimeModelMixin, self).save(*args, **kwargs)
 
 

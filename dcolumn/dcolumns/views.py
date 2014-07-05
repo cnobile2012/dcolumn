@@ -19,7 +19,7 @@ log = logging.getLogger('dcolumn.views')
 
 class ContextDataMixin(object):
 
-    def get_dynamic_column_context_data(self, class_name=u'', obj=None):
+    def get_dynamic_column_context_data(self, class_name=u'', **kwargs):
         context = {}
         fk_slugs = DynamicColumn.objects.get_fk_slugs()
         name = dcolumn_manager.get_collection_name(class_name)
@@ -92,6 +92,7 @@ class CollectionCreateUpdateViewMixin(ContextDataMixin):
         """
         Get context data for the KeyValue objects.
         """
+        kwargs[u'class_name'] = self.model.__name__
         context = super(CollectionCreateUpdateViewMixin,
                         self).get_context_data(**kwargs)
         context.update(self.get_dynamic_column_context_data(**kwargs))
@@ -109,7 +110,9 @@ class CollectionDetailViewMixin(ContextDataMixin):
         """
         Get context data for the KeyValue objects.
         """
-        context = super(CollectionViewMixin, self).get_context_data(**kwargs)
+        kwargs[u'class_name'] = self.model.__name__
+        context = super(CollectionDetailViewMixin,
+                        self).get_context_data(**kwargs)
         context.update(self.get_dynamic_column_context_data(**kwargs))
         context.update(self.get_relation_context_data(
             obj=self.object, **kwargs))

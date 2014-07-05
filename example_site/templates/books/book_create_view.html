@@ -7,11 +7,11 @@
   <h2>Test Dynamic Columns</h2>
   <div class="wrapper">
 {% if object %}
-    <form name="parent-update" method="post"
-          action="{% url 'parent-update' object.pk %}">
+    <form name="book-update" method="post"
+          action="{% url 'book-update' object.pk %}">
 {% else %}
-    <form name="parent-update" method="post"
-          action="{% url 'parent-create' %}">
+    <form name="book-update" method="post"
+          action="{% url 'book-create' %}">
 {% endif %}
       <div class="container">
         {% csrf_token %}
@@ -25,9 +25,9 @@
         <div class="dynamic-container top-container">
           <ul>
             <li>
-              {{ form.name.label_tag }}
-              {{ form.name.as_widget }}
-              {{ form.name.errors }}
+              {{ form.title.label_tag }}
+              {{ form.title.as_widget }}
+              {{ form.title.errors }}
             </li>
 {% for relation in relations.values %}
 {% if relation.location == css.top %}
@@ -70,12 +70,12 @@
       <div id="submit">
 {% if object %}
         <button type="submit"
-                class="parent-submit"
-                uri="{% url 'parent-update' object.pk %}">Update</button>
+                class="book-submit"
+                uri="{% url 'book-update' object.pk %}">Update</button>
 {% else %}
         <button type="submit"
-                class="parent-submit"
-                uri="{% url 'parent-create' %}">Save</button>
+                class="book-submit"
+                uri="{% url 'book-create' %}">Save</button>
 {% endif %}
       </div> <!-- div#submit -->
     </form>

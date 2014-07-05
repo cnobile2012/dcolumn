@@ -85,6 +85,13 @@ class CollectionFormMixin(forms.ModelForm):
         self.relations = ColumnCollection.objects.serialize_columns(
             self.coll_name)
         self.fields[u'column_collection'].required = False
+
+        if u'ctime' in self.fields:
+            self.fields[u'ctime'].required = False
+
+        if u'mtime' in self.fields:
+            self.fields[u'mtime'].required = False
+
         log.debug("args: %s, kwargs: %s", args, kwargs)
         log.debug("fields: %s, data: %s", self.fields, self.data)
 
@@ -121,7 +128,7 @@ class CollectionFormMixin(forms.ModelForm):
                     self.validate_value_type(relation, key, value)
                     self.validate_value_length(relation, key, value)
 
-        log.debug("form.errors: %s", self._errors)
+        log.warn("form.errors: %s", self._errors)
 
     def validate_store_relation(self, relation, value):
         """
@@ -250,6 +257,8 @@ class KeyValueForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(KeyValueForm, self).__init__(*args, **kwargs)
+        self.fields[u'value'].widget = forms.TextInput(
+            attrs={u'size': 50, u'maxlength': 2000})
         log.debug("args: %s, kwargs: %s", args, kwargs)
 
         if hasattr(self.instance, 'collection'):

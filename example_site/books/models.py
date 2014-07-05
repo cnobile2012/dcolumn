@@ -6,6 +6,7 @@ import logging
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.core.urlresolvers import reverse
 
 from dcolumn.common.model_mixins import (
     UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin)
@@ -37,8 +38,19 @@ class Author(CollectionBase):
         verbose_name = _("Author")
         verbose_name_plural = _("Authors")
 
+    def save(self, *args, **kwargs):
+        super(Author, self).save(*args, **kwargs)
+
     def __unicode__(self):
         return unicode("{}".format(self.name))
+
+    def get_absolute_url(self):
+        return reverse('author-detail', kwargs={'pk': self.pk})
+
+    def _detail_producer(self):
+        return u'<a href="{}">View Page</a>'.format(self.get_absolute_url())
+    _detail_producer.short_description = "View Detail"
+    _detail_producer.allow_tags = True
 
 
 #
@@ -61,9 +73,19 @@ class Publisher(CollectionBase):
         verbose_name = _("Publisher")
         verbose_name_plural = _("Publishers")
 
+    def save(self, *args, **kwargs):
+        super(Publisher, self).save(*args, **kwargs)
+
     def __unicode__(self):
         return unicode("{}".format(self.name))
 
+    def get_absolute_url(self):
+        return reverse('publisher-detail', kwargs={'pk': self.pk})
+
+    def _detail_producer(self):
+        return u'<a href="{}">View Page</a>'.format(self.get_absolute_url())
+    _detail_producer.short_description = "View Detail"
+    _detail_producer.allow_tags = True
 
 #
 # Book
@@ -84,6 +106,9 @@ class Book(CollectionBase):
     class Meta:
         verbose_name = _("Book")
         verbose_name_plural = _("Books")
+
+    def save(self, *args, **kwargs):
+        super(Book, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return unicode("{}".format(self.title))

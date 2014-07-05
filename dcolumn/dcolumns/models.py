@@ -196,6 +196,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                     u"for all Collections."))
 
     def save(self, *args, **kwargs):
+        log.debug("kwargs: %s", kwargs)
         super(CollectionBase, self).save(*args, **kwargs)
 
     def serialize_key_value_pairs(self):
@@ -206,28 +207,12 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return result
 
-    ## def find_key_value(self, name):
-    ##     # FIX ME -- This needs to find the model named with 'name' then return
-    ##     # the value of that object, not the hand edited name in the
-    ##     # dynamic_column.
-    ##     record = self.keyvalue_pairs.filter(dynamic_column__name=name)
-    ##     result = u''
-
-    ##     if len(record) > 0:
-    ##         result = record[0].value
-
-    ##     return result
-
 
 #
 # KeyValue
 #
 class KeyValueManager(models.Manager):
     pass
-
-    ## def set_parent_key_value_pairs(self, obj):
-    ##     for item in obj.column_collection.dynamic_column.all():
-    ##         self.create(parent=obj, dynamic_column=item)
 
 
 class KeyValue(models.Model):

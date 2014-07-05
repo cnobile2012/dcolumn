@@ -23,7 +23,8 @@ class AuthorAdmin(UserAdminMixin):
                                   'ctime', 'user', 'mtime',)}),
         )
     readonly_fields = ('creator', 'ctime', 'user', 'mtime',)
-    list_display = ('name', 'column_collection', 'user', 'mtime',)
+    list_display = ('name', 'column_collection', 'user', 'mtime',
+                    '_detail_producer',)
     inlines = (KeyValueInline,)
     form = AuthorForm
 
@@ -39,7 +40,8 @@ class PublisherAdmin(UserAdminMixin):
                                   'ctime', 'user', 'mtime',)}),
         )
     readonly_fields = ('creator', 'ctime', 'user', 'mtime',)
-    list_display = ('name', 'column_collection', 'user', 'mtime',)
+    list_display = ('name', 'column_collection', 'user', 'mtime',
+                    '_detail_producer',)
     inlines = (KeyValueInline,)
     form = PublisherForm
 
@@ -55,7 +57,8 @@ class BookAdmin(UserAdminMixin):
                                   'ctime', 'user', 'mtime',)}),
         )
     readonly_fields = ('creator', 'ctime', 'user', 'mtime',)
-    list_display = ('title', 'column_collection', 'user', 'mtime',)
+    list_display = ('title', 'column_collection', 'user', 'mtime',
+                    '_detail_producer',)
     inlines = (KeyValueInline,)
     form = BookForm
 

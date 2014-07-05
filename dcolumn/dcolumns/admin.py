@@ -10,12 +10,13 @@ from dcolumn.common.admin_mixins import UserAdminMixin
 from .models import DynamicColumn, ColumnCollection, KeyValue
 from .forms import DynamicColumnForm, ColumnCollectionForm, KeyValueForm
 
+
 #
 # KeyValue
 #
 class KeyValueInline(admin.TabularInline):
     fieldsets = (
-        (None, {'fields': ('dynamic_column', 'value', 'collection',)}),
+        (None, {'fields': ('dynamic_column', 'value',)}),
         )
     ordering = ('dynamic_column__location', 'dynamic_column__order',)
     extra = 0

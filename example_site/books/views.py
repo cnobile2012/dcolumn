@@ -6,6 +6,7 @@ import logging
 
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, UpdateView
+from django.core.urlresolvers import reverse
 
 from dcolumn.dcolumns.views import (
     CollectionCreateUpdateViewMixin, CollectionDetailViewMixin)
@@ -17,7 +18,7 @@ from .forms import BookForm
 #
 # BookCreateView
 #
-class BookCreateView(CreateView, CollectionCreateUpdateViewMixin):
+class BookCreateView(CollectionCreateUpdateViewMixin, CreateView):
     template_name = u'books/book_create_view.html'
     form_class = BookForm
     model = Book
@@ -33,7 +34,7 @@ book_create_view = BookCreateView.as_view()
 #
 # BookUpdateView
 #
-class BookUpdateView(UpdateView, CollectionCreateUpdateViewMixin):
+class BookUpdateView(CollectionCreateUpdateViewMixin, UpdateView):
     template_name = u'books/book_create_view.html'
     form_class = BookForm
     model = Book
@@ -49,7 +50,7 @@ book_update_view = BookUpdateView.as_view()
 #
 # BookDetailView
 #
-class BookDetailView(DetailView, CollectionDetailViewMixin):
+class BookDetailView(CollectionDetailViewMixin, DetailView):
     template_name = u'books/book_detail_view.html'
     model = Book
 
@@ -59,13 +60,13 @@ class BookDetailView(DetailView, CollectionDetailViewMixin):
         """
         context = super(BookDetailView, self).get_context_data(**kwargs)
         # Create actions if any.
-        parent = kwargs.get(u'object')
-        pk = parent and parent.id or 0
+        book = kwargs.get(u'object')
+        pk = book and book.id or 0
         actions = [
             {u'name': u'Create a New Record',
-             u'url': reverse(u'parent-create')},
+             u'url': reverse(u'book-create')},
             {u'name': u'Edit this Record',
-             u'url': reverse(u'parent-update', args=(pk,))},
+             u'url': reverse(u'book-update', args=(pk,))},
             ]
         context[u'actions'] = actions
         # Create messages if any.
