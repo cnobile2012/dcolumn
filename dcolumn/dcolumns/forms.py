@@ -257,7 +257,7 @@ class KeyValueForm(forms.ModelForm):
             columns = ColumnCollection.objects.get_column_collection(coll_name)
             self.fields[u'dynamic_column'].queryset = columns
         else:
-            log.debug("instance: %s", dir(self.instance))
+            log.debug("instance: %s", self.instance)
 
 
     class Meta:
