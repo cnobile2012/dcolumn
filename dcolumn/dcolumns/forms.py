@@ -3,6 +3,7 @@
 #
 
 import logging
+import datetime
 
 from django import forms
 from django.utils.translation import ugettext_lazy as _
@@ -22,7 +23,7 @@ class ColumnCollectionForm(forms.ModelForm):
         super(ColumnCollectionForm, self).__init__(*args, **kwargs)
         log.debug("args: %s, kwargs: %s", args, kwargs)
         columns = ColumnCollection.objects.get_column_collection(
-            self.instance.name)
+            self.instance.name, unassigned=True)
         self.fields[u'dynamic_column'].queryset = columns
 
     class Meta:

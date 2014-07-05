@@ -61,7 +61,7 @@ class DynamicColumnAdmin(UserAdminMixin):
                     '_relation_producer', 'store_relation', 'required',
                     'location', 'order', 'mtime', 'active',)
     list_editable = ('location', 'order', 'active',)
-    ordering = ('location', 'order', 'name',)
+    ordering = ('column_collection__name', 'location', 'order', 'name',)
     form = DynamicColumnForm
 
 

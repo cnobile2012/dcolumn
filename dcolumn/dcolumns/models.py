@@ -67,7 +67,6 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
         help_text=_("Choose the value type."))
     relation = models.IntegerField(
         verbose_name=_("Choice Relation"), null=True, blank=True,
-        #choices=dcolumn_manager.choice_relations,
         help_text=_("Choose the Choice Relation Type."))
     required = models.BooleanField(
         verbose_name=_("Required Field"), choices=YES_NO, default=NO,
@@ -110,7 +109,7 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
     def _collection_producer(self):
         result = []
 
-        for collection in self.column_collections.all():
+        for collection in self.column_collection.all():
             result.append('<span>{}</span>'.format(collection.name))
 
         return ", ".join(result)
@@ -123,12 +122,17 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
 #
 class ColumnCollectionManager(StatusModelManagerMixin):
 
-    def get_column_collection(self, name):
+    def get_column_collection(self, name, unassigned=False):
         log.debug("Collection name: %s", name)
 
         try:
-            return self.active().get(name=name).dynamic_column.active(
-                ).order_by('location', 'order', 'name')
+            queryset = self.active().get(name=name).dynamic_column.active()
+
+            if unassigned:
+                queryset = queryset | DynamicColumn.objects.active().filter(
+                    column_collection=None)
+
+            return queryset.filter().order_by('location', 'order', 'name')
         except self.model.DoesNotExist:
             msg = ("No objects in database, please create initial objects "
                    "for Dynamic Columns and Column Collections")
@@ -174,7 +178,7 @@ class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin):
         help_text=_("Enter a unique name for this record."))
     dynamic_column = models.ManyToManyField(
         DynamicColumn, verbose_name=_("Dynamic Column"),
-        related_name='column_collections')
+        related_name='column_collection')
 
     objects = ColumnCollectionManager()
 
