@@ -5,18 +5,63 @@ body {
   padding-bottom: 3em;
   background-color: #f5f0f0;
   font-size: medium;
+  color: rgb(146, 113, 28);
 }
 
 h2 {
   display: block;
   margin: 10px auto;
   width: 270px;
+  text-align: center;
+}
+
+.header {
+  width: 78%;
+  margin: 10px auto 5px auto;
+  border: 1px solid #999;
+  -moz-border-radius: 10px 10px 10px 10px;
+  -webkit-border-radius: 10px 10px 10px 10px;
+  -khtml-border-radius: 10px 10px 10px 10px;
+  border-radius: 10px 10px 10px 10px;
+  background-color: #eeefd0;
+}
+
+.header .dashboard {
+  padding: 5px 0;
+  width: 404px;
+  margin: 0 auto 10px auto;
+}
+
+.dashboard ul {
+/*  width: 404px;*/
+  margin: 0 auto;
+  padding: 0;
+}
+
+.dashboard ul li {
+  display: inline-block;
+  width: 130px;
+  height: 20px;
+  border: 1px solid rgb(146, 113, 28);
+  -moz-border-radius: 10px 10px 10px 10px;
+  -webkit-border-radius: 10px 10px 10px 10px;
+  -khtml-border-radius: 10px 10px 10px 10px;
+  border-radius: 10px 10px 10px 10px;
+}
+
+.dashboard ul li a {
+  display: block;
+  margin-top: 2px;
+  text-align: center;
+  text-decoration: none !important;
+  font-weight: bold;
+  font-size: 90%;
+  color: rgb(146, 113, 28);
 }
 
 .wrapper {
   width: 80%;
   margin: 0 auto;
-  padding: .25em .75em;
 }
 
 .wrapper .actions {

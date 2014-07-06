@@ -1,9 +1,20 @@
 {% extends "base.html" %}
 {% load url from future %}
 {% load autodisplay %}
-{% block title %}Test Dynamic Columns{% endblock %}
+{% block title %}Book Detail{% endblock %}
+{% block header %}
+  <div class="header">
+    <h2>Book Detail</h2>
+    <div class="dashboard">
+      <ul>
+        <li><a href="">Home</a></li>
+        <li><a href="{% url 'author-create' %}">Create Author</a></li>
+        <li><a href="{% url 'publisher-create' %}">Create Publisher</a></li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}
 {% block content %}
-  <h2>Test Dynamic Columns</h2>
   <div class="wrapper">
       <div class="actions">
 {% spaceless %}

@@ -23,6 +23,8 @@ class AuthorForm(CollectionFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(AuthorForm, self).__init__(*args, **kwargs)
+        self.fields[u'name'].widget = forms.TextInput(
+            attrs={u'size': 50, u'maxlength': 250})
 
     class Meta:
         model = Author
@@ -35,6 +37,8 @@ class PublisherForm(CollectionFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(PublisherForm, self).__init__(*args, **kwargs)
+        self.fields[u'name'].widget = forms.TextInput(
+            attrs={u'size': 50, u'maxlength': 250})
 
     class Meta:
         model = Publisher

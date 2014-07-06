@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% load url from future %}
 {% load autodisplay %}
-{% block title %}Book{% endblock %}
+{% block title %}Author{% endblock %}
 {% block head_extras %}{% endblock %}
 {% block header %}
   <div class="header">
-    <h2>Book</h2>
+    <h2>Author</h2>
     <div class="dashboard">
       <ul>
         <li><a href="">Home</a></li>
-        <li><a href="{% url 'author-create' %}">Create Author</a></li>
+        <li><a href="{% url 'book-create' %}">Create Book</a></li>
         <li><a href="{% url 'publisher-create' %}">Create Publisher</a></li>
       </ul>
     </div>
@@ -18,11 +18,11 @@
 {% block content %}
   <div class="wrapper">
 {% if object %}
-    <form name="book-update" method="post"
-          action="{% url 'book-update' object.pk %}">
+    <form name="author-update" method="post"
+          action="{% url 'author-update' object.pk %}">
 {% else %}
-    <form name="book-update" method="post"
-          action="{% url 'book-create' %}">
+    <form name="author-update" method="post"
+          action="{% url 'author-create' %}">
 {% endif %}
       <div class="container">
         {% csrf_token %}
@@ -36,9 +36,9 @@
         <div class="dynamic-container top-container">
           <ul>
             <li>
-              {{ form.title.label_tag }}
-              {{ form.title.as_widget }}
-              {{ form.title.errors }}
+              {{ form.name.label_tag }}
+              {{ form.name.as_widget }}
+              {{ form.name.errors }}
             </li>
 {% for relation in relations.values %}
 {% if relation.location == css.top %}
@@ -81,12 +81,12 @@
       <div id="submit">
 {% if object %}
         <button type="submit"
-                class="book-submit"
-                uri="{% url 'book-update' object.pk %}">Update</button>
+                class="author-submit"
+                uri="{% url 'author-update' object.pk %}">Update</button>
 {% else %}
         <button type="submit"
-                class="book-submit"
-                uri="{% url 'book-create' %}">Save</button>
+                class="author-submit"
+                uri="{% url 'author-create' %}">Save</button>
 {% endif %}
       </div> <!-- div#submit -->
     </form>

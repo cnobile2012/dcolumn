@@ -63,6 +63,6 @@ class BookAdmin(UserAdminMixin):
     form = BookForm
 
 
-admin.site.register(Book, BookAdmin)
-admin.site.register(Author, AuthorAdmin)
 admin.site.register(Publisher, PublisherAdmin)
+admin.site.register(Author, AuthorAdmin)
+admin.site.register(Book, BookAdmin)

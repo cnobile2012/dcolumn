@@ -1,15 +1,14 @@
 {% extends "base.html" %}
 {% load url from future %}
 {% load autodisplay %}
-{% block title %}Book{% endblock %}
-{% block head_extras %}{% endblock %}
+{% block title %}Author Detail{% endblock %}
 {% block header %}
   <div class="header">
-    <h2>Book</h2>
+    <h2>Author Detail</h2>
     <div class="dashboard">
       <ul>
         <li><a href="">Home</a></li>
-        <li><a href="{% url 'author-create' %}">Create Author</a></li>
+        <li><a href="{% url 'book-create' %}">Create Book</a></li>
         <li><a href="{% url 'publisher-create' %}">Create Publisher</a></li>
       </ul>
     </div>
@@ -17,35 +16,39 @@
 {% endblock %}
 {% block content %}
   <div class="wrapper">
-{% if object %}
-    <form name="book-update" method="post"
-          action="{% url 'book-update' object.pk %}">
-{% else %}
-    <form name="book-update" method="post"
-          action="{% url 'book-create' %}">
+      <div class="actions">
+{% spaceless %}
+{% if actions %}
+        <ul>
+{% for action in actions %}
+          <li><a href="{{ action.url }}">{{ action.name }}</a></li>
+{% if not forloop.last %}
+          <li><span>,&nbsp;&nbsp;</span></li>
 {% endif %}
+{% endfor %}
+        </ul>        
+{% endif %}
+{% endspaceless %}
+      </div>
       <div class="container">
-        {% csrf_token %}
-        <div id="message">
-{% if form.errors %}
-          <ul class="errorlist">
-            <li>Invalid data, please see below for details.</li>
-          </ul>
+        <div class="message">
+{% if info_message.created %}
+          <div>The record has been created and is displayed below.</div>
+{% elif info_message.updated %}
+          <div>The record has been updated and is displayed below.</div>
 {% endif %}
         </div>
         <div class="dynamic-container top-container">
           <ul>
             <li>
-              {{ form.title.label_tag }}
-              {{ form.title.as_widget }}
-              {{ form.title.errors }}
+              <label>Name</label>
+              <span>{{ object.name }}</span>
             </li>
 {% for relation in relations.values %}
 {% if relation.location == css.top %}
             <li>
               <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
-              {% auto_display relation options=dynamicColumns %}
-              {% combine_contexts form.errors relation.slug %}
+              {% auto_display relation options=dynamicColumns display=True %}
             </li>
 {% endif %}
 {% endfor %}
@@ -57,8 +60,7 @@
 {% if relation.location == css.center %}
             <li>
               <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
-              {% auto_display relation options=dynamicColumns %}
-              {% combine_contexts form.errors relation.slug %}
+              {% auto_display relation options=dynamicColumns display=True %}
             </li>
 {% endif %}
 {% endfor %}
@@ -70,25 +72,12 @@
 {% if relation.location == css.bottom %}
             <li>
               <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
-              {% auto_display relation options=dynamicColumns %}
-              {% combine_contexts form.errors relation.slug %}
+              {% auto_display relation options=dynamicColumns display=True %}
             </li>
 {% endif %}
 {% endfor %}
           </ul>
         </div>
       </div> <!-- div.container -->
-      <div id="submit">
-{% if object %}
-        <button type="submit"
-                class="book-submit"
-                uri="{% url 'book-update' object.pk %}">Update</button>
-{% else %}
-        <button type="submit"
-                class="book-submit"
-                uri="{% url 'book-create' %}">Save</button>
-{% endif %}
-      </div> <!-- div#submit -->
-    </form>
   </div> <!-- div.wrapper -->
 {% endblock %}

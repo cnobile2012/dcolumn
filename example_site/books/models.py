@@ -35,6 +35,7 @@ class Author(CollectionBase):
     objects = AuthorManager()
 
     class Meta:
+        ordering = ('name',)
         verbose_name = _("Author")
         verbose_name_plural = _("Authors")
 
@@ -45,18 +46,11 @@ class Author(CollectionBase):
         return unicode("{}".format(self.name))
 
     def get_absolute_url(self):
-        result = u''
-
-        try:
-            result = reverse('author-detail', kwargs={'pk': self.pk})
-        except NoReverseMatch:
-            pass
-
-        return result
+        return reverse('author-detail', kwargs={u'pk': self.pk})
 
     def _detail_producer(self):
         return u'<a href="{}">View Page</a>'.format(self.get_absolute_url())
-    _detail_producer.short_description = "View Detail"
+    _detail_producer.short_description = _(u"View Detail")
     _detail_producer.allow_tags = True
 
 
@@ -87,18 +81,11 @@ class Publisher(CollectionBase):
         return unicode("{}".format(self.name))
 
     def get_absolute_url(self):
-        result = u''
-
-        try:
-            result = reverse('publisher-detail', kwargs={'pk': self.pk})
-        except NoReverseMatch:
-            pass
-
-        return result
+        return reverse('publisher-detail', kwargs={u'pk': self.pk})
 
     def _detail_producer(self):
         return u'<a href="{}">View Page</a>'.format(self.get_absolute_url())
-    _detail_producer.short_description = "View Detail"
+    _detail_producer.short_description = _(u"View Detail")
     _detail_producer.allow_tags = True
 
 #
@@ -128,16 +115,9 @@ class Book(CollectionBase):
         return unicode("{}".format(self.title))
 
     def get_absolute_url(self):
-        result = u''
-
-        try:
-            result = reverse('book-detail', kwargs={'pk': self.pk})
-        except NoReverseMatch:
-            pass
-
-        return result
+        return reverse('book-detail', kwargs={u'pk': self.pk})
 
     def _detail_producer(self):
         return u'<a href="{}">View Page</a>'.format(self.get_absolute_url())
-    _detail_producer.short_description = "View Detail"
+    _detail_producer.short_description = _(u"View Detail")
     _detail_producer.allow_tags = True
