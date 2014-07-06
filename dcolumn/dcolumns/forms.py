@@ -261,6 +261,7 @@ class KeyValueForm(forms.ModelForm):
         self.fields[u'value'].widget = forms.TextInput(
             attrs={u'size': 50, u'maxlength': 2000})
         log.debug("args: %s, kwargs: %s", args, kwargs)
+        #log.debug("dir(self): %s", dir(self))
 
         if hasattr(self.instance, 'collection'):
             coll_name = self.instance.collection.column_collection.name
@@ -268,7 +269,6 @@ class KeyValueForm(forms.ModelForm):
             self.fields[u'dynamic_column'].queryset = columns
         else:
             log.debug("instance: %s", self.instance)
-
 
     class Meta:
         model = KeyValue
