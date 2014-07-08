@@ -3,17 +3,22 @@
 #
 
 import os, logging
+import datetime
 from StringIO import StringIO
 
 from django import template
 from django.utils.safestring import mark_safe
 
 from dcolumn.dcolumns.models import DynamicColumn
+from dcolumn.dcolumns.manager import dcolumn_manager
 
 log = logging.getLogger(u'dcolumn.templates')
 register = template.Library()
 
 
+#
+# auto_display
+#
 @register.tag(name='auto_display')
 def auto_display(parser, token):
     """
@@ -227,6 +232,114 @@ class AutoDisplayNode(template.Node):
         return elem
 
 
+#
+# single_display
+#
+@register.tag(name='single_display')
+def single_display(parser, token):
+    """
+    Displays a single value as text. You will need to warp the resul$
+    this tag in the html tag of your choice.
+
+    Arguments::
+
+      obj  -- The model object.
+      slug -- The slug for the DynamicColumn type.
+      as   -- Manditory delimiter.
+      name -- Name for context variable.
+
+    Usage Examples::
+
+      {% single_display <object> <slug> as <context name>  %}
+
+      {% single_display obj country as country %}
+    """
+    try:
+        tag_name, obj, slug, delimiter, name = token.split_contents()
+    except ValueError:
+        msg = "{} tag requires four arguments."
+        raise template.TemplateSyntaxError(
+            msg.format(token.contents.split()[0]))
+
+    if delimiter != u'as':
+        raise template.TemplateSyntaxError(
+            "The second argument must be the word 'as' found '{}'.".format(
+                delimiter))
+
+    return SingleDisplayNode(tag_name, obj, slug, name)
+
+
+class SingleDisplayNode(template.Node):
+
+    def __init__(self, tag_name, obj, slug, name):
+        self.tag_name = tag_name
+        self.obj = template.Variable(obj)
+        self.slug = slug
+        self.name = name
+
+    def _fix_boolean(self, dc, value):
+        return {0: u'Unknown', 1: u'Yes', 2: u'No'}.get(value, u'')
+
+    def _fix_choice(self, dc, value):
+        choice_name = dcolumn_manager.choice_relation_map[dc.relation]
+        obj, field = dcolumn_manager.choice_map[choice_name]
+        value = int(value)
+
+        for choice in obj.objects.dynamic_column():
+            if getattr(choice, u'pk') == value:
+                value = getattr(choice, field)
+                break
+
+        return (value != 0) and value or u''
+
+    def _fix_date(self, dc, value):
+        return datetime.date(*[int(v) for v in value.split('-') if v.isdigit()])
+
+    def _fix_float(self, dc, value):
+        return float(value)
+
+    def _fix_number(self, dc, value):
+        return value
+
+    def _fix_text(self, dc, value):
+        return value
+
+    def _fix_text_block(self, dc, value):
+        return value
+
+    METHOD_MAP = {
+        DynamicColumn.BOOLEAN: _fix_boolean,
+        DynamicColumn.CHOICE: _fix_choice,
+        DynamicColumn.DATE: _fix_date,
+        DynamicColumn.FLOAT: _fix_float,
+        DynamicColumn.NUMBER: _fix_number,
+        DynamicColumn.TEXT: _fix_text,
+        DynamicColumn.TEXT_BLOCK: _fix_text_block,
+        }
+
+    def render(self, context):
+        try:
+            obj = self.obj.resolve(context)
+        except template.VariableDoesNotExist:
+            obj = None
+
+        value = u''
+
+        try:
+            key_value = obj.keyvalue_pairs.get(dynamic_column__slug=self.slug)
+            dc = key_value.dynamic_column
+            value_type = dc.value_type
+            value = self.METHOD_MAP[value_type](self, dc, key_value.value)
+        except obj.DoesNotExist:
+            log.warn("KeyValue pair does not exist for slug %s", self.slug)
+
+        context[self.name] = value
+        return u''
+
+
+#
+# combine_contexts
+#
 @register.tag(name='combine_contexts')
 def combine_contexts(parser, token):
     """
