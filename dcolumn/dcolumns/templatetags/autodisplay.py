@@ -238,8 +238,9 @@ class AutoDisplayNode(template.Node):
 @register.tag(name='single_display')
 def single_display(parser, token):
     """
-    Displays a single value as text. You will need to warp the resul$
-    this tag in the html tag of your choice.
+    Returns a context variable containing a single value who's data type is
+    based on the type of object. You will need to warp the result in an html
+    tage of your choice.
 
     Arguments::
 
