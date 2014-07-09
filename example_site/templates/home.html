@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load url from future %}
+{% load autodisplay %}
+{% block title %}Book Detail{% endblock %}
+{% block header %}
+  <div class="header">
+    <h2>Book Detail</h2>
+    <div class="dashboard">
+      <ul>
+        <li><a href="{% url 'author-create' %}">Create Author</a></li>
+        <li><a href="{% url 'publisher-create' %}">Create Publisher</a></li>
+        <li><a href="{% url 'book-create' %}">Create Book</a></li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}
