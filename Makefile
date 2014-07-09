@@ -21,6 +21,9 @@ tar	: clean
 	@(cd ..; tar -czvf $(PACKAGE_DIR).tar.gz --exclude=".git" \
           --exclude="djangotests/static" --exclude=".DS_Store" $(PACKAGE_DIR))
 
+build	: clean
+	python setup.py sdist
+
 #----------------------------------------------------------------------
 
 clean	:
