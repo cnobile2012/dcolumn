@@ -165,7 +165,7 @@ class DynamicColumnManager(object):
         model_name = model_name.lower()
         item_names = dict([
             (k.lower(), v)
-            for k, v in settings.DYNAMIC_COLUMNS.get(u'ITEM_NAMES').items()])
+            for k, v in settings.DYNAMIC_COLUMNS.get(u'COLLECTIONS').items()])
 
         if model_name not in item_names:
             msg = _("Invalid model name: {}".format(model_name))

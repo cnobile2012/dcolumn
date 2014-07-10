@@ -108,7 +108,7 @@ DYNAMIC_COLUMNS = {
     # The default key/value pairs for the ColumnCollection object to use for
     # all tables that use dcolumn. The key is the table name and the value is
     # the name used in the ColumnCollection record.
-    u'ITEM_NAMES': {
+    u'COLLECTIONS': {
         u'Book': u'Book Current',
         u'Author': u'Author Current',
         u'Publisher': u'Publisher Current',
