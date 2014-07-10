@@ -15,15 +15,14 @@ Basic Installation
         'dcolumn.dcolumns',
         )
 
- 2. Add the following code stanza to the settings file. The 'COLLECTIONS' key
+ 2. Add the following code stanza to the settings file. The `COLLECTIONS` key
     points to key value pairs where the key is the model name and the value
     is a unique name given to a collection set. This collection set is kept
-    in the model named 'ColumnCollection'. As of now there is only a single
+    in the model named `ColumnCollection`. As of now there is only a single
     asynchronous call to the internal API. It is by default only accessed by
     logged in users. You can change this behavior by setting
-    'INACTIVATE_API_AUTH' to 'True'.
+    `INACTIVATE_API_AUTH` to `True`.
 
-    # DCOLUMN config
     DYNAMIC_COLUMNS = {
         # The default key/value pairs for the ColumnCollection object to use
         # for all tables that use dcolumn. The key is the table name and the
@@ -40,7 +39,7 @@ Basic Installation
  3. If you want authorization on the API you will need to set the standard
     Django setting 'LOGIN_URL' to something reasonable.
 
-    # Change the URL below to your login path.
+    `# Change the URL below to your login path.`
     LOGIN_URL = u"/admin/"
 
  4. There are two ways to define page location of each new field that you
