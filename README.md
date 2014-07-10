@@ -72,4 +72,4 @@ Basic Installation
 You will see that this is all rather simple and you'll need to write very
 little code to support DynamicColumns.
 
-Feel free to contact me at: carl.nobile@gmail.com
+Feel free to contact me at: carl dot nobile at gmail.com
