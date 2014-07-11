@@ -171,6 +171,11 @@ class ColumnCollectionManager(StatusModelManagerMixin):
         return [dcolumn_manager.choice_relation_map.get(record.relation)
                 for record in records if record.relation]
 
+    def get_collection_choices(self, name, use_pk=False):
+         records = self.get_column_collection(name)
+         choices = [(use_pk and r.pk or r.slug, r.name) for r in records]
+         return choices
+
 
 class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin):
     name = models.CharField(
