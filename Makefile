@@ -33,3 +33,4 @@ clean	:
 
 clobber	: clean
 	@rm -rf dist *.egg-info
+	@(cd $(DOCS_DIR); make clobber)

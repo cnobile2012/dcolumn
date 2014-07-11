@@ -8,7 +8,7 @@
 
 FQDN		= $(shell hostname --fqdn)
 DOC_DIR		= $(shell pwd)
-API_DIR		= dcapi
+API_DIR		= html
 URL		= http://${FQDN}${DOC_DIR}/${API_DIR}/index.html
 
 # source setup_settings;
@@ -16,11 +16,7 @@ URL		= http://${FQDN}${DOC_DIR}/${API_DIR}/index.html
 all	: clobber api-docs
 #----------------------------------------------------------------------
 api-docs:
-	@(cd ..; \
-          epydoc -v --name "Dynamic Columns" -o docs/${API_DIR} \
-          --show-private --show-imports --graph all --url "${URL}" \
-          */*.py */*/*.py */*/*/*.py  \
-         )
+	@(cd ..; epydoc -v --config docs/epydoc.conf)
 
 #----------------------------------------------------------------------
 clean	:
