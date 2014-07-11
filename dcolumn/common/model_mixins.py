@@ -2,6 +2,8 @@
 # dcolumn/common/model_mixins.py
 #
 
+__docformat__ = "restructuredtext en"
+
 import re
 import logging
 from datetime import datetime
@@ -19,6 +21,11 @@ log = logging.getLogger('dcolumn.models')
 # UserModel
 #
 class UserModelMixin(models.Model):
+    """
+    Abstract model mixin used in the model classes to provide user and
+    creator fields.
+    """
+
     user = models.ForeignKey(
         User, verbose_name=_("Modifier"), db_index=True, editable=False,
         related_name="%(app_label)s_%(class)s_updater_related",
@@ -32,13 +39,22 @@ class UserModelMixin(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
+        """
+        Save is here to assure that save is executed throughout the MRO.
+        """
         super(UserModelMixin, self).save(*args, **kwargs)
 
     def _user_producer(self):
+        """
+        Primary use is in the admin class to supply the user's full name.
+        """
         return self.user.get_full_name()
     _user_producer.short_description = _("Updater")
 
     def _creator_producer(self):
+        """
+        Primary use is in the admin class to supply the creator's full name.
+        """
         return self.creator.get_full_name()
     _creator_producer.short_description = _("Creator")
 
@@ -47,6 +63,11 @@ class UserModelMixin(models.Model):
 # TimeModel
 #
 class TimeModelMixin(models.Model):
+    """
+    Abstract model mixin used in the model classes to supply ctime and mtime
+    fields.
+    """
+
     ctime = models.DateTimeField(
         verbose_name=_("Date Created"),
         help_text=_("The date and time of creation."))
@@ -58,6 +79,9 @@ class TimeModelMixin(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
+        """
+        Permit the disabling of the ctime and mtime.
+        """
         if not kwargs.pop(u'disable_ctime', False) and self.ctime is None:
             self.ctime = datetime.now(tzutc())
 
@@ -73,12 +97,27 @@ class TimeModelMixin(models.Model):
 # StatusModel
 #
 class StatusModelManagerMixin(models.Manager):
+    """
+    Manager mixin for the StatusModelMixin abstract model.
+    """
 
     def active(self, active=True):
+        """
+        Return as default only active database objects.
+
+        :Parameters:
+          active : `bool`
+            If `True` return only active records else if `False` return
+            non-active records.
+        """
         return self.filter(active=active)
 
 
 class StatusModelMixin(models.Model):
+    """
+    Abstract model mixin used in the model classes to supply the active field.
+    """
+
     active = models.BooleanField(
         verbose_name=_("Active"), default=True,
         help_text=_("If checked the record is active."))
@@ -87,4 +126,7 @@ class StatusModelMixin(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
+        """
+        Save is here to assure that save is executed throughout the MRO.
+        """
         super(StatusModelMixin, self).save(*args, **kwargs)

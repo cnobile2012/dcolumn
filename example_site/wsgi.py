@@ -1,5 +1,5 @@
 """
-WSGI config for djangotests project.
+WSGI config for example_site project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
