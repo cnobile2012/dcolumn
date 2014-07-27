@@ -164,6 +164,10 @@ var DynamicColumn = Class.extend({
         break;
       case 2: // Choice
         if(relation.store_relation) {
+          if(value === undefined) {
+            value = "";
+          }
+
           if(value === "" || self._isInOptions(relation.slug, value)) {
             $obj = self._choiceSelect(id, name, relation);
             value = self._getOptionId(relation.slug, value);

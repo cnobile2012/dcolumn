@@ -72,7 +72,7 @@ class DynamicColumnManager(object):
     @property
     def choice_relations(self):
         """
-        A property that returns the HTML select choices.
+        A property that returns the HTML select tag choices.
 
         :Returns:
           A list of the choices.
@@ -175,5 +175,8 @@ class DynamicColumnManager(object):
 
     def get_api_auth_state(self):
         return settings.DYNAMIC_COLUMNS.get(u'INACTIVATE_API_AUTH', False)
+
+    def get_relation_model_field(self, relation):
+        return self.choice_map.get(self.choice_relation_map.get(relation))
 
 dcolumn_manager = DynamicColumnManager()

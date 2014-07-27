@@ -139,9 +139,8 @@ class CollectionFormMixin(forms.ModelForm):
         """
         if relation.get(u'store_related', False):
             log.debug("value: %s, relation: %s", value, relation)
-            name = DynamicColumn.CHOICE_RELATION_MAP.get(
+            data = dcolumn_manager.get_relation_model_field(
                 relation.get('relation', u''))
-            data = DynamicColumn.MODEL_MAP.get(name)
 
             if len(data) == 2:
                 model, field = data
