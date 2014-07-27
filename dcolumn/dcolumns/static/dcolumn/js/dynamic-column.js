@@ -136,7 +136,7 @@ var DynamicColumn = Class.extend({
     var cType = $(this).find(':selected').attr('value');
     var relation = self.data.relations[cType];
     var $td = $(this).parent().next();
-    var $input = $td.find('input, textarea');
+    var $input = $td.find('input, textarea, select');
     var value = $input.attr('value') || $input.text();
     var id = $input.attr('id');
     var name = $input.attr('name');
@@ -169,14 +169,14 @@ var DynamicColumn = Class.extend({
           }
 
           if(value === "" || self._isInOptions(relation.slug, value)) {
-            $obj = self._choiceSelect(id, name, relation);
+            $obj = self._choiceSelect(id, name, relation.slug);
             value = self._getOptionId(relation.slug, value);
           } else {
             $obj = $('<span id="' + id + '" name="' + name + '">' + value +
               '</span>');
           }
         } else {
-          $obj = self._choiceSelect(id, name, relation);
+          $obj = self._choiceSelect(id, name, relation.slug);
         }
 
         break;
@@ -229,7 +229,7 @@ var DynamicColumn = Class.extend({
     var result = false;
 
     for(var i = 0; i < options.length; i++) {
-      if(value == options[i][0]) {
+      if(value == options[i][0] || value == options[i][1]) {
         result = true;
         break;
       }
@@ -238,20 +238,20 @@ var DynamicColumn = Class.extend({
     return result;
   },
 
-  _choiceSelect: function(id, name, relation) {
+  _choiceSelect: function(id, name, slug) {
     $obj = $('<select id="' + id + '" name="' + name + '"></select>');
 
     /*
-     * Get options from self.data.dynamicColumn using 'relation.slug' and
+     * Get options from self.data.dynamicColumn using 'slug' and
      * add these options to the select.
      */
     var option = "<option></option>";
-    var options = this.data.dynamicColumns[relation.slug];
+    var options = this.data.dynamicColumns[slug];
     var $option = null;
 
     if(options === undefined) {
       var msg = "Invalid relationship make a note of the steps that " +
-          "led to this error and send them in a bug report.";
+                "led to this error and send them in a bug report.";
       var data = {};
       data[name] = [msg];
       this._mimicDjangoErrors(data);

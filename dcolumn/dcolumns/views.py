@@ -24,14 +24,18 @@ class ContextDataMixin(object):
         fk_slugs = DynamicColumn.objects.get_fk_slugs()
         name = dcolumn_manager.get_collection_name(class_name)
 
-        for name in ColumnCollection.objects.get_active_relation_items(name):
-            model, field = dcolumn_manager.choice_map.get(name)
+        for model_name in ColumnCollection.objects.get_active_relation_items(
+            name):
+            model, field = dcolumn_manager.choice_map.get(model_name)
             objects = context.setdefault(u'dynamicColumns', {})
             values = [(r.pk, getattr(r, field))
                       for r in model.objects.dynamic_column()]
             values.insert(0, (0, "Choose a value"))
-            objects[fk_slugs.get(name)] = values
+            objects[fk_slugs.get(model_name)] = values
+            log.debug("model_name: %s, model: %s, field: %s, fk_slugs: %s, "
+                      "values: %s", model_name, model, field, fk_slugs, values)
 
+        log.debug("context: %s", context)
         return context
 
     def get_relation_context_data(self, class_name=u'', obj=None, **kwargs):
@@ -74,6 +78,7 @@ class CollectionAJAXView(JSONResponseMixin, TemplateView, ContextDataMixin):
         except Exception, e:
             context[u'valid'] = False
             context[u'message'] = "Error occured: {}".format(e)
+            log.error(context[u'message'], exc_info=True)
 
         return context
 

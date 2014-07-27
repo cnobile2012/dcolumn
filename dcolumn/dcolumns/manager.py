@@ -59,6 +59,9 @@ class DynamicColumnManager(object):
         self._relation_numbers.add(relation_num)
         self._relations.append((relation_num, choice.__name__))
         self._choice_map[choice.__name__] = (choice, field)
+        log.debug("choice: %s, relation_num: %s, field: %s, relations: %s, "
+                  "choice_map: %s", choice, relation_num, field,
+                  self._relations, self._choice_map)
 
     def _test_field(self, choice, field):
         obj = choice()
@@ -161,7 +164,7 @@ class DynamicColumnManager(object):
         return self._css_container_map
 
     def get_collection_name(self, model_name):
-        log.debug("Model name: %s", model_name)
+        #log.debug("Model name: %s", model_name)
         model_name = model_name.lower()
         item_names = dict([
             (k.lower(), v)

@@ -19,6 +19,51 @@ log = logging.getLogger('example_site.models')
 
 
 #
+# Promotion
+#
+class PromotionManager(StatusModelManagerMixin):
+
+    def dynamic_column(self):
+        return self.active()
+
+
+class Promotion(UserModelMixin, TimeModelMixin, StatusModelMixin):
+    name = models.CharField(
+        verbose_name=_(u"Promotion's Name"), max_length=250,
+        help_text=_(u"Enter the name of the promotion."))
+    description = models.TextField(
+        verbose_name=_(u"Description"),
+        help_text=_(u"Enter a description of the book promotion."))
+    start_date = models.DateTimeField(
+        verbose_name=_(u"Start Date & Time"), null=True, blank=True,
+        help_text=_(u"Enter the start date and time of this promotion."))
+    end_date = models.DateTimeField(
+        verbose_name=_(u"End Date & Time"), null=True, blank=True,
+        help_text=_(u"Enter the end date and time of this promotion."))
+
+    objects = PromotionManager()
+
+    class Meta:
+        ordering = ('-start_date', 'name',)
+        verbose_name = _(u"Promotion")
+        verbose_name_plural = _(u"Promotions")
+
+    def save(self, *args, **kwargs):
+        super(Promotion, self).save(*args, **kwargs)
+
+    def __unicode__(self):
+        return u"{}-{}".format(self.name, self.start_date.isoformat())
+
+    def get_absolute_url(self):
+        return reverse('promotion-detail', kwargs={u'pk': self.pk})
+
+    def _detail_producer(self):
+        return u'<a href="{}">View Page</a>'.format(self.get_absolute_url())
+    _detail_producer.short_description = _(u"View Detail")
+    _detail_producer.allow_tags = True
+
+
+#
 # Author
 #
 class AuthorManager(StatusModelManagerMixin):
@@ -43,7 +88,7 @@ class Author(CollectionBase):
         super(Author, self).save(*args, **kwargs)
 
     def __unicode__(self):
-        return unicode("{}".format(self.name))
+        return self.name
 
     def get_absolute_url(self):
         return reverse('author-detail', kwargs={u'pk': self.pk})

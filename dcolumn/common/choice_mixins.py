@@ -85,24 +85,35 @@ class InspectChoice(object):
 # BaseChoiceManager
 #
 class BaseChoiceManager(InspectChoice):
-    _VALUES = None
+    VALUES = None
+    FIELD_LIST = None
 
     def __init__(self):
         super(BaseChoiceManager, self).__init__()
         self.containers = []
         self.container_map = {}
 
-        if not self._VALUES:
+        if not self.VALUES:
             raise TypeError(_(u"Must set the '_VALUES' object to valid "
                               u"choices for the container object."))
+
+        if not self.FIELD_LIST and len(self.FIELD_LIST) > 1:
+            raise TypeError(_(u"Must provide fields to populate for your "
+                              u"choices."))
 
     @InspectChoice.set_model
     def dynamic_column(self):
         if not self.containers:
-            for pk, name in enumerate(self._VALUES, start=1):
+            for pk, values in enumerate(self.VALUES, start=1):
                 obj = self.model()
-                obj.pk = pk
-                obj.name = name
+                setattr(obj, self.FIELD_LIST[0], pk)
+
+                if isinstance(values, (tuple, list)):
+                    for idx in xrange(len(values)):
+                        setattr(obj, self.FIELD_LIST[idx+1], values[idx])
+                else:
+                    setattr(obj, self.FIELD_LIST[1], values)
+
                 self.containers.append(obj)
 
             self.container_map.update(dict([(cont.pk, cont)

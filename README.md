@@ -59,7 +59,7 @@ Basic Installation
 
  5. The models need to subclass the `CollectionBase` object from dcolumn. The
     model manager needs to subclass `StatusModelManagerMixin` and also needs
-    to impliment a method named `dynamic_column`. See the example code 
+    to implement a method named `dynamic_column`. See the example code 
 
  6. Any forms used with a dynamic column model will need to subclass
     `CollectionFormMixin`. You do not need to subclass `forms.ModelForm`, this
@@ -68,6 +68,11 @@ Basic Installation
  7. Any views need to subclass `CollectionCreateUpdateViewMixin` which must be
     before the class-based view that you will use. Once again see the example
     code.
+
+Do Not's
+--------
+Once you have registered the choices/models with `dcolumn_manager.register_choice()` do not change it, as the numeric value is stored in the `DynamicColumn` table. So obviously if you really really really need to change it you can, but you must modify the `Relation` in all the affected rows in the `DynamicColumn` table.
+
 
 You will see that this is all rather simple and you'll need to write very
 little code to support DynamicColumns.

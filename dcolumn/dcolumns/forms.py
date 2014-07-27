@@ -63,7 +63,7 @@ class DynamicColumnForm(forms.ModelForm):
 
 
 #
-# CollectionMixin
+# CollectionFormMixin
 #
 class CollectionFormMixin(forms.ModelForm):
     SPECIAL_CASE_MAP = {DynamicColumn.BOOLEAN: u'1',

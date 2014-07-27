@@ -9,11 +9,26 @@ from django import forms
 from dcolumn.dcolumns.forms import CollectionFormMixin
 from dcolumn.dcolumns.manager import dcolumn_manager
 
-from .models import Author, Publisher, Book
+from .models import Promotion, Author, Publisher, Book
 
-dcolumn_manager.register_choice(Author, 2, u'name')
-dcolumn_manager.register_choice(Publisher, 3, u'name')
-dcolumn_manager.register_choice(Book, 4, u'title')
+dcolumn_manager.register_choice(Promotion, 2, u'name')
+dcolumn_manager.register_choice(Author, 3, u'name')
+dcolumn_manager.register_choice(Publisher, 4, u'name')
+dcolumn_manager.register_choice(Book, 5, u'title')
+
+
+#
+# Promotion
+#
+class PromotionForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(PromotionForm, self).__init__(*args, **kwargs)
+        self.fields[u'name'].widget = forms.TextInput(
+            attrs={u'size': 100, u'maxlength': 250})
+
+    class Meta:
+        model = Promotion
 
 
 #
