@@ -79,7 +79,7 @@ class CollectionFormMixin(forms.ModelForm):
                       DynamicColumn.CHOICE: 12}
 
     class Meta:
-        exclude = ['creator', 'user', 'ctime', 'mtime']
+        exclude = ['creator', 'updater', 'created', 'updated']
 
     def __init__(self, *args, **kwargs):
         super(CollectionFormMixin, self).__init__(*args, **kwargs)
@@ -89,11 +89,11 @@ class CollectionFormMixin(forms.ModelForm):
             self.coll_name)
         self.fields[u'column_collection'].required = False
 
-        if u'ctime' in self.fields:
-            self.fields[u'ctime'].required = False
+        if u'created' in self.fields:
+            self.fields[u'created'].required = False
 
-        if u'mtime' in self.fields:
-            self.fields[u'mtime'].required = False
+        if u'updated' in self.fields:
+            self.fields[u'updated'].required = False
 
         log.debug("args: %s, kwargs: %s", args, kwargs)
         log.debug("fields: %s, data: %s", self.fields, self.data)
@@ -214,7 +214,7 @@ class CollectionFormMixin(forms.ModelForm):
                   request, inst, self.instance)
 
         if request:
-            inst.user = request.user
+            inst.updater = request.user
             inst.active = True
 
             if not hasattr(inst, u'creator') or not inst.creator:

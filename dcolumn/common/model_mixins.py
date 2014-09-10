@@ -26,10 +26,10 @@ class UserModelMixin(models.Model):
     creator fields.
     """
 
-    user = models.ForeignKey(
-        User, verbose_name=_("Modifier"), db_index=True, editable=False,
+    updater = models.ForeignKey(
+        User, verbose_name=_("Updater"), db_index=True, editable=False,
         related_name="%(app_label)s_%(class)s_updater_related",
-        help_text=_("The last user to modify this record."))
+        help_text=_("The last user to update this record."))
     creator = models.ForeignKey(
         User, verbose_name=_("Creator"), db_index=True, editable=False,
         related_name="%(app_label)s_%(class)s_creator_related",
@@ -44,12 +44,12 @@ class UserModelMixin(models.Model):
         """
         super(UserModelMixin, self).save(*args, **kwargs)
 
-    def _user_producer(self):
+    def _updater_producer(self):
         """
         Primary use is in the admin class to supply the user's full name.
         """
-        return self.user.get_full_name()
-    _user_producer.short_description = _("Updater")
+        return self.updater.get_full_name()
+    _updater_producer.short_description = _("Updater")
 
     def _creator_producer(self):
         """
@@ -64,32 +64,32 @@ class UserModelMixin(models.Model):
 #
 class TimeModelMixin(models.Model):
     """
-    Abstract model mixin used in the model classes to supply ctime and mtime
-    fields.
+    Abstract model mixin used in the model classes to supply created and
+    updated fields.
     """
 
-    ctime = models.DateTimeField(
+    created = models.DateTimeField(
         verbose_name=_("Date Created"),
         help_text=_("The date and time of creation."))
-    mtime = models.DateTimeField(
-        verbose_name=_("Last Modified"),
-        help_text=_("The date and time last modified."))
+    updated = models.DateTimeField(
+        verbose_name=_("Last Updated"),
+        help_text=_("The date and time last updated."))
 
     class Meta:
         abstract = True
 
     def save(self, *args, **kwargs):
         """
-        Permit the disabling of the ctime and mtime.
+        Permit the disabling of the created and updated.
         """
-        if not kwargs.pop(u'disable_ctime', False) and self.ctime is None:
-            self.ctime = datetime.now(tzutc())
+        if not kwargs.pop(u'disable_created', False) and self.created is None:
+            self.created = datetime.now(tzutc())
 
-        if not kwargs.pop(u'disable_mtime', False):
-            self.mtime = datetime.now(tzutc())
+        if not kwargs.pop(u'disable_updated', False):
+            self.updated = datetime.now(tzutc())
 
-        log.debug("kwargs: %s, ctime: %s, mtime: %s",
-                  kwargs, self.ctime, self.mtime)
+        log.debug("kwargs: %s, created: %s, updated: %s",
+                  kwargs, self.created, self.updated)
         super(TimeModelMixin, self).save(*args, **kwargs)
 
 

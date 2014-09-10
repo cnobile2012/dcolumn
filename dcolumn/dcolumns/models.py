@@ -192,7 +192,7 @@ class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin):
         verbose_name_plural = _("Column Collections")
 
     def __unicode__(self):
-        return u"{}-{}".format(self.name, self.mtime.isoformat())
+        return u"{}-{}".format(self.name, self.updated.isoformat())
 
 
 #

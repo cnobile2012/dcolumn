@@ -12,11 +12,5 @@ class UserAdminMixin(admin.ModelAdmin):
         if change is False:
             obj.creator = request.user
 
-        obj.user = request.user
-
-        # Just in case an external import was done.
-        # (A migration where a ctime didn't exist.)
-        if obj.ctime is None:
-            obj.ctime = datetime.datetime.now()
-
+        obj.updater = request.user
         super(UserAdminMixin, self).save_model(request, obj, form, change)

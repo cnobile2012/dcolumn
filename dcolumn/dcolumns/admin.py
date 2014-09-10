@@ -35,11 +35,11 @@ class ColumnCollectionAdmin(UserAdminMixin):
     fieldsets = (
         (None, {'fields': ('name', 'dynamic_column',)}),
         (_('Status'), {'classes': ('collapse',),
-                       'fields': ('active', 'creator', 'ctime', 'user',
-                                  'mtime',)}),
+                       'fields': ('active', 'creator', 'created', 'updater',
+                                  'updated',)}),
         )
-    readonly_fields = ('creator', 'ctime', 'user', 'mtime',)
-    list_display = ('name', 'user', 'mtime',)
+    readonly_fields = ('creator', 'created', 'updater', 'updated',)
+    list_display = ('name', 'updater', 'updated',)
     filter_horizontal = ('dynamic_column',)
     form = ColumnCollectionForm
 
@@ -53,13 +53,13 @@ class DynamicColumnAdmin(UserAdminMixin):
                            'store_relation',)}),
         (_('Screen Location'), {'fields': ('location', 'order', 'required',)}),
         (_('Status'), {'classes': ('collapse',),
-                       'fields': ('slug', 'active', 'creator', 'ctime', 'user',
-                                  'mtime',)}),
+                       'fields': ('slug', 'active', 'creator', 'created',
+                                  'updater', 'updated',)}),
         )
-    readonly_fields = ('creator', 'slug', 'user', 'ctime', 'mtime',)
+    readonly_fields = ('creator', 'slug', 'updater', 'created', 'updated',)
     list_display = ('name', '_collection_producer', 'value_type',
                     '_relation_producer', 'store_relation', 'required',
-                    'location', 'order', 'mtime', 'active',)
+                    'location', 'order', 'updated', 'active',)
     list_editable = ('location', 'order', 'active',)
     ordering = ('column_collection__name', 'location', 'order', 'name',)
     form = DynamicColumnForm

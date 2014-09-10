@@ -20,11 +20,12 @@ class PromotionAdmin(UserAdminMixin):
         (None, {'fields': ('name', 'description', 'active', 'start_date',
                            'end_date',)}),
         (_('Status'), {'classes': ('collapse',),
-                       'fields': ('creator', 'ctime', 'user', 'mtime',)}),
+                       'fields': ('creator', 'created', 'updater',
+                                  'updated',)}),
         )
-    readonly_fields = ('creator', 'ctime', 'user', 'mtime',)
+    readonly_fields = ('creator', 'created', 'updater', 'updated',)
     list_display = ('name', 'description', 'active', 'start_date', 'end_date',
-                    'mtime',) # '_detail_producer',)
+                    'updated',) # '_detail_producer',)
     list_editable = ('active',)
     form = PromotionForm
 
@@ -37,10 +38,10 @@ class AuthorAdmin(UserAdminMixin):
         (None, {'fields': ('name',)}),
         (_('Status'), {'classes': ('collapse',),
                        'fields': ('column_collection', 'active', 'creator',
-                                  'ctime', 'user', 'mtime',)}),
+                                  'created', 'updater', 'updated',)}),
         )
-    readonly_fields = ('creator', 'ctime', 'user', 'mtime',)
-    list_display = ('name', 'column_collection', 'user', 'mtime',
+    readonly_fields = ('creator', 'created', 'updater', 'updated',)
+    list_display = ('name', 'column_collection', 'updater', 'updated',
                     '_detail_producer',)
     inlines = (KeyValueInline,)
     form = AuthorForm
@@ -54,10 +55,10 @@ class PublisherAdmin(UserAdminMixin):
         (None, {'fields': ('name',)}),
         (_('Status'), {'classes': ('collapse',),
                        'fields': ('column_collection', 'active', 'creator',
-                                  'ctime', 'user', 'mtime',)}),
+                                  'created', 'updater', 'updated',)}),
         )
-    readonly_fields = ('creator', 'ctime', 'user', 'mtime',)
-    list_display = ('name', 'column_collection', 'user', 'mtime',
+    readonly_fields = ('creator', 'created', 'updater', 'updated',)
+    list_display = ('name', 'column_collection', 'updater', 'updated',
                     '_detail_producer',)
     inlines = (KeyValueInline,)
     form = PublisherForm
@@ -71,10 +72,10 @@ class BookAdmin(UserAdminMixin):
         (None, {'fields': ('title',)}),
         (_('Status'), {'classes': ('collapse',),
                        'fields': ('column_collection', 'active', 'creator',
-                                  'ctime', 'user', 'mtime',)}),
+                                  'created', 'updater', 'updated',)}),
         )
-    readonly_fields = ('creator', 'ctime', 'user', 'mtime',)
-    list_display = ('title', 'column_collection', 'user', 'mtime',
+    readonly_fields = ('creator', 'created', 'updater', 'updated',)
+    list_display = ('title', 'column_collection', 'updater', 'updated',
                     '_detail_producer',)
     inlines = (KeyValueInline,)
     form = BookForm
