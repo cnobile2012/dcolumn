@@ -23,8 +23,12 @@ log = logging.getLogger('example_site.models')
 #
 class PromotionManager(StatusModelManagerMixin):
 
-    def dynamic_column(self):
-        return self.active()
+    def dynamic_column(self, active=True):
+        """
+        We need to return all choices even if some are inactive, because
+        the store_relation field in DynamicColumn' is acive for this model.
+        """
+        return self.active(active=active)
 
 
 class Promotion(UserModelMixin, TimeModelMixin, StatusModelMixin):

@@ -197,6 +197,7 @@ class AutoDisplayNode(template.Node):
                 options = fk_options.get(slug, {})
             else:
                 msg = u'Invalid key for relation, {}'.format(relation)
+                log.error(msg)
                 raise template.TemplateSyntaxError(msg)
 
         return options
@@ -206,7 +207,13 @@ class AutoDisplayNode(template.Node):
         buff = StringIO(elem)
         buff.seek(0, os.SEEK_END)
         value = relation.get(u'value', u'')
-        value = value.isdigit() and int(value) or value
+
+        # Get the ID if the value is the actual value.
+        if relation.get(u'store_relation', False):
+            value = [k for k, v in options if v == value]
+            value = len(value) >= 1 and value[0] or 0
+
+        value = str(value).isdigit() and int(value) or value
 
         for k, v in options:
             s = k == value and u" selected" or u""

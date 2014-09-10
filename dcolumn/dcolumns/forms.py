@@ -28,6 +28,7 @@ class ColumnCollectionForm(forms.ModelForm):
 
     class Meta:
         model = ColumnCollection
+        exclude = []
 
 
 #
@@ -43,6 +44,7 @@ class DynamicColumnForm(forms.ModelForm):
 
     class Meta:
         model = DynamicColumn
+        exclude = []
 
     def clean(self):
         cleaned_data = super(DynamicColumnForm, self).clean()
@@ -77,7 +79,7 @@ class CollectionFormMixin(forms.ModelForm):
                       DynamicColumn.CHOICE: 12}
 
     class Meta:
-        exclude = ('creator', 'user', 'ctime', 'mtime')
+        exclude = ['creator', 'user', 'ctime', 'mtime']
 
     def __init__(self, *args, **kwargs):
         super(CollectionFormMixin, self).__init__(*args, **kwargs)
@@ -137,7 +139,7 @@ class CollectionFormMixin(forms.ModelForm):
         PK. If 'store_relation' is True then lookup in the choices using the
         PK and return the actual value.
         """
-        if relation.get(u'store_related', False):
+        if relation.get(u'store_relation', False):
             log.debug("value: %s, relation: %s", value, relation)
             data = dcolumn_manager.get_relation_model_field(
                 relation.get('relation', u''))
@@ -271,3 +273,4 @@ class KeyValueForm(forms.ModelForm):
 
     class Meta:
         model = KeyValue
+        exclude = []

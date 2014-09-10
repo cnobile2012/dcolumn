@@ -5,7 +5,7 @@
 import logging
 import inspect
 
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 
 log = logging.getLogger('dcolumn.choices')
 

@@ -29,6 +29,7 @@ class PromotionForm(forms.ModelForm):
 
     class Meta:
         model = Promotion
+        exclude = []
 
 
 #
@@ -43,6 +44,7 @@ class AuthorForm(CollectionFormMixin):
 
     class Meta:
         model = Author
+        exclude = CollectionFormMixin.Meta.exclude
 
 
 #
@@ -57,6 +59,7 @@ class PublisherForm(CollectionFormMixin):
 
     class Meta:
         model = Publisher
+        exclude = CollectionFormMixin.Meta.exclude
 
 
 #
@@ -71,3 +74,4 @@ class BookForm(CollectionFormMixin):
 
     class Meta:
         model = Book
+        exclude = CollectionFormMixin.Meta.exclude

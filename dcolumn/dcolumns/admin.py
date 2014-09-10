@@ -49,9 +49,9 @@ class ColumnCollectionAdmin(UserAdminMixin):
 #
 class DynamicColumnAdmin(UserAdminMixin):
     fieldsets = (
-        (None, {'fields': ('name', 'value_type', 'relation', 'store_relation',
-                           'required',)}),
-        (_('Screen Location'), {'fields': ('location', 'order',)}),
+        (None, {'fields': ('name', 'value_type', 'relation',
+                           'store_relation',)}),
+        (_('Screen Location'), {'fields': ('location', 'order', 'required',)}),
         (_('Status'), {'classes': ('collapse',),
                        'fields': ('slug', 'active', 'creator', 'ctime', 'user',
                                   'mtime',)}),

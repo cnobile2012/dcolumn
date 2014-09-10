@@ -108,9 +108,14 @@ class StatusModelManagerMixin(models.Manager):
         :Parameters:
           active : `bool`
             If `True` return only active records else if `False` return
-            non-active records.
+            non-active records. If `None` return all records.
         """
-        return self.filter(active=active)
+        query = []
+
+        if active is not None:
+            query.append(Q(active=active))
+
+        return self.filter(*query)
 
 
 class StatusModelMixin(models.Model):
