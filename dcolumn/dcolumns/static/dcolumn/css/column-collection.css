@@ -1,0 +1,14 @@
+ul.collection-message {
+  padding: 0;
+  background-color: yellow;
+  color: #5b80b2;
+  
+}
+
+ul.collection-message li {
+  list-style-type: none;
+  padding: 8px;
+  font-size: 130%;
+  font-weight: bold;
+  border: 3px double red;
+}

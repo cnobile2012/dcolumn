@@ -22,13 +22,23 @@ class ColumnCollectionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ColumnCollectionForm, self).__init__(*args, **kwargs)
         log.debug("args: %s, kwargs: %s", args, kwargs)
-        columns = ColumnCollection.objects.get_column_collection(
+        self.columns = ColumnCollection.objects.get_column_collection(
             self.instance.name, unassigned=True)
-        self.fields[u'dynamic_column'].queryset = columns
+        self.fields[u'dynamic_column'].queryset = self.columns
 
     class Meta:
         model = ColumnCollection
         exclude = []
+
+    def clean(self):
+        if not self.columns:
+            msg = ("No objects in the database, please create initial objects "
+                   "in the Dynamic Columns model to be used for this "
+                   "collection type.")
+            log.error(msg)
+            raise forms.ValidationError({u'dynamic_column': [msg]})
+
+        return self.cleaned_data
 
 
 #

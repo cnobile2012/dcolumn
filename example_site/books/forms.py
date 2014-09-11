@@ -26,6 +26,9 @@ class PromotionForm(forms.ModelForm):
         super(PromotionForm, self).__init__(*args, **kwargs)
         self.fields[u'name'].widget = forms.TextInput(
             attrs={u'size': 100, u'maxlength': 250})
+        # Gets rid of the annoying colon afer every label, but only works on
+        # Django 1.6 and above.
+        self.label_suffix = u''
 
     class Meta:
         model = Promotion
@@ -41,6 +44,9 @@ class AuthorForm(CollectionFormMixin):
         super(AuthorForm, self).__init__(*args, **kwargs)
         self.fields[u'name'].widget = forms.TextInput(
             attrs={u'size': 50, u'maxlength': 250})
+        # Gets rid of the annoying colon afer every label, but only works on
+        # Django 1.6 and above.
+        self.label_suffix = u''
 
     class Meta:
         model = Author
@@ -56,6 +62,9 @@ class PublisherForm(CollectionFormMixin):
         super(PublisherForm, self).__init__(*args, **kwargs)
         self.fields[u'name'].widget = forms.TextInput(
             attrs={u'size': 50, u'maxlength': 250})
+        # Gets rid of the annoying colon afer every label, but only works on
+        # Django 1.6 and above.
+        self.label_suffix = u''
 
     class Meta:
         model = Publisher
@@ -71,6 +80,9 @@ class BookForm(CollectionFormMixin):
         super(BookForm, self).__init__(*args, **kwargs)
         self.fields[u'title'].widget = forms.TextInput(
             attrs={u'size': 50, u'maxlength': 250})
+        # Gets rid of the annoying colon afer every label, but only works on
+        # Django 1.6 and above.
+        self.label_suffix = u''
 
     class Meta:
         model = Book

@@ -123,21 +123,24 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
 class ColumnCollectionManager(StatusModelManagerMixin):
 
     def get_column_collection(self, name, unassigned=False):
-        log.debug("Collection name: %s", name)
+        """
+        name       -- Name of the column collection.
+        unassigned -- Get items that are not assigned to a column collection
+                      yet.
+        """
+        log.debug("Collection name: %s, unassigned: %s", name, unassigned)
+        queryset = self.none()
 
         try:
             queryset = self.active().get(name=name).dynamic_column.active()
-
-            if unassigned:
-                queryset = queryset | DynamicColumn.objects.active().filter(
-                    column_collection=None)
-
-            return queryset.filter().order_by('location', 'order', 'name')
         except self.model.DoesNotExist:
-            msg = ("No objects in database, please create initial objects "
-                   "for Dynamic Columns and Column Collections")
-            log.error(msg)
-            raise self.model.DoesNotExist(msg)
+            pass # This is caught in the form.
+
+        if unassigned:
+            queryset = queryset | DynamicColumn.objects.active().filter(
+                column_collection=None)
+
+        return queryset
 
     def serialize_columns(self, name, obj=None):
         records = self.get_column_collection(name)

@@ -103,7 +103,6 @@ h2 {
   display: block;
   border: 1px solid #999;
   padding: .25em .75em;
-  /* Negative margin tucks the table beneath the faux tab. */
   margin: 0 auto;
   width: 96%;
   background-color: white;

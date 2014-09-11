@@ -43,6 +43,11 @@ class ColumnCollectionAdmin(UserAdminMixin):
     filter_horizontal = ('dynamic_column',)
     form = ColumnCollectionForm
 
+    class Media:
+        js = ('dcolumn/js/jquery-1.11.1.min.js', 'dcolumn/js/inheritance.js',
+              'dcolumn/js/column-collection.js',)
+        css = {u'all': ('dcolumn/css/column-collection.css',)}
+
 
 #
 # DynamicColumn
