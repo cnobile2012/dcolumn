@@ -50,22 +50,28 @@ Basic Installation
     value. They would be reference as `css.top`, `css.center`, etc.
 
         dcolumn_manager.register_css_containers(
-               (u'top-container', u'center-container', u'bottom-container'))
+               (u'top-container', u'center-container', u'bottom-container')
+        )
 
         dcolumn_manager.register_css_containers(
                ((u'top', u'top-container'),
                 (u'center', u'center-container'),
-                (u'bottom', u'bottom-container')))
+                (u'bottom', u'bottom-container'))
+        )
 
- 5. The models need to subclass the `CollectionBase` object from dcolumn. The
-    model manager needs to subclass `StatusModelManagerMixin` and also needs
-    to implement a method named `dynamic_column`. See the example code 
+ 5. The models need to subclass the `CollectionBase` model base class from
+    dcolumn. The model manager needs to subclass `StatusModelManagerMixin` and
+    also needs to implement a method named `dynamic_column`. See the example
+    code.
 
- 6. Any forms used with a dynamic column model will need to subclass
+ 6. The `CollectionBaseManagerBase` manager base class from dcolumn should also
+    be sub-classed to pick up a few convenience methods. This is not mandatory.
+
+ 7. Any forms used with a dynamic column model will need to subclass
     `CollectionFormMixin`. You do not need to subclass `forms.ModelForm`, this
     is done for you already by `CollectionFormMixin`.
 
- 7. Any views need to subclass `CollectionCreateUpdateViewMixin` which must be
+ 8. Any views need to subclass `CollectionCreateUpdateViewMixin` which must be
     before the class-based view that you will use. Once again see the example
     code.
 
@@ -73,8 +79,26 @@ Do Not's
 --------
 Once you have registered the choices/models with `dcolumn_manager.register_choice()` do not change it, as the numeric value is stored in the `DynamicColumn` table. So obviously if you really really really need to change it you can, but you must modify the `Relation` in all the affected rows in the `DynamicColumn` table.
 
+You will see that this is all rather simple and you'll need to write very little code to support DynamicColumns.
 
-You will see that this is all rather simple and you'll need to write very
-little code to support DynamicColumns.
+It is also not advisable to hardcode any of the slugs created when a dynamic column is created as these slugs can change if the display name changes in the record.
+
+API Details
+-----------
+
+## DynamicColumnManager
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Feel free to contact me at: carl dot nobile at gmail.com
