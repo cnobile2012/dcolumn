@@ -169,6 +169,14 @@ ul.errorlist li {
   margin-left: 5px;
 }
 
+.dynamic-container input[type=text] {
+  width: 220px;
+}
+
+.dynamic-container input[type=number] {
+  width: 100px;
+}
+
 .dynamic-container span {
   float: left;
   min-height: 18px;

@@ -125,7 +125,7 @@ class AutoDisplayNode(template.Node):
         DynamicColumn.TEXT_BLOCK: (u'<textarea class="large-text-field" '
                                    u'id="{}" name="{}" cols="40" rows="10"'
                                    u'>{}</textarea>\n'),
-        DynamicColumn.DATE: (u'<input id="{}" class="wants_datepicker" '
+        DynamicColumn.DATE: (u'<input id="{}" type="date" '
                              u'name="{}" size="20" type="text" value="{}" />'),
         DynamicColumn.BOOLEAN: u'<select id="{}" name="{}">\n',
         DynamicColumn.FLOAT: (u'<input id="{}" name="{}" type="text" '
