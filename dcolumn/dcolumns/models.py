@@ -219,6 +219,42 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return result
 
+    def set_key_value_pair(self, slug, value, field=None):
+        """
+        This method sets an arbitrary key/value pair, it will log an error
+        if the key/value pair could not be found.
+
+        If value hold the value 'increment' or 'decrement' the value
+        associated with the slug will be incremented or decremented.
+        """
+        if value:
+            try:
+                dc = self.column_collection.dynamic_column.get(slug=slug)
+            except self.DoesNotExist as e:
+                log.error("DynamicColumn with slug '%s' does not exist.", slug)
+                # Cannot create a dynamic column if not in the collection
+                # already.
+                return
+
+            if dc.store_relation and field:
+                value = getattr(value, field)
+            elif hasattr(value, u'pk'):
+                value = value.pk
+            elif isinstance(value, (datetime.datetime, datetime.date)):
+                value = value.strftime(u"%Y-%m-%d")
+
+            kv, created = self.keyvalue_pairs.get_or_create(
+                dynamic_column=dc, defaults={u'value': value})
+
+            if not created:
+                if u'increment' == value and kv.value.isdigit():
+                    value = int(kv.value) + 1
+                elif u'decrement' == value and kv.value.isdigit():
+                    value = int(kv.value) - 1
+
+                kv.value = value
+                kv.save()
+
 
 #
 # KeyValue
@@ -239,8 +275,9 @@ class KeyValue(models.Model):
     objects = KeyValueManager()
 
     class Meta:
+        ordering = ('dynamic_column__location', 'dynamic_column__order',)
         verbose_name = _("Key Value")
         verbose_name_plural = _("Key Values")
 
     def __unicode__(self):
-        return u"{}".format(self.value)
+        return self.value
