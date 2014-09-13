@@ -125,8 +125,8 @@ class ColumnCollectionManager(StatusModelManagerMixin):
     def get_column_collection(self, name, unassigned=False):
         """
         name       -- Name of the column collection.
-        unassigned -- Get items that are not assigned to a column collection
-                      yet.
+        unassigned -- Also get items that are not assigned to a column
+                      collection yet.
         """
         log.debug("Collection name: %s, unassigned: %s", name, unassigned)
         queryset = self.none()
@@ -175,9 +175,14 @@ class ColumnCollectionManager(StatusModelManagerMixin):
                 for record in records if record.relation]
 
     def get_collection_choices(self, name, use_pk=False):
-         records = self.get_column_collection(name)
-         choices = [(use_pk and r.pk or r.slug, r.name) for r in records]
-         return choices
+        """
+        Returns a set of choices for a list of options on an HTML select tag.
+        Normally the slug is returnd as the option value, however if `use_pk`
+        is `True` then the value attribute will get the pk of the record.
+        """
+        records = self.get_column_collection(name)
+        choices = [(use_pk and r.pk or r.slug, r.name) for r in records]
+        return choices
 
 
 class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin):
