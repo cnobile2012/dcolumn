@@ -75,9 +75,14 @@ Basic Installation
     before the class-based view that you will use. Once again see the example
     code.
 
+Functional Details
+------------------
+
+
+
 Do Not's
 --------
-Once you have registered the choices/models with `dcolumn_manager.register_choice()` do not change it, as the numeric value is stored in the `DynamicColumn` table. So obviously if you really really really need to change it you can, but you must modify the `Relation` in all the affected rows in the `DynamicColumn` table.
+Once you have registered the choices/models with `dcolumn_manager.register_choice()` do not change it, as the numeric value is stored in the `DynamicColumn` table. So obviously if you really really really need to change it you can, but you must manually modify the `Relation` in all the affected rows in the `DynamicColumn` table.
 
 You will see that this is all rather simple and you'll need to write very little code to support DynamicColumns.
 
@@ -86,18 +91,74 @@ It is also not advisable to hardcode any of the slugs created when a dynamic col
 API Details
 -----------
 
-## DynamicColumnManager
+### Models and Managers
 
+#### DynamicColumnManager
+ 1. get_fk_slugs
+   * Takes no arguments
+   * Returns all dynamic column slugs that have a `value_type` of `CHOICE`.
+     These include all Django models and the Choice models.
 
+#### DynamicColumn
+There are no user methods on the `DynamicColumn` model at this time.
 
+#### ColumnCollectionManager
+ 1. get_column_collection
+   * `name` positional argument and is a collection name as defined in the
+     DYNAMIC_COLUMNS.COLLECTIONS dictionary.
+   * `unassigned` keyword argument defaults to `False`, if `True` gets the
+     items that are assigned to the collection name plus any unassigned items.
+   * Returns a column collection.
+ 2. serialize_columns
+   * `name` positional argument and is a collection name as defined in the
+     DYNAMIC_COLUMNS.COLLECTIONS dictionary.
+   * `obj` keyword argument defaults to `None` otherwise an instance of a
+     dynamic column enabled model.
+   * Returns a serialized version of the dynamic columns.
+ 3. get_active_relation_items
+   * `name` positional argument and is a collection name as defined in the
+     DYNAMIC_COLUMNS.COLLECTIONS dictionary.
+   * Returns a list of dynamic columns that have a `value_type` of CHOICE.
+ 4. get_collection_choices
+   * `name` positional argument and is a collection name as defined in the
+     DYNAMIC_COLUMNS.COLLECTIONS dictionary.
+   * `use_pk` keyword argument defaults to `False`, if `True` returns the pk
+     instead of the slug as the HTML select option value.
+   * Returns a list of tuples that can be used for HTML select options.
 
+#### ColumnCollection
+There are no user methods on the `ColumnCollection` model at this time.
 
+#### CollectionBaseManagerBase
+ 1. get_all_slugs
+   * Takes no arguments
+   * Returns a list of all slugs
 
+ 2. get_all_fields
+   * Takes no arguments
+   * Returns a list of all model fields.
 
+ 3. get_all_fields_and_slugs
+   * Takes no arguments
+   * Returns a list of all model fields and slugs.
 
+#### CollectionBase
+ 1. serialize_key_value_pairs
+   * Takes no arguments
+   * Returns a dictionary where the key is the pk of a dynamic column and the
+     value is the value of the keyvalue pair.
+ 2. set_key_value_pair
+   * `slug` positional argument and is the slug of any dynamic column object.
+   * `value` positional argument and is a value to be set on a keyvalue pair.
+   * Returns nothing. Sets a value on a keyvalue pair object.
 
+#### KeyValueManager
+There are no user methods on the `KeyValueManager` manager at this time.
 
+#### KeyValue
+There are no user methods on the `KeyValue` model at this time.
 
+### DynamicColumnManager
 
 
 
