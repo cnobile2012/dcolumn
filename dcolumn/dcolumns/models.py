@@ -201,6 +201,22 @@ class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin):
 #
 # CollectionBase
 #
+class CollectionBaseManagerBase(models.Manager):
+
+    def get_all_slugs(self):
+        return [r.slug for r in DynamicColumn.objects.all().order_by('slug')]
+
+    def get_all_fields(self):
+        return [unicode(field)
+                for field in self.model._meta.get_all_field_names()
+                if u'collection' not in field and field != u'keyvalue_pairs']
+
+    def get_all_fields_and_slugs(self):
+        result = self.get_all_slugs() + self.get_all_fields()
+        result.sort()
+        return result
+
+
 class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
     column_collection = models.ForeignKey(
         ColumnCollection, verbose_name=_("Column Collection"),

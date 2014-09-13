@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 
 from dcolumn.common.model_mixins import (
     UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin)
-from dcolumn.dcolumns.models import CollectionBase
+from dcolumn.dcolumns.models import CollectionBase, CollectionBaseManagerBase
 
 from .choices import Language
 
@@ -70,7 +70,7 @@ class Promotion(UserModelMixin, TimeModelMixin, StatusModelMixin):
 #
 # Author
 #
-class AuthorManager(StatusModelManagerMixin):
+class AuthorManager(CollectionBaseManagerBase, StatusModelManagerMixin):
 
     def dynamic_column(self):
         return self.active()
@@ -106,7 +106,7 @@ class Author(CollectionBase):
 #
 # Publisher
 #
-class PublisherManager(StatusModelManagerMixin):
+class PublisherManager(CollectionBaseManagerBase, StatusModelManagerMixin):
 
     def dynamic_column(self):
         return self.active()
@@ -140,7 +140,7 @@ class Publisher(CollectionBase):
 #
 # Book
 #
-class BookManager(StatusModelManagerMixin):
+class BookManager(CollectionBaseManagerBase, StatusModelManagerMixin):
 
     def dynamic_column(self):
         return self.active()
