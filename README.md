@@ -103,23 +103,23 @@ API Details
 There are no user methods on the `DynamicColumn` model at this time.
 
 #### ColumnCollectionManager
- 1. get_column_collection
+ 1. get_column_collection `method`
    * `name` positional argument and is a collection name as defined in the
      DYNAMIC_COLUMNS.COLLECTIONS dictionary.
    * `unassigned` keyword argument defaults to `False`, if `True` gets the
      items that are assigned to the collection name plus any unassigned items.
    * Returns a column collection.
- 2. serialize_columns
+ 2. serialize_columns `method`
    * `name` positional argument and is a collection name as defined in the
      DYNAMIC_COLUMNS.COLLECTIONS dictionary.
    * `obj` keyword argument defaults to `None` otherwise an instance of a
      dynamic column enabled model.
    * Returns a serialized version of the dynamic columns.
- 3. get_active_relation_items
+ 3. get_active_relation_items `method`
    * `name` positional argument and is a collection name as defined in the
      DYNAMIC_COLUMNS.COLLECTIONS dictionary.
    * Returns a list of dynamic columns that have a `value_type` of CHOICE.
- 4. get_collection_choices
+ 4. get_collection_choices `method`
    * `name` positional argument and is a collection name as defined in the
      DYNAMIC_COLUMNS.COLLECTIONS dictionary.
    * `use_pk` keyword argument defaults to `False`, if `True` returns the pk
@@ -130,35 +130,75 @@ There are no user methods on the `DynamicColumn` model at this time.
 There are no user methods on the `ColumnCollection` model at this time.
 
 #### CollectionBaseManagerBase
- 1. get_all_slugs
+ 1. get_all_slugs `method`
    * Takes no arguments
    * Returns a list of all slugs
-
- 2. get_all_fields
+ 2. get_all_fields `method`
    * Takes no arguments
    * Returns a list of all model fields.
-
  3. get_all_fields_and_slugs
-   * Takes no arguments
+   * Takes no arguments `method`
    * Returns a list of all model fields and slugs.
 
 #### CollectionBase
  1. serialize_key_value_pairs
-   * Takes no arguments
-   * Returns a dictionary where the key is the pk of a dynamic column and the
-     value is the value of the keyvalue pair.
- 2. set_key_value_pair
+   * Takes no arguments `method`
+   * Returns a dictionary where the key is the pk of a DynamicColumn instance
+     and the value of the KeyValue instance associated with the DynamicColumn
+     instance.
+ 2. set_key_value_pair `method`
    * `slug` positional argument and is the slug of any dynamic column object.
    * `value` positional argument and is a value to be set on a keyvalue pair.
-   * Returns nothing. Sets a value on a keyvalue pair object.
+   * Returns nothing. Sets a value on a keyValue object.
 
 #### KeyValueManager
-There are no user methods on the `KeyValueManager` manager at this time.
+There are no user methods on the `KeyValueManager` model manager at this time.
 
 #### KeyValue
 There are no user methods on the `KeyValue` model at this time.
 
 ### DynamicColumnManager
+The `DynamicColumnManager` holds all the relevent states of the system and should be the first place you come when you need to know something about the system.
+
+ 1. register_choice `method`
+   * `choice` positional argument and is a CHOICE type object either a Django
+     model or a choice model.
+   * `relation_num` positional argument and is a numeric identifier used as the
+     HTML select option value.
+   * `field` positional argument and is a string used as the HTML select option
+     text value.
+ 2. choice_relations `property`
+   * Takes no arguments
+   * Returns a list of choices.
+ 3. choice_relation_map `property`
+   * Takes no arguments
+   * Returns a dictionary of choices.
+ 4. choice_map `property`
+   * Takes no arguments
+   * Returns a dictionary where the key is the choice model name and the value
+     is a tuple of the choice model object and the relevent field name.
+ 5. register_css_containers `method`
+   * `container_list` positional argument and is a list of the CSS classes or
+     ids that will determine the location on the page of the various dynamic
+     columns.
+ 6. css_containers `property`
+   * Takes no arguments
+   * Returns a list of tuples where the tuple is (num, text)
+ 7. css_container_map `property`
+   * Takes no arguments
+   * Returns a dictionary of the CSS containers.
+ 8. get_collection_name `method`
+   * `model_name` positional argument and is the key name used in the
+     settings.DYNAMIC_COLUMNS.COLLECTIONS.
+   * The `ColumnCollection` instance name.
+ 9. get_api_auth_state `method`
+   * Takes no arguments
+   * Returns the value of settings.DYNAMIC_COLUMNS.INACTIVATE_API_AUTH
+ 10. get_relation_model_field `method`
+   * `relation` positional argument and is the value in the `DynamicColumn`
+     relation field.
+   * Returns the field used in the HTML select option text value.
+
 
 
 

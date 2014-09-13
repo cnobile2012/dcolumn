@@ -164,7 +164,16 @@ class DynamicColumnManager(object):
         return self._css_container_map
 
     def get_collection_name(self, model_name):
-        #log.debug("Model name: %s", model_name)
+        """
+        Gets the `ColumnCollection` instance name.
+
+        :Parameters:
+          model_name : `str`
+            The key name used in the settings.DYNAMIC_COLUMNS.COLLECTIONS.
+
+        :Returns:
+          The `ColumnCollection` instance name.
+        """
         model_name = model_name.lower()
         item_names = dict([
             (k.lower(), v)
@@ -177,9 +186,22 @@ class DynamicColumnManager(object):
         return item_names.get(model_name, u'')
 
     def get_api_auth_state(self):
+        """
+        Gets the value of settings.DYNAMIC_COLUMNS.INACTIVATE_API_AUTH.
+        """
         return settings.DYNAMIC_COLUMNS.get(u'INACTIVATE_API_AUTH', False)
 
     def get_relation_model_field(self, relation):
+        """
+        Gets the field used in the HTML select option text value.
+
+        :Parameters:
+          relation `int`
+            The value in the `DynamicColumn` relation field.
+
+        :Returns:
+          The field used in the HTML select option text value.
+        """
         return self.choice_map.get(self.choice_relation_map.get(relation))
 
 dcolumn_manager = DynamicColumnManager()
