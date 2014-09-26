@@ -113,7 +113,6 @@ def auto_display(parser, token):
 
 
 class AutoDisplayNode(template.Node):
-    TRUE_FALSE = {u'True': True, u'False': False}
     ERROR_MSG = (u"Invalid relation object--please note steps that "
                  u"led to this error and file a bug report.")
     YES_NO = ((1, u'Unknown'), (2, u'Yes'), (3, u'No'),)
@@ -125,8 +124,8 @@ class AutoDisplayNode(template.Node):
         DynamicColumn.TEXT_BLOCK: (u'<textarea class="large-text-field" '
                                    u'id="{}" name="{}" cols="40" rows="10"'
                                    u'>{}</textarea>\n'),
-        DynamicColumn.DATE: (u'<input id="{}" type="date" '
-                             u'name="{}" size="20" type="text" value="{}" />'),
+        DynamicColumn.DATE: (u'<input id="{}" type="date" name="{}" '
+                             u'value="{}" />'),
         DynamicColumn.BOOLEAN: u'<select id="{}" name="{}">\n',
         DynamicColumn.FLOAT: (u'<input id="{}" name="{}" type="text" '
                               u'value="{}" />'),
@@ -134,12 +133,12 @@ class AutoDisplayNode(template.Node):
         }
 
     def __init__(self, tag_name, relation, prefix=u'', options=None,
-                 display=False):
+                 display='False'):
         self.tag_name = tag_name
         self.relation = template.Variable(relation)
         self.prefix = prefix
         self.fk_options = options and template.Variable(options) or None
-        self.display = display
+        self.display = eval(display)
 
     def render(self, context):
         try:
@@ -147,14 +146,13 @@ class AutoDisplayNode(template.Node):
         except template.VariableDoesNotExist:
             relation = {}
 
-        display = self.TRUE_FALSE.get(self.display, False)
-        log.debug("relation: %s, display: %s", relation, display)
+        log.debug("relation: %s, display: %s", relation, self.display)
 
         if relation:
             value_type = relation.get(u'value_type')
 
-            if display:
-                elem = u'<span id="{}" name="{}">{}</span>'
+            if self.display:
+                elem = u'<span id="{}">{}</span>'
             else:
                 elem = self.ELEMENT_TYPES.get(value_type, u'')
 
@@ -170,15 +168,17 @@ class AutoDisplayNode(template.Node):
 
                 options = self._find_options(relation, fk_options)
 
-                if display:
+                if self.display:
                     elem = self._find_value(elem, attr, options, relation)
                 else:
                     elem = self._add_options(elem, attr, options, relation)
             elif value_type == DynamicColumn.BOOLEAN:
-                if display:
+                if self.display:
                     elem = self._find_value(elem, attr, self.YES_NO, relation)
                 else:
                     elem = self._add_options(elem, attr, self.YES_NO, relation)
+            elif self.display:
+                elem = elem.format("id-" + attr, relation.get(u'value', u''))
             else:
                 elem = elem.format("id-" + attr, attr,
                                    relation.get(u'value', u''))
@@ -225,6 +225,9 @@ class AutoDisplayNode(template.Node):
         return elem
 
     def _find_value(self, elem, attr, options, relation):
+        """
+        Find value in display mode only.
+        """
         value = relation.get(u'value', u'')
         default = u''
 
