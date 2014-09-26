@@ -82,11 +82,12 @@
 {% if object %}
         <button type="submit"
                 class="pubisher-submit"
-                uri="{% url 'publisher-update' object.pk %}">Update</button>
+                formaction="{% url 'publisher-update' object.pk %}">
+          Update</button>
 {% else %}
         <button type="submit"
                 class="publisher-submit"
-                uri="{% url 'publisher-create' %}">Save</button>
+                formaction="{% url 'publisher-create' %}">Save</button>
 {% endif %}
       </div> <!-- div#submit -->
     </form>
