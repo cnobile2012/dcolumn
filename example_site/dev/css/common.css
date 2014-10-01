@@ -19,10 +19,10 @@ h2 {
   width: 78%;
   margin: 10px auto 5px auto;
   border: 1px solid #999;
-  -moz-border-radius: 10px 10px 10px 10px;
-  -webkit-border-radius: 10px 10px 10px 10px;
-  -khtml-border-radius: 10px 10px 10px 10px;
-  border-radius: 10px 10px 10px 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -khtml-border-radius: 10px;
+  border-radius: 10px;
   background-color: #eeefd0;
 }
 
@@ -42,10 +42,10 @@ h2 {
   width: 130px;
   height: 20px;
   border: 1px solid rgb(146, 113, 28);
-  -moz-border-radius: 10px 10px 10px 10px;
-  -webkit-border-radius: 10px 10px 10px 10px;
-  -khtml-border-radius: 10px 10px 10px 10px;
-  border-radius: 10px 10px 10px 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -khtml-border-radius: 10px;
+  border-radius: 10px;
 }
 
 .dashboard ul li a {
@@ -69,10 +69,10 @@ h2 {
   padding: .25em .75em;
   font-size: 100%;
   border: 1px solid #999;
-  -moz-border-radius: 10px 10px 10px 10px;
-  -webkit-border-radius: 10px 10px 10px 10px;
-  -khtml-border-radius: 10px 10px 10px 10px;
-  border-radius: 10px 10px 10px 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -khtml-border-radius: 10px;
+  border-radius: 10px;
   background-color: #eeefd0;
 }
 
@@ -106,10 +106,10 @@ h2 {
   margin: 0 auto;
   width: 96%;
   background-color: white;
-  -moz-border-radius: 10px 10px 10px 10px;
-  -webkit-border-radius: 10px 10px 10px 10px;
-  -khtml-border-radius: 10px 10px 10px 10px;
-  border-radius: 10px 10px 10px 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -khtml-border-radius: 10px;
+  border-radius: 10px;
   background-color: #eeefd0;
 }
 
@@ -197,7 +197,11 @@ ul.errorlist li {
 
 button {
   background-color: #eeefd0;
-  font-size: 80%;
+  border-color: rgb(192, 174, 129);
   border-radius: 10px;
   -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -khtml-border-radius: 10px;
+  color: rgb(146, 113, 28);
+  font-weight: bold;
 }
