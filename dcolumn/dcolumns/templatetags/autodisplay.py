@@ -248,16 +248,16 @@ class AutoDisplayNode(template.Node):
 @register.tag(name='single_display')
 def single_display(parser, token):
     """
-    Returns a context variable containing a single value who's data type is
+    Returns a context variable containing a single value where the data type is
     based on the type of object. You will need to warp the result in an html
-    tage of your choice.
+    tag of your choice.
 
     Arguments::
 
-      obj  -- The model object.
+      obj  -- A CollectionBase derived model object.
       slug -- The slug for the DynamicColumn type.
       as   -- Manditory delimiter.
-      name -- Name for context variable.
+      name -- Name for context variable similar to the slug name.
 
     Usage Examples::
 
@@ -358,8 +358,8 @@ def combine_contexts(parser, token):
 
     Arguments::
 
-      obj      -- The primary object in the context.
-      variable -- The object that needs to identify specificity.
+      obj      -- An object in the contect that has member objects.
+      variable -- A variable that defines a member object name.
 
     Usage Examples::
 
