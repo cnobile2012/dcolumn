@@ -224,10 +224,10 @@ The `single_display` tag displays a single slug based on a `CollectionBase` deri
  3. as `str`
    * A delimiter keyword used to define the next argument.
  4. name `str`
-   * The variable name created in the context that will hold the value of the slug. ex. if the slug is `first-name` the context variable could be `first_name`.
+   * The variable name created in the context that will hold the value of the slug. ex. If the slug is `first-name` the context variable could be `first_name`.
 
 #### combine_contexts
-The `combine_contexts` tag combines two different context variables. This would often be used to get the template error from a form for a specific slug. ex. The combination of `form.error` and `relation.slug` would give you the error for the form `input` element.
+The `combine_contexts` tag combines two different context variables. This would often be used to get the template error from a form for a specific slug. ex. The combination of `form.error` and `relation.slug` would give you the error for a form `input` element.
 
  1. obj `instance object`
    * Any instance object that has member objects.
