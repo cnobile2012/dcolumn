@@ -221,7 +221,7 @@ The `single_display` tag displays a single slug based on a `CollectionBase` deri
    * A model instance that is derived from `CollectionBase`.
  2. slug `str`
    * The `slug` from a DynamicColumn record.
- 3 as `str`
+ 3. as `str`
    * A delimiter keyword used to define the next argument.
  4. name `str`
    * The variable name created in the context that will hold the value of the slug. ex. if the slug is `first-name` the context variable could be `first_name`.
