@@ -9,7 +9,7 @@ from StringIO import StringIO
 from django import template
 from django.utils.safestring import mark_safe
 
-from dcolumn.dcolumns.models import DynamicColumn
+from dcolumn.dcolumns.models import DynamicColumn, KeyValue
 from dcolumn.dcolumns.manager import dcolumn_manager
 
 log = logging.getLogger(u'dcolumn.templates')
@@ -341,7 +341,7 @@ class SingleDisplayNode(template.Node):
             dc = key_value.dynamic_column
             value_type = dc.value_type
             value = self.METHOD_MAP[value_type](self, dc, key_value.value)
-        except obj.DoesNotExist:
+        except KeyValue.DoesNotExist:
             log.warn("KeyValue pair does not exist for slug %s", self.slug)
 
         context[self.name] = value
