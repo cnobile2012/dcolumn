@@ -58,8 +58,9 @@ class DynamicColumnAdmin(UserAdminMixin):
                            'store_relation',)}),
         (_('Screen Location'), {'fields': ('location', 'order', 'required',)}),
         (_('Status'), {'classes': ('collapse',),
-                       'fields': ('slug', 'active', 'creator', 'created',
-                                  'updater', 'updated',)}),
+                       'fields': ('preferred_slug', 'slug', 'active',
+                                  'creator', 'created', 'updater',
+                                  'updated',)}),
         )
     readonly_fields = ('creator', 'slug', 'updater', 'created', 'updated',)
     list_display = ('name', '_collection_producer', 'value_type',

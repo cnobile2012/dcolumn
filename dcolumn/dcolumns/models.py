@@ -61,7 +61,16 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
     name = models.CharField(
         verbose_name=_("Name"), max_length=50,
         help_text=_("Enter a column name."))
-    slug = models.SlugField(verbose_name=_("Slug"), editable=False)
+    preferred_slug = models.SlugField(
+        verbose_name=_("Preferred Slug"), null=True, blank=True,
+        help_text=_(u"If you don't want the slug to change when the name "
+                    u"changes enter a slug here. However, if you change this "
+                    u"field the slug will track it."))
+    slug = models.SlugField(
+        verbose_name=_("Slug"), editable=False,
+        help_text=_(u"This field is normally created from the name field, "
+                    u"however, if you want to prevent it from changing when "
+                    u"the name changes enter a preferred slug above."))
     value_type = models.IntegerField(
         verbose_name=_("Value Type"), choices=VALUE_TYPES,
         help_text=_("Choose the value type."))
@@ -91,7 +100,11 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
         verbose_name_plural = _("Dynamic Columns")
 
     def save(self):
-        self.slug = slugify(self.name)
+        if self.preferred_slug:
+            self.slug = self.preferred_slug
+        else:
+            self.slug = slugify(self.name)
+
         super(DynamicColumn, self).save()
 
     def __unicode__(self):
@@ -142,15 +155,21 @@ class ColumnCollectionManager(StatusModelManagerMixin):
 
         return queryset
 
-    def serialize_columns(self, name, obj=None):
+    def serialize_columns(self, name, obj=None, by_slug=False):
         records = self.get_column_collection(name)
         result = OrderedDict()
 
         if obj:
             key_value_map = obj.serialize_key_value_pairs()
 
+        if by_slug:
+            key = u'slug'
+        else:
+            key = u'pk'
+
         for record in records:
-            rec = result.setdefault(record.pk, {})
+            rec = result.setdefault(getattr(record, key), {})
+            rec[u'pk'] = record.pk
             rec[u'name'] = record.name
             rec[u'slug'] = record.slug
             rec[u'value_type'] = record.value_type
@@ -240,6 +259,17 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return result
 
+    def get_key_value_pair(self, slug):
+        dc = None
+
+        try:
+            dc = self.column_collection.dynamic_column.get(slug=slug)
+        except self.DoesNotExist as e:
+            log.error("DynamicColumn with slug '%s' does not exist.", slug)
+            # Cannot get a dynamic column if not in the collection already.
+
+        return dc
+
     def set_key_value_pair(self, slug, value, field=None):
         """
         This method sets an arbitrary key/value pair, it will log an error
@@ -249,32 +279,27 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         associated with the slug will be incremented or decremented.
         """
         if value:
-            try:
-                dc = self.column_collection.dynamic_column.get(slug=slug)
-            except self.DoesNotExist as e:
-                log.error("DynamicColumn with slug '%s' does not exist.", slug)
-                # Cannot create a dynamic column if not in the collection
-                # already.
-                return
+            dc = self.get_key_value_pair(slug)
 
-            if dc.store_relation and field:
-                value = getattr(value, field)
-            elif hasattr(value, u'pk'):
-                value = value.pk
-            elif isinstance(value, (datetime.datetime, datetime.date)):
-                value = value.strftime(u"%Y-%m-%d")
+            if dc:
+                if dc.store_relation and field:
+                    value = getattr(value, field)
+                elif hasattr(value, u'pk'):
+                    value = value.pk
+                elif isinstance(value, (datetime.datetime, datetime.date)):
+                    value = value.strftime(u"%Y-%m-%d")
 
-            kv, created = self.keyvalue_pairs.get_or_create(
-                dynamic_column=dc, defaults={u'value': value})
+                kv, created = self.keyvalue_pairs.get_or_create(
+                    dynamic_column=dc, defaults={u'value': value})
 
-            if not created:
-                if u'increment' == value and kv.value.isdigit():
-                    value = int(kv.value) + 1
-                elif u'decrement' == value and kv.value.isdigit():
-                    value = int(kv.value) - 1
+                if not created:
+                    if u'increment' == value and kv.value.isdigit():
+                        value = int(kv.value) + 1
+                    elif u'decrement' == value and kv.value.isdigit():
+                        value = int(kv.value) - 1
 
-                kv.value = value
-                kv.save()
+                    kv.value = value
+                    kv.save()
 
 
 #

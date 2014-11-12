@@ -340,7 +340,12 @@ class SingleDisplayNode(template.Node):
             key_value = obj.keyvalue_pairs.get(dynamic_column__slug=self.slug)
             dc = key_value.dynamic_column
             value_type = dc.value_type
-            value = self.METHOD_MAP[value_type](self, dc, key_value.value)
+
+            if key_value.value:
+                if dc.store_relation and not key_value.value.isdigit():
+                    value_type = DynamicColumn.TEXT
+
+                value = self.METHOD_MAP[value_type](self, dc, key_value.value)
         except KeyValue.DoesNotExist:
             log.warn("KeyValue pair does not exist for slug %s", self.slug)
 

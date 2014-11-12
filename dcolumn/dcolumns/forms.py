@@ -96,7 +96,7 @@ class CollectionFormMixin(forms.ModelForm):
         self.coll_name = dcolumn_manager.get_collection_name(
             self.Meta.model.__name__)
         self.relations = ColumnCollection.objects.serialize_columns(
-            self.coll_name)
+            self.coll_name, by_slug=True)
         self.fields[u'column_collection'].required = False
 
         if u'created' in self.fields:
@@ -112,10 +112,10 @@ class CollectionFormMixin(forms.ModelForm):
         if self.instance and self.instance.pk is not None:
             for pk, value in self.instance.serialize_key_value_pairs().items():
                 relation = self.relations.setdefault(pk, {})
-                # We do not want to overwrite changed data with the old data
-                # so we skip over the below equate.
-                if u'value' in relation: continue
-                relation[u'value'] = value
+                # We only want to add new data not overwrite data that is
+                # already there.
+                if u'value' not in relation:
+                    relation[u'value'] = value
 
         return self.relations
 
