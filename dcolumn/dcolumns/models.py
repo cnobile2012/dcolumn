@@ -259,30 +259,47 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return result
 
-    def get_key_value_pair(self, slug):
-        dc = None
-
+    def get_dynamic_column(self, slug):
         try:
             dc = self.column_collection.dynamic_column.get(slug=slug)
         except self.DoesNotExist as e:
             log.error("DynamicColumn with slug '%s' does not exist.", slug)
             # Cannot get a dynamic column if not in the collection already.
+            dc = None
 
         return dc
+
+    def get_key_value_pair(self, slug):
+        try:
+            dc = self.column_collection.dynamic_column.get(slug=slug)
+            obj = self.keyvalue_pairs.get(dynamic_column=dc)
+            value = obj.value
+        except (self.DoesNotExist, DynamicColumn.DoesNotExist) as e:
+            log.error("Could not find value for slug '%s'.", slug)
+            value = u''
+
+        return value
 
     def set_key_value_pair(self, slug, value, field=None):
         """
         This method sets an arbitrary key/value pair, it will log an error
         if the key/value pair could not be found.
 
-        If value hold the value 'increment' or 'decrement' the value
+        If value contains the value 'increment' or 'decrement' the value
         associated with the slug will be incremented or decremented.
+
+        Arguments:
+          slug  -- The slug associated with the key value pair.
+          value -- The value can be textor an object to get the value from.
+          field -- The field used to get the value on the object.
         """
         if value:
-            dc = self.get_key_value_pair(slug)
+            dc = self.get_dynamic_column(slug)
 
             if dc:
                 if dc.store_relation and field:
+                    value = getattr(value, field)
+                elif hasattr(value, field):
                     value = getattr(value, field)
                 elif hasattr(value, u'pk'):
                     value = value.pk
