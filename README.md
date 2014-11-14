@@ -86,7 +86,8 @@ Once you have registered the choices/models with `dcolumn_manager.register_choic
 
 You will see that this is all rather simple and you'll need to write very little code to support DynamicColumns.
 
-It is also not advisable to hardcode any of the slugs created when a dynamic column is created as these slugs can change if the display name changes in the record. The reason for this is, let's say you set display name to `Last Name` giving you the `last-name` slug, but latter you decide to change it to `Surname`. The slug would still be `last-name` which may no longer be intuitive as you write additional code. I found that in general the place where you may need to hardcode the slug would be in migration code. Just remember it needs to change if you change the `DynamicColumn` display name.
+If you need to hardcode any of the slugs elsewhere in your code then you definitly need to set the 'Preferred Slug' field to your desired slug. If you do not do this the slug will track any changes made to the 'Name' fields breaking your code. The only caveat is that the slug will now track the 'Preferred Slug' field, so don't change it after your code is using the slug value. I've put this out of the way in the admin 'Status' section of the 'Dynamic Columns' entries.
+
 
 API Details
 -----------
