@@ -229,16 +229,15 @@ class AutoDisplayNode(template.Node):
         Find value in display mode only.
         """
         value = relation.get(u'value', u'')
-        default = u''
 
         # Get the value is the ID then get the value.
         if relation.get(u'store_relation', False):
             log.debug("value: %s", value)
-            default = value
+        else:
+            key = value.isdigit() and int(value) or value
+            value = dict(options).get(key, u'')
 
-        key = value.isdigit() and int(value) or value
-        value = dict(options).get(key, default)
-        elem = elem.format("id-" + attr, attr, value)
+        elem = elem.format("id-" + attr, value)
         return elem
 
 

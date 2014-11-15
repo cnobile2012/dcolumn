@@ -96,7 +96,7 @@ class CollectionFormMixin(forms.ModelForm):
         self.coll_name = dcolumn_manager.get_collection_name(
             self.Meta.model.__name__)
         self.relations = ColumnCollection.objects.serialize_columns(
-            self.coll_name, by_slug=True)
+            self.coll_name)
         self.fields[u'column_collection'].required = False
 
         if u'created' in self.fields:
@@ -111,6 +111,7 @@ class CollectionFormMixin(forms.ModelForm):
     def get_display_data(self):
         if self.instance and self.instance.pk is not None:
             for pk, value in self.instance.serialize_key_value_pairs().items():
+                log.debug("pk: %s, value: %s", pk, value)
                 relation = self.relations.setdefault(pk, {})
                 # We only want to add new data not overwrite data that is
                 # already there.
@@ -176,9 +177,18 @@ class CollectionFormMixin(forms.ModelForm):
     def validate_date_types(self, relation, key, value):
         if relation.get(u'value_type') == DynamicColumn.DATE:
             if value:
+                year = month = day = 0
                 day_month, delim, year = value.partition(', ')
-                day, delim, month = day_month.partition(' ')
-                month = self._MONTHS.get(month.lower(), 0)
+
+                if delim:
+                    day, delim, month = day_month.partition(' ')
+                    month = self._MONTHS.get(month.lower(), 0)
+                else:
+                    tmp = value.split(u'-')
+
+                    if len(tmp) == 3:
+                        year, month, day = tmp
+
                 log.debug("year: %s, month: %s, day: %s", year, month, day)
 
                 if not year.isdigit() or not month or not day.isdigit():
@@ -186,8 +196,8 @@ class CollectionFormMixin(forms.ModelForm):
                         [u"Invalid year, month, or day, found: {}".format(
                             value)])
                 else:
-                    value = datetime.date(int(year), month, int(day)).strftime(
-                        u'%Y-%m-%d')
+                    value = datetime.date(int(year), int(month),
+                                          int(day)).strftime(u'%Y-%m-%d')
 
         return value
 
@@ -212,6 +222,12 @@ class CollectionFormMixin(forms.ModelForm):
 
     def validate_value_length(self, relation, key, value):
         value_type = relation.get(u'value_type')
+
+        # If store_relation is True then the storage type is DynamicColumn.TEXT.
+        if relation.get(u'store_relation', False):
+            value_type = DynamicColumn.TEXT
+
+        log.debug("key: %s, value: %s", key, value)
 
         if len(value) > self.MAX_LENGTH_MAP.get(value_type):
                 self._errors[key] = self.error_class(

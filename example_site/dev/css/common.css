@@ -180,6 +180,7 @@ ul.errorlist li {
 .dynamic-container span {
   float: left;
   min-height: 18px;
+  max-width: 75%;
   margin-top: 3px;
   margin-left: 5px;
   font-size: 80%
