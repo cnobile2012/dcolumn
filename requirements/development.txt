@@ -3,3 +3,6 @@
 
 # Debug toolbar
 django_debug_toolbar
+
+# SlimIt - JavaScript minifier
+slimit
