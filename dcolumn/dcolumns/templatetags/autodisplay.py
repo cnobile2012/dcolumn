@@ -116,6 +116,8 @@ class AutoDisplayNode(template.Node):
     ERROR_MSG = (u"Invalid relation object--please note steps that "
                  u"led to this error and file a bug report.")
     YES_NO = ((1, u'Unknown'), (2, u'Yes'), (3, u'No'),)
+    DISPLAY_TAG = u'<span id="{}">{}</span>'
+    STORE_WRAPPER = u'<div class="storage-wrapper">{}{}</div>'
     ELEMENT_TYPES = {
         DynamicColumn.NUMBER: (u'<input id="{}" name="{}" type="number" '
                                u'value="{}" />'),
@@ -152,7 +154,7 @@ class AutoDisplayNode(template.Node):
             value_type = relation.get(u'value_type')
 
             if self.display:
-                elem = u'<span id="{}">{}</span>'
+                elem = self.DISPLAY_TAG
             else:
                 elem = self.ELEMENT_TYPES.get(value_type, u'')
 
@@ -172,15 +174,21 @@ class AutoDisplayNode(template.Node):
                     elem = self._find_value(elem, attr, options, relation)
                 else:
                     elem = self._add_options(elem, attr, options, relation)
+
+                    if (relation.get(u'store_relation', False) and
+                        u'selected' not in elem):
+                        tmp_elem = self._find_value(
+                            self.DISPLAY_TAG, u'store-' + attr, {}, relation)
+                        elem = self.STORE_WRAPPER.format(elem, tmp_elem)
             elif value_type == DynamicColumn.BOOLEAN:
                 if self.display:
                     elem = self._find_value(elem, attr, self.YES_NO, relation)
                 else:
                     elem = self._add_options(elem, attr, self.YES_NO, relation)
             elif self.display:
-                elem = elem.format("id-" + attr, relation.get(u'value', u''))
+                elem = elem.format(u"id-" + attr, relation.get(u'value', u''))
             else:
-                elem = elem.format("id-" + attr, attr,
+                elem = elem.format(u"id-" + attr, attr,
                                    relation.get(u'value', u''))
         else:
             elem = u"<span>{}</span>".format(self.ERROR_MSG)
@@ -188,6 +196,12 @@ class AutoDisplayNode(template.Node):
         return mark_safe(elem)
 
     def _find_options(self, relation, fk_options):
+        """
+        Find the options for this relation.
+
+        The fk_option argument can either be the options we need in a list or
+        tuple or a dict of all options for all choice type objects.
+        """
         if isinstance(fk_options, (list, tuple,)):
             options = fk_options
         else:
@@ -203,20 +217,30 @@ class AutoDisplayNode(template.Node):
         return options
 
     def _add_options(self, elem, attr, options, relation):
+        """
+        Find the value in the option if it exists and set the selected
+        property on the appropriate option. In the case of a stored relation
+        find the selected option by the actual value as the PK is not
+        available in this case.
+        """
         elem = elem.format("id-" + attr, attr)
         buff = StringIO(elem)
         buff.seek(0, os.SEEK_END)
         value = relation.get(u'value', u'')
 
-        # Get the ID if the value is the actual value.
+        # Get the ID if the value is stored and not a pk.
         if relation.get(u'store_relation', False):
             value = [k for k, v in options if v == value]
             value = len(value) >= 1 and value[0] or 0
 
-        value = str(value).isdigit() and int(value) or value
+        value = unicode(value).isdigit() and int(value) or value
 
         for k, v in options:
-            s = k == value and u" selected" or u""
+            s = u""
+
+            if k == value and unicode(value).isdigit() and int(value) != 0:
+                s = u" selected"
+
             buff.write(u'<option value="{}"{}>{}</option>\n'.format(k, s, v))
 
         buff.write(u'</select>\n')
@@ -226,13 +250,17 @@ class AutoDisplayNode(template.Node):
 
     def _find_value(self, elem, attr, options, relation):
         """
-        Find value in display mode only.
+        Produce the element filled with the value. This method is used only
+        for display mode.
         """
+        log.debug("elem: %s, attr: %s, options: %s, relation: %s",
+                  elem, attr, options, relation)
         value = relation.get(u'value', u'')
 
         # Get the value is the ID then get the value.
         if relation.get(u'store_relation', False):
-            log.debug("value: %s", value)
+            if value == u'0':
+                value = u''
         else:
             key = value.isdigit() and int(value) or value
             value = dict(options).get(key, u'')

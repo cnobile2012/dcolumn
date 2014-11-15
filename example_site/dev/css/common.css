@@ -186,6 +186,23 @@ ul.errorlist li {
   font-size: 80%
 }
 
+.dynamic-container .storage-wrapper {
+  width: 75%;
+  margin: 0 0 5px 200px;
+  min-height: 18px;
+}
+
+.storage-wrapper select {
+  float: left;
+}
+
+.storage-wrapper span {
+  clear: left;
+  height: 20px;
+  margin-bottom: 5px;
+  color: rgb(107, 100, 83);
+}
+
 .large-text-field {
   width: 610px
 }
