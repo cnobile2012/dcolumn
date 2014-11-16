@@ -5,10 +5,10 @@ Have you ever wanted to add new fields to a model, but you didn't have time to
 make the code and model changes required? Well this may be a solution to that
 often occurring scenario.
 
-It is highly recomended that after doing a pip install to clone the git
+It is highly recommended that after doing a pip install to clone the git
 repository as many examples exist there that will not be in a pip install.
 Examples of CSS used with the template tags mentioned below and a demo
-PostgreSQL database containing test data is also available. The repsitory can
+PostgreSQL database containing test data is also available. The repository can
 be found at: https://github.com/cnobile2012/dcolumn
 
 Basic Installation
@@ -98,7 +98,7 @@ You will see that this is all rather simple and you'll need to write very
 little code to support DynamicColumns.
 
 If you need to hardcode any of the slugs elsewhere in your code then you
-definitly need to set the 'Preferred Slug' field to your desired slug. If you
+definitely need to set the 'Preferred Slug' field to your desired slug. If you
 do not do this the slug will track any changes made to the 'Name' fields
 breaking your code. The only caveat is that the slug will now track the
 'Preferred Slug' field, so don't change it after your code is using the slug
@@ -177,7 +177,7 @@ There are no user methods on the `KeyValue` model at this time.
 
 ### DynamicColumnManager
 This is not the model manager mentioned above. The `DynamicColumnManager` holds
-all the relevent states of the system and should be the first place you come
+all the relevant states of the system and should be the first place you come
 when you need to know something about the system.
 
  1. register_choice `method`
@@ -196,7 +196,7 @@ when you need to know something about the system.
  4. choice_map `property`
    * Takes no arguments
    * Returns a dictionary where the key is the choice model name and the value
-     is a tuple of the choice model object and the relevent field name.
+     is a tuple of the choice model object and the relevant field name.
  5. register_css_containers `method`
    * `container_list` positional argument and is a list of the CSS classes or
      ids that will determine the location on the page of the various dynamic
