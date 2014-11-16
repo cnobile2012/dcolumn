@@ -1,9 +1,15 @@
 Django Tool to Create Dynamic Fields
 ====================================
 
-This app would be used when designing your models. Any fields that need to be
-indexed or are part of a primary key would be created normally in your model.
-You can find example code at: https://github.com/cnobile2012/dcolumn
+Have you ever wanted to add new fields to a model, but you didn't have time to
+make the code and model changes required? Well this may be a solution to that
+often occurring scenario.
+
+It is highly recomended that after doing a pip install to clone the git
+repository as many examples exist there that will not be in a pip install.
+Examples of CSS used with the template tags mentioned below and a demo
+PostgreSQL database containing test data is also available. The repsitory can
+be found at: https://github.com/cnobile2012/dcolumn
 
 Basic Installation
 ------------------
@@ -82,11 +88,22 @@ Functional Details
 
 Do Not's
 --------
-Once you have registered the choices/models with `dcolumn_manager.register_choice()` do not change it, as the numeric value is stored in the `DynamicColumn` table. So obviously if you really really really need to change it you can, but you must manually modify the `Relation` in all the affected rows in the `DynamicColumn` table.
+Once you have registered the choices/models with
+`dcolumn_manager.register_choice()` do not change it, as the numeric value is
+stored in the `DynamicColumn` table. So obviously if you really really really
+need to change it you can, but you must manually modify the `Relation` in all
+the affected rows in the `DynamicColumn` table.
 
-You will see that this is all rather simple and you'll need to write very little code to support DynamicColumns.
+You will see that this is all rather simple and you'll need to write very
+little code to support DynamicColumns.
 
-If you need to hardcode any of the slugs elsewhere in your code then you definitly need to set the 'Preferred Slug' field to your desired slug. If you do not do this the slug will track any changes made to the 'Name' fields breaking your code. The only caveat is that the slug will now track the 'Preferred Slug' field, so don't change it after your code is using the slug value. I've put this out of the way in the admin 'Status' section of the 'Dynamic Columns' entries.
+If you need to hardcode any of the slugs elsewhere in your code then you
+definitly need to set the 'Preferred Slug' field to your desired slug. If you
+do not do this the slug will track any changes made to the 'Name' fields
+breaking your code. The only caveat is that the slug will now track the
+'Preferred Slug' field, so don't change it after your code is using the slug
+value. I've put this out of the way in the admin 'Status' section of the
+'Dynamic Columns' entries.
 
 
 API Details
@@ -159,7 +176,9 @@ There are no user methods on the `KeyValueManager` model manager at this time.
 There are no user methods on the `KeyValue` model at this time.
 
 ### DynamicColumnManager
-This is not the model manager mentioned above. The `DynamicColumnManager` holds all the relevent states of the system and should be the first place you come when you need to know something about the system.
+This is not the model manager mentioned above. The `DynamicColumnManager` holds
+all the relevent states of the system and should be the first place you come
+when you need to know something about the system.
 
  1. register_choice `method`
    * `choice` positional argument and is a CHOICE type object either a Django
@@ -201,22 +220,33 @@ This is not the model manager mentioned above. The `DynamicColumnManager` holds 
    * Returns the field used in the HTML select option text value.
 
 ### Template Tags
-There are only three template tags that can be used. These tags will help with displaying the proper type of fields in your templates.
+There are only three template tags that can be used. These tags will help with
+displaying the proper type of fields in your templates.
 
 #### auto_display
-The `auto_display` tag displays the dynamic columns in your template as either form elements or `span` elements. This tag takes one positional argument and three keyword arguments. Please look at the example code for usage.
+The `auto_display` tag displays the dynamic columns in your template as either
+form elements or `span` elements. This tag takes one positional argument and
+three keyword arguments. Please look at the example code for usage.
 
  1. relation `dict`
-   * A dictionary representing the meta data for a specific field. This data is a single value dict that can be found in the context as `relations`.
+   * A dictionary representing the meta data for a specific field. This data
+     is a single value dict that can be found in the context as `relations`.
  2. prefix `str`
-   * Defaults to an empty string, but can be used to put a common prefix on all tag id and name attributes. Not often used.
+   * Defaults to an empty string, but can be used to put a common prefix on all
+     tag id and name attributes. Not often used.
  3. option `(list, tuple) or dict`
-   * Used only for choice type fields, but can be passed into the template tag for all types--if needed it will be used. The entire `dynamicColumns` from the context can be passed in (dict) or just the specific field's data `list or tuple`.
+   * Used only for choice type fields, but can be passed into the template tag
+     for all types--if needed it will be used. The entire `dynamicColumns` from
+     the context can be passed in (dict) or just the specific field's data
+     `list or tuple`.
  4. display `bool`
-   * This keyword argument is either `True` or `False`. `False` is the default and generates `input` or `select` tags for form data. If `True` `span` tags are generated for detail pages where no forms would generally be used.
+   * This keyword argument is either `True` or `False`. `False` is the default
+     and generates `input` or `select` tags for form data. If `True` `span`
+     tags are generated for detail pages where no forms would generally be used.
 
 #### single_display
-The `single_display` tag displays a single slug based on a `CollectionBase` derived model. This tag would often be used in list templates.
+The `single_display` tag displays a single slug based on a `CollectionBase`
+derived model. This tag would often be used in list templates.
 
  1. obj `model instance`
    * A model instance that is derived from `CollectionBase`.
@@ -225,10 +255,15 @@ The `single_display` tag displays a single slug based on a `CollectionBase` deri
  3. as `str`
    * A delimiter keyword used to define the next argument.
  4. name `str`
-   * The variable name created in the context that will hold the value of the slug. ex. If the slug is `first-name` the context variable could be `first_name`.
+   * The variable name created in the context that will hold the value of the
+     slug. ex. If the slug is `first-name` the context variable could be
+     `first_name`.
 
 #### combine_contexts
-The `combine_contexts` tag combines two different context variables. This would often be used to get the template error from a form for a specific slug. ex. The combination of `form.error` and `relation.slug` would give you the error for a form `input` element.
+The `combine_contexts` tag combines two different context variables. This would
+often be used to get the template error from a form for a specific slug. ex.
+The combination of `form.error` and `relation.slug` would give you the error
+for a form `input` element.
 
  1. obj `instance object`
    * Any instance object that has member objects.

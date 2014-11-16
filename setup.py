@@ -11,7 +11,7 @@ setup(
     version='0.1',
     packages=['dcolumn', 'dcolumn.dcolumns', 'dcolumn.common',],
     include_package_data=True,
-    license='MIT License',
+    license='MIT',
     description=('An app to give any database model the ability to '
                  'dynamilcly add fields.'),
     long_description=README,
@@ -29,5 +29,5 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-    ],
-)
+        ],
+    )
