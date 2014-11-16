@@ -26,7 +26,8 @@ api-docs: clean
 build	: clean
 	python setup.py sdist
 
-
+upload	: build
+	python setup.py upload
 
 #----------------------------------------------------------------------
 
