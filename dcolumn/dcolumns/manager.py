@@ -11,6 +11,9 @@ log = logging.getLogger(u'dcolumn.manager')
 
 
 class DynamicColumnManager(object):
+    """
+    This class manages the dynamic columns.
+    """
     __shared_state = {}
     _relations = [(0, _("---------"))]
     _relation_map = None
@@ -29,16 +32,16 @@ class DynamicColumnManager(object):
         at this time.
 
         :Parameters:
-          choice : `ClassType`
+          choice : ClassType
             This can be either a Django model or choice object. A choice object
             mimics a model class so that this manager can work with them
             as if they were Django models.
 
-          relation_num : `int`
+          relation_num : int
             A numeric identifier for the `choice` used as the HTML select
             option value.
 
-          field : `str`
+          field : str
             A field from the model or choice object used as the HTML select
             option text.
         """
@@ -64,6 +67,19 @@ class DynamicColumnManager(object):
                   self._relations, self._choice_map)
 
     def _test_field(self, choice, field):
+        """
+        Test that the specified field is a member object on the instantiated
+        class object.
+
+        :Parameters:
+          choice : ClassType
+            This can be either a Django model or choice object. A choice object
+            mimics a model class so that this manager can work with them
+            as if they were Django models.
+          field : str
+            A field from the model or choice object used as the HTML select
+            option text.
+        """
         obj = choice()
 
         if not hasattr(obj, field):
@@ -113,7 +129,7 @@ class DynamicColumnManager(object):
         the settings file.
 
         :Parameters:
-          container_list : `list` or `tuple`
+          container_list : list or tuple
             A list of the CSS classes or ids that will determine the location
             on the page of the various dynamic columns.
         """
@@ -168,8 +184,8 @@ class DynamicColumnManager(object):
         Gets the `ColumnCollection` instance name.
 
         :Parameters:
-          model_name : `str`
-            The key name used in the settings.DYNAMIC_COLUMNS.COLLECTIONS.
+          model_name : str
+            The key name used in the `settings.DYNAMIC_COLUMNS.COLLECTIONS`.
 
         :Returns:
           The `ColumnCollection` instance name.
@@ -196,7 +212,7 @@ class DynamicColumnManager(object):
         Gets the field used in the HTML select option text value.
 
         :Parameters:
-          relation `int`
+          relation : int
             The value in the `DynamicColumn` relation field.
 
         :Returns:

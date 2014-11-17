@@ -20,13 +20,13 @@ class InspectChoice(object):
 
     def _caller_info(self, skip=2):
         """
-        Get a name of a caller in the format module.class.method
+        Get a name of a caller in the format module.class.method.
 
-        Arguments::
-          skip `int`
-             Specifies how many levels of stack to skip while getting caller
-             name. skip=1 means 'who calls me', skip=2 'who calls my caller'
-             etc.
+        :Parameters:
+          skip : `int`
+            Specifies how many levels of stack to skip while getting caller
+            name. skip=1 means 'who calls me', skip=2 'who calls my caller'
+            etc.
 
         An empty string is returned if skipped levels exceed stack height
 

@@ -2,6 +2,15 @@
 # dcolumn/dcolumns/models.py
 #
 
+"""
+Dynamic Column depended models
+
+by: Carl J. Nobile
+
+email: carl.nobile@gmail.com
+"""
+__docformat__ = "restructuredtext en"
+
 import logging
 from collections import OrderedDict
 
@@ -137,9 +146,14 @@ class ColumnCollectionManager(StatusModelManagerMixin):
 
     def get_column_collection(self, name, unassigned=False):
         """
-        name       -- Name of the column collection.
-        unassigned -- Also get items that are not assigned to a column
-                      collection yet.
+        Get the query set for the named collection. If unassigned is True add
+        the unassigned dynamic colums to the query set.
+
+        :Parameters:
+            name : `str`
+              Name of the column collection.
+            unassigned : `bool`
+              Also get items that are not assigned to a column collection yet.
         """
         log.debug("Collection name: %s, unassigned: %s", name, unassigned)
         queryset = self.none()

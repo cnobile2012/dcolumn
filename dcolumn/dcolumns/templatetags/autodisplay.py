@@ -2,6 +2,15 @@
 # dcolumn/dcolumns/templatetags/autodisplay.py
 #
 
+"""
+Template tags used for displaying dynamic columns.
+
+by: Carl J. Nobile
+
+email: carl.nobile@gmail.com
+"""
+__docformat__ = "restructuredtext en"
+
 import os, logging
 import datetime
 from StringIO import StringIO
@@ -18,6 +27,8 @@ register = template.Library()
 
 #
 # auto_display
+#
+# NOTE: Formatting of the doc string is to conform with django docs not epydoc.
 #
 @register.tag(name='auto_display')
 def auto_display(parser, token):
@@ -113,6 +124,9 @@ def auto_display(parser, token):
 
 
 class AutoDisplayNode(template.Node):
+    """
+    Node class for the `auto_display` tag.
+    """
     ERROR_MSG = (u"Invalid relation object--please note steps that "
                  u"led to this error and file a bug report.")
     YES_NO = ((1, u'Unknown'), (2, u'Yes'), (3, u'No'),)
@@ -143,6 +157,16 @@ class AutoDisplayNode(template.Node):
         self.display = eval(display)
 
     def render(self, context):
+        """
+        Render the results in an HTML friendly way.
+
+        :Parameters:
+          context
+            The context as profided bt django.
+
+        :Return:
+          The HTML element rendered for a specific dynamic column slug.
+        """
         try:
             relation = self.relation.resolve(context)
         except template.VariableDoesNotExist:
@@ -201,6 +225,16 @@ class AutoDisplayNode(template.Node):
 
         The fk_option argument can either be the options we need in a list or
         tuple or a dict of all options for all choice type objects.
+
+        :Parameters:
+          relation : dict
+            The meta data for a dynamic column.
+          fk_options : list or dict
+            Can be the list of a specific slug's display options or the full
+            `dynamicColumns` dict object.
+
+        :Returns:
+          The list of options.
         """
         if isinstance(fk_options, (list, tuple,)):
             options = fk_options
@@ -218,10 +252,23 @@ class AutoDisplayNode(template.Node):
 
     def _add_options(self, elem, attr, options, relation):
         """
-        Find the value in the option if it exists and set the selected
+        Find the value in the options if it exists and set the selected
         property on the appropriate option. In the case of a stored relation
         find the selected option by the actual value as the PK is not
         available in this case.
+
+        :Parameters:
+          elem : str
+            The HTML element.
+          attr : str
+            Text object to be used when creating the element's attributes.
+          options : list
+            The options used when creating the HTML select element.
+          relation : dict
+            The meta data for a dynamic column.
+
+        :Returns:
+          The populated HTML element.
         """
         elem = elem.format("id-" + attr, attr)
         buff = StringIO(elem)
@@ -251,7 +298,20 @@ class AutoDisplayNode(template.Node):
     def _find_value(self, elem, attr, options, relation):
         """
         Produce the element filled with the value. This method is used only
-        for display mode.
+        for display mode and the element is usually a <span>.
+
+        :Parameters:
+          elem : str
+            The HTML element.
+          attr : str
+            Text object to be used when creating the element's attributes.
+          options : list
+            The options used when creating the HTML select element.
+          relation : dict
+            The meta data for a dynamic column.
+
+        :Returns:
+          The populated HTML element.
         """
         log.debug("elem: %s, attr: %s, options: %s, relation: %s",
                   elem, attr, options, relation)
@@ -271,6 +331,8 @@ class AutoDisplayNode(template.Node):
 
 #
 # single_display
+#
+# NOTE: Formatting of the doc string is to conform with django docs not epydoc.
 #
 @register.tag(name='single_display')
 def single_display(parser, token):
@@ -308,6 +370,9 @@ def single_display(parser, token):
 
 
 class SingleDisplayNode(template.Node):
+    """
+    Node class for the `single_display` tag.
+    """
 
     def __init__(self, tag_name, obj, slug, name):
         self.tag_name = tag_name
@@ -383,6 +448,8 @@ class SingleDisplayNode(template.Node):
 #
 # combine_contexts
 #
+# NOTE: Formatting of the doc string is to conform with django docs not epydoc.
+#
 @register.tag(name='combine_contexts')
 def combine_contexts(parser, token):
     """
@@ -408,6 +475,9 @@ def combine_contexts(parser, token):
 
 
 class CombineContextsNode(template.Node):
+    """
+    Node class for the `combine_contexts` tag.
+    """
 
     def __init__(self, tag_name, obj, variable):
         self.tag_name = tag_name

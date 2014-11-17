@@ -80,7 +80,7 @@ class TimeModelMixin(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        Permit the disabling of the created and updated.
+        Permit the disabling of the created and updated date times.
         """
         if not kwargs.pop(u'disable_created', False) and self.created is None:
             self.created = datetime.now(tzutc())
