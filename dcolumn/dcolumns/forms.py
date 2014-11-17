@@ -260,9 +260,6 @@ class CollectionFormMixin(forms.ModelForm):
             log.debug("pk: %s, slug: %s, value: %s",
                       pk, relation.get(u'slug'), relation.get(u'value'))
 
-            if not required and not value:
-                continue
-
             try:
                 obj, created = self.instance.keyvalue_pairs.get_or_create(
                     collection=self.instance, dynamic_column_id=int(pk),
