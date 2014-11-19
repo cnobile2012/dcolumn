@@ -7,6 +7,8 @@ import inspect
 
 from django.utils.translation import ugettext_lazy as _
 
+from dcolumn.common import ChoiceManagerImplementation
+
 log = logging.getLogger('dcolumn.choices')
 
 
@@ -84,7 +86,7 @@ class InspectChoice(object):
 #
 # BaseChoiceManager
 #
-class BaseChoiceManager(InspectChoice):
+class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
     VALUES = None
     FIELD_LIST = None
 
@@ -121,7 +123,7 @@ class BaseChoiceManager(InspectChoice):
 
         return self.containers
 
-    def get_value_by_pk(self, pk):
+    def get_value_by_pk(self, pk, field=None):
         self.dynamic_column()
         value = u''
         pk = int(pk)
@@ -129,8 +131,22 @@ class BaseChoiceManager(InspectChoice):
         if pk != 0:
             try:
                 obj = self.container_map.get(pk)
-                value = obj.name
+                value = getattr(obj, field)
             except AttributeError as e:
                 log.error("Access to PK %s failed, %s", pk, e)
 
         return value
+
+    def get_choices(self, field, comment=True):
+        choices = [(obj.pk, getattr(obj, field))
+                   for obj in self.dynamic_column()]
+
+        if comment:
+            choices.insert(
+                0, (0, _("Please choose a {}".format(self.model.__name__))))
+
+        return choices
+
+    def get_choice_map(self, field):
+        return dict([(getattr(obj, field), obj.pk)
+                     for obj in self.dynamic_column()])

@@ -17,10 +17,10 @@ from collections import OrderedDict
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
-from django.core.urlresolvers import reverse
 
 from dcolumn.common.model_mixins import (
     UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin)
+
 from .manager import dcolumn_manager
 
 log = logging.getLogger('dcolumn.models')
@@ -137,6 +137,10 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
         return ", ".join(result)
     _collection_producer.short_description = _("Collections")
     _collection_producer.allow_tags = True
+
+    def get_choice_relation_object_and_field(self):
+        return dcolumn_manager.get_relation_model_field(self.value_type)
+
 
 
 #
@@ -276,19 +280,27 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
     def get_dynamic_column(self, slug):
         try:
             dc = self.column_collection.dynamic_column.get(slug=slug)
-        except self.DoesNotExist as e:
+        except DynamicColumn.DoesNotExist as e:
             log.error("DynamicColumn with slug '%s' does not exist.", slug)
             # Cannot get a dynamic column if not in the collection already.
             dc = None
 
         return dc
 
-    def get_key_value_pair(self, slug):
+    def get_key_value_pair(self, slug, field):
+        dc = self.get_dynamic_column(slug)
+
         try:
-            dc = self.column_collection.dynamic_column.get(slug=slug)
             obj = self.keyvalue_pairs.get(dynamic_column=dc)
-            value = obj.value
-        except (self.DoesNotExist, DynamicColumn.DoesNotExist) as e:
+
+            model_meta = dc.get_choice_relation_object_and_field()
+
+            if model_meta and not dc.store_relation:
+                model, notused = model_meta
+                value = model.objects.get_value_by_pk(obj.value, field=field)
+            else:
+                value = obj.value
+        except self.keyvalue_pairs.model.DoesNotExist as e:
             log.error("Could not find value for slug '%s'.", slug)
             value = u''
 

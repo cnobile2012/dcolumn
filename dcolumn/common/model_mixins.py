@@ -2,6 +2,13 @@
 # dcolumn/common/model_mixins.py
 #
 
+"""
+Mixins used in Django models.
+
+by: Carl J. Nobile
+
+email: carl.nobile@gmail.com
+"""
 __docformat__ = "restructuredtext en"
 
 import re
@@ -13,6 +20,8 @@ from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
+
+from dcolumn.common import ChoiceManagerImplementation
 
 log = logging.getLogger('dcolumn.models')
 
@@ -135,3 +144,30 @@ class StatusModelMixin(models.Model):
         Save is here to assure that save is executed throughout the MRO.
         """
         super(StatusModelMixin, self).save(*args, **kwargs)
+
+
+#
+# BaseChoiceModelManager
+#
+class BaseChoiceModelManager(models.Manager, ChoiceManagerImplementation):
+
+    def get_value_by_pk(self, pk, field=None):
+        value = u''
+
+        if int(pk) != 0:
+            try:
+                obj = self.get(pk=pk)
+                value = getattr(obj, field)
+            except self.model.DoesNotExist as e:
+                log.error("Access to PK %s failed, %s", pk, e)
+
+        return value
+
+    def get_choices(self, field, comment=True):
+        choices = [(obj.pk, getattr(obj, field)) for obj in self.all()]
+
+        if comment:
+            choices.insert(
+                0, (0, _("Please choose a {}".format(self.model.__name__))))
+
+        return choices
