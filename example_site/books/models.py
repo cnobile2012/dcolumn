@@ -9,7 +9,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse, NoReverseMatch
 
 from dcolumn.common.model_mixins import (
-    UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin)
+    UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin,
+    BaseChoiceModelManager)
 from dcolumn.dcolumns.models import CollectionBase, CollectionBaseManagerBase
 
 from .choices import Language
@@ -21,7 +22,7 @@ log = logging.getLogger('example_site.models')
 #
 # Promotion
 #
-class PromotionManager(StatusModelManagerMixin):
+class PromotionManager(BaseChoiceModelManager, StatusModelManagerMixin):
 
     def dynamic_column(self, active=True):
         """
@@ -29,6 +30,10 @@ class PromotionManager(StatusModelManagerMixin):
         the store_relation field in DynamicColumn' is acive for this model.
         """
         return self.active(active=active)
+
+    def get_choice_map(self, field, active=True):
+        return dict([(getattr(obj, field), obj.pk)
+                     for obj in self.dynamic_column(active=active)])
 
 
 class Promotion(UserModelMixin, TimeModelMixin, StatusModelMixin):
@@ -70,10 +75,15 @@ class Promotion(UserModelMixin, TimeModelMixin, StatusModelMixin):
 #
 # Author
 #
-class AuthorManager(CollectionBaseManagerBase, StatusModelManagerMixin):
+class AuthorManager(CollectionBaseManagerBase, StatusModelManagerMixin,
+                    BaseChoiceModelManager):
 
-    def dynamic_column(self):
-        return self.active()
+    def dynamic_column(self, active=True):
+        return self.active(active=active)
+
+    def get_choice_map(self, field, active=True):
+        return dict([(getattr(obj, field), obj.pk)
+                     for obj in self.dynamic_column(active=active)])
 
 
 class Author(CollectionBase):
@@ -106,10 +116,15 @@ class Author(CollectionBase):
 #
 # Publisher
 #
-class PublisherManager(CollectionBaseManagerBase, StatusModelManagerMixin):
+class PublisherManager(CollectionBaseManagerBase, StatusModelManagerMixin,
+                       BaseChoiceModelManager):
 
-    def dynamic_column(self):
-        return self.active()
+    def dynamic_column(self, active=True):
+        return self.active(active=active)
+
+    def get_choice_map(self, field, active=True):
+        return dict([(getattr(obj, field), obj.pk)
+                     for obj in self.dynamic_column(active=active)])
 
 
 class Publisher(CollectionBase):
@@ -140,10 +155,15 @@ class Publisher(CollectionBase):
 #
 # Book
 #
-class BookManager(CollectionBaseManagerBase, StatusModelManagerMixin):
+class BookManager(CollectionBaseManagerBase, StatusModelManagerMixin,
+                  BaseChoiceModelManager):
 
-    def dynamic_column(self):
-        return self.active()
+    def dynamic_column(self, active=True):
+        return self.active(active=active)
+
+    def get_choice_map(self, field, active=True):
+        return dict([(getattr(obj, field), obj.pk)
+                     for obj in self.dynamic_column(active=active)])
 
 
 class Book(CollectionBase):
