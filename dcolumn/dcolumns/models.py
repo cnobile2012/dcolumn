@@ -306,7 +306,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return value
 
-    def set_key_value_pair(self, slug, value, field=None):
+    def set_key_value_pair(self, slug, value, field=None, force=False):
         """
         This method sets an arbitrary key/value pair, it will log an error
         if the key/value pair could not be found.
@@ -318,8 +318,10 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
           slug  -- The slug associated with the key value pair.
           value -- The value can be textor an object to get the value from.
           field -- The field used to get the value on the object.
+          force -- Default is False, do not save empty strings or None objects
+                   else True save empty string objects only.
         """
-        if value:
+        if (force and value == u'') or value not in (None, u''):
             dc = self.get_dynamic_column(slug)
 
             if dc:
