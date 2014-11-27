@@ -319,7 +319,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
           value -- The value can be textor an object to get the value from.
           field -- The field used to get the value on the object.
           force -- Default is False, do not save empty strings or None objects
-                   else True save empty string objects only.
+                   else True save empty strings only.
         """
         if (force and value == u'') or value not in (None, u''):
             dc = self.get_dynamic_column(slug)
