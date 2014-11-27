@@ -138,8 +138,8 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': "%(asctime)s %(levelname)s %(module)s %(funcName)s " + \
-            "[line:%(lineno)d] %(message)s"
+            'format': ("%(asctime)s %(levelname)s %(module)s %(funcName)s "
+                       "[line:%(lineno)d] %(message)s")
             },
         'simple': {
             'format': '%(asctime)s %(levelname)s %(message)s'
@@ -163,7 +163,8 @@ LOGGING = {
             'formatter': 'simple'
             },
         'views_file': {
-            'class': 'example_site.common.loghandlers.DeferredRotatingFileHandler',
+            'class': ('example_site.common.loghandlers'
+                      '.DeferredRotatingFileHandler'),
             'level': 'DEBUG',
             'formatter': 'verbose',
             'filename': '/dev/null',
@@ -171,7 +172,8 @@ LOGGING = {
             'backupCount': 5,
             },
         'models_file': {
-            'class': 'example_site.common.loghandlers.DeferredRotatingFileHandler',
+            'class': ('example_site.common.loghandlers'
+                      '.DeferredRotatingFileHandler'),
             'level': 'DEBUG',
             'formatter': 'verbose',
             'filename': '/dev/null',
@@ -179,7 +181,8 @@ LOGGING = {
             'backupCount': 5,
             },
         'templates_file': {
-            'class': 'example_site.common.loghandlers.DeferredRotatingFileHandler',
+            'class': ('example_site.common.loghandlers'
+                      '.DeferredRotatingFileHandler'),
             'level': 'DEBUG',
             'formatter': 'verbose',
             'filename': '/dev/null',
@@ -187,7 +190,17 @@ LOGGING = {
             'backupCount': 5,
             },
         'manager_file': {
-            'class': 'example_site.common.loghandlers.DeferredRotatingFileHandler',
+            'class': ('example_site.common.loghandlers'
+                      '.DeferredRotatingFileHandler'),
+            'level': 'DEBUG',
+            'formatter': 'verbose',
+            'filename': '/dev/null',
+            'maxBytes': 50000000, # 50 Meg bytes
+            'backupCount': 5,
+            },
+        'choice_file': {
+            'class': ('example_site.common.loghandlers'
+                      '.DeferredRotatingFileHandler'),
             'level': 'DEBUG',
             'formatter': 'verbose',
             'filename': '/dev/null',
@@ -233,6 +246,11 @@ LOGGING = {
             },
         'dcolumn.manager': {
             'handlers': ('manager_file', 'console', 'mail_admins',),
+            'level': 'ERROR',
+            'propagate': True,
+            },
+        'dcolumn.choices': {
+            'handlers': ('choice_file', 'console', 'mail_admins',),
             'level': 'ERROR',
             'propagate': True,
             },
