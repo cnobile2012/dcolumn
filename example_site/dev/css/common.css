@@ -41,6 +41,7 @@ h2 {
   display: inline-block;
   width: 130px;
   height: 20px;
+  margin: 5px 0;
   border: 1px solid rgb(146, 113, 28);
   -moz-border-radius: 10px;
   -webkit-border-radius: 10px;

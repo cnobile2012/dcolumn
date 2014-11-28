@@ -4,8 +4,7 @@
 
 import logging
 
-from django.views.generic import DetailView
-from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic import DetailView, CreateView, UpdateView, ListView
 from django.core.urlresolvers import reverse
 
 from dcolumn.dcolumns.views import (
@@ -79,6 +78,16 @@ class BookDetailView(CollectionDetailViewMixin, DetailView):
         return context
 
 book_detail_view = BookDetailView.as_view()
+
+
+#
+# BookListView
+#
+class BookListView(ListView):
+    template_name = u'books/book_list_view.html'
+    model = Book
+
+book_list_view = BookListView.as_view()
 
 
 #
