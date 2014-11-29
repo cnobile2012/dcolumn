@@ -6,7 +6,7 @@
 {% endblock %}
 {% block header %}
   <div class="header">
-    <h2>Author</h2>
+    <h2>Promotion</h2>
     <div class="dashboard">
       <ul>
         <li><a href="{% url 'home' %}">Home</a></li>
@@ -49,12 +49,12 @@
             </li>
             <li>
               {{ form.start_date.label_tag }}
-              {{ form.start_date.as_widget }}
+              <input id="id_start_date" type="date" name="start_date" />
               {{ form.start_date.errors }}
             </li>
             <li>
               {{ form.end_date.label_tag }}
-              {{ form.end_date.as_widget }}
+              <input id="id_end_date" type="date" name="end_date" />
               {{ form.end_date.errors }}
             </li>
             <li>
@@ -65,7 +65,7 @@
           </ul>
         </div>
       </div> <!-- div.container -->
-      <div id="submit">
+      <div class="actions">
 {% if object %}
         <button type="submit"
                 class="author-submit"
@@ -75,7 +75,7 @@
                 class="author-submit"
                 formaction="{% url 'author-create' %}">Save</button>
 {% endif %}
-      </div> <!-- div#submit -->
+      </div> <!-- div.actions -->
     </form>
   </div> <!-- div.wrapper -->
 {% endblock %}

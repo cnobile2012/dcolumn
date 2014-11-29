@@ -51,34 +51,8 @@
 {% endfor %}
           </ul>
         </div>
-        <div class="dynamic-container {{ css.center }}">
-          <ul>
-{% for relation in relations.values %}
-{% if relation.location == css.center %}
-            <li>
-              <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
-              {% auto_display relation options=dynamicColumns %}
-              {% combine_contexts form.errors relation.slug %}
-            </li>
-{% endif %}
-{% endfor %}
-          </ul>
-        </div>
-        <div class="dynamic-container {{ css.bottom }}">
-          <ul>
-{% for relation in relations.values %}
-{% if relation.location == css.bottom %}
-            <li>
-              <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
-              {% auto_display relation options=dynamicColumns %}
-              {% combine_contexts form.errors relation.slug %}
-            </li>
-{% endif %}
-{% endfor %}
-          </ul>
-        </div>
       </div> <!-- div.container -->
-      <div id="submit">
+      <div class="actions">
 {% if object %}
         <button type="submit"
                 class="author-submit"
@@ -88,7 +62,7 @@
                 class="author-submit"
                 formaction="{% url 'author-create' %}">Save</button>
 {% endif %}
-      </div> <!-- div#submit -->
+      </div> <!-- div.actions -->
     </form>
   </div> <!-- div.wrapper -->
 {% endblock %}

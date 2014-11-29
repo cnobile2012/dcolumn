@@ -104,6 +104,20 @@ h2 {
   color: blue;
 }
 
+.actions button {
+  display: block;
+  width: 12em;
+  margin: 0 auto;
+  background-color: #eeefd0;
+  border-color: rgb(192, 174, 129);
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -khtml-border-radius: 10px;
+  color: rgb(146, 113, 28);
+  font-weight: bold;
+}
+
 .container {
   display: block;
   border: 1px solid #999;
@@ -210,21 +224,4 @@ ul.errorlist li {
 
 .large-text-field {
   width: 610px;
-}
-
-#submit button {
-  display: block;
-  width: 12em;
-  margin: 10px auto 0 auto;
-}
-
-button {
-  background-color: #eeefd0;
-  border-color: rgb(192, 174, 129);
-  border-radius: 10px;
-  -moz-border-radius: 10px;
-  -webkit-border-radius: 10px;
-  -khtml-border-radius: 10px;
-  color: rgb(146, 113, 28);
-  font-weight: bold;
 }

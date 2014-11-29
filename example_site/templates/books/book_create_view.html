@@ -78,7 +78,7 @@
           </ul>
         </div>
       </div> <!-- div.container -->
-      <div id="submit">
+      <div class="actions">
 {% if object %}
         <button type="submit"
                 class="book-submit"
@@ -88,7 +88,7 @@
                 class="book-submit"
                 formaction="{% url 'book-create' %}">Save</button>
 {% endif %}
-      </div> <!-- div#submit -->
+      </div> <!-- div.actions -->
     </form>
   </div> <!-- div.wrapper -->
 {% endblock %}
