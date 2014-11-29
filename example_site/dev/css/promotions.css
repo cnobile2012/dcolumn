@@ -1,0 +1,15 @@
+/*
+ * CSS for promotions.
+ */
+
+#id_name {
+  width: 525px;
+}
+
+#id_description {
+  width: 610px;
+}
+
+#id_start_date, #id_end_date {
+  width: 154px;
+}
