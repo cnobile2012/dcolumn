@@ -1,0 +1,36 @@
+/*
+ * CSS for paginating lists.
+ */
+
+.list-pagination {
+  height: 18px;
+  width: 225px;
+  margin: 5px auto;
+  color: #999;
+  font-size: 95%;
+}
+
+.list-pagination ul {
+  display: inline-block;
+  margin: -5px;
+  padding: 0;
+  height: 20px;
+}
+
+.list-pagination li {
+  float: right;
+  display: block;
+  width: 28px;
+  list-style-type: none;
+  text-align: center;
+}
+
+.list-pagination li a {
+  text-decoration: none !important;
+  font-size: 80%;
+}
+
+.list-pagination li.middle {
+  width: 120px;
+  margin: 1px;
+}

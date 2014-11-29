@@ -32,7 +32,12 @@ class PromotionForm(forms.ModelForm):
 
     class Meta:
         model = Promotion
-        exclude = []
+        exclude = ()
+
+    class Media:
+        css = {
+            'all': ('css/promotions.css',)
+            }
 
 
 #

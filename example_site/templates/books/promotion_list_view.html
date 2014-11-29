@@ -13,7 +13,7 @@
         <li><a href="{% url 'home' %}">Home</a></li>
         <li><a href="{% url 'author-create' %}">Create Author</a></li>
         <li><a href="{% url 'publisher-create' %}">Create Publisher</a></li>
-        <li><a href="{% url 'promotion-create' %}">Create Promotion</a></li>
+        <li><a href="{% url 'book-create' %}">Create Book</a></li>
       </ul>
     </div>
   </div>
@@ -48,45 +48,25 @@
       <table>
         <thead>
           <tr>
-            <th>Title</th>
-            <th>SKU</th>
-            <th>Author</th>
-            <th>Publisher</th>
-            <th>Edition</th>
-            <th>Published Date</th>
-            <th>Copyright Year</th>
-            <th>ISBN-10</th>
-            <th>ISBN-13</th>
-            <th>Language</th>
-            <th>Promotion</th>
-          </tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Active</th>
+         </tr>
         </thead>
         <tbody>
 {% for object in object_list %}
           <tr>
             <td>
-              <a href="{% url 'book-detail' object.id %}">{{ object.title }}</a>
+              <a href="{% url 'promotion-detail' object.id %}">
+                {{ object.name }}
+              </a>
             </td>
-{% single_display object stock-unit-id as sku %}
-            <td style="text-align: right;">{{ sku }}</td>
-{% single_display object author as author %}
-            <td>{{ author }}</td>
-{% single_display object publisher as publisher %}
-            <td>{{ publisher }}</td>
-{% single_display object edition as edition %}
-            <td style="text-align: right;">{{ edition }}</td>
-{% single_display object published-date as pdate %}
-            <td style="text-align: right;">{{ pdate|date:"Y-m-d" }}</td>
-{% single_display object copyright-year as cyear %}
-            <td style="text-align: right;">{{ cyear }}</td>
-{% single_display object isbn-10 as isbn10 %}
-            <td>{{ isbn10 }}</td>
-{% single_display object isbn-13 as isbn13 %}
-            <td>{{ isbn13 }}</td>
-{% single_display object language as language %}
-            <td>{{ language }}</td>
-{% single_display object promotion as promotion %}
-            <td>{{ promotion }}</td>
+            <td>{{ object.description }}</td>
+            <td>{{ object.start_date|date:"Y-m-d" }}</td>
+            <td>{{ object.end_date|date:"Y-m-d" }}</td>
+            <td>{{ object.active|yesno }}</td>
           </tr>
 {% endfor %}
         </tbody>

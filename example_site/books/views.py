@@ -10,8 +10,8 @@ from django.core.urlresolvers import reverse
 from dcolumn.dcolumns.views import (
     CollectionCreateUpdateViewMixin, CollectionDetailViewMixin)
 
-from .models import Book, Publisher, Author
-from .forms import BookForm, PublisherForm, AuthorForm
+from .models import Book, Publisher, Author, Promotion
+from .forms import BookForm, PublisherForm, AuthorForm, PromotionForm
 
 
 #
@@ -86,6 +86,7 @@ book_detail_view = BookDetailView.as_view()
 class BookListView(ListView):
     template_name = u'books/book_list_view.html'
     model = Book
+    paginate_by = 50
 
 book_list_view = BookListView.as_view()
 
@@ -157,6 +158,17 @@ publisher_detail_view = PublisherDetailView.as_view()
 
 
 #
+# PublisherListView
+#
+class PublisherListView(ListView):
+    template_name = u'books/publisher_list_view.html'
+    model = Publisher
+    paginate_by = 50
+
+publisher_list_view = PublisherListView.as_view()
+
+
+#
 # AuthorCreateView
 #
 class AuthorCreateView(CollectionCreateUpdateViewMixin, CreateView):
@@ -220,3 +232,91 @@ class AuthorDetailView(CollectionDetailViewMixin, DetailView):
         return context
 
 author_detail_view = AuthorDetailView.as_view()
+
+
+#
+# AuthorListView
+#
+class AuthorListView(ListView):
+    template_name = u'books/author_list_view.html'
+    model = Author
+    paginate_by = 50
+
+author_list_view = AuthorListView.as_view()
+
+
+#
+# PromotionCreateView
+#
+class PromotionCreateView(CreateView):
+    template_name = u'books/promotion_create_view.html'
+    form_class = PromotionForm
+    model = Promotion
+
+    def get_success_url(self):
+        url = self.object.get_absolute_url()
+        url += '?created=true'
+        return url
+
+promotion_create_view = PromotionCreateView.as_view()
+
+
+#
+# PromotionUpdateView
+#
+class PromotionUpdateView(UpdateView):
+    template_name = u'books/promotion_create_view.html'
+    form_class = PromotionForm
+    model = Promotion
+
+    def get_success_url(self):
+        url = self.object.get_absolute_url()
+        url += '?updated=true'
+        return url
+
+promotion_update_view = PromotionUpdateView.as_view()
+
+
+#
+# PromotionDetailView
+#
+class PromotionDetailView(DetailView):
+    template_name = u'books/promotion_detail_view.html'
+    model = Promotion
+
+    def get_context_data(self, **kwargs):
+        """
+        Get context data for the KeyValue objects.
+        """
+        context = super(PromotionDetailView, self).get_context_data(**kwargs)
+        # Create actions if any.
+        promotion = kwargs.get(u'object')
+        pk = promotion and promotion.id or 0
+        actions = [
+            {u'name': u'Create a New Promotion Entry',
+             u'url': reverse(u'promotion-create')},
+            {u'name': u'Edit this Promotion Entry',
+             u'url': reverse(u'promotion-update', args=(pk,))},
+            ]
+        context[u'actions'] = actions
+        # Create messages if any.
+        info_message = {}
+
+        for flag in (u'created', u'updated',):
+            info_message[flag] = bool(self.request.GET.get(flag, u''))
+
+        context[u'info_message'] = info_message
+        return context
+
+promotion_detail_view = PromotionDetailView.as_view()
+
+
+#
+# PromotionListView
+#
+class PromotionListView(ListView):
+    template_name = u'books/promotion_list_view.html'
+    model = Promotion
+    paginate_by = 50
+
+promotion_list_view = PromotionListView.as_view()

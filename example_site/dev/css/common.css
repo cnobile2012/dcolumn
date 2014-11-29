@@ -1,3 +1,7 @@
+/*
+ * CSS common to most pages.
+ */
+
 body {
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
@@ -28,7 +32,7 @@ h2 {
 
 .header .dashboard {
   padding: 5px 0;
-  width: 405px;
+  width: 545px;
   margin: 0 auto 10px auto;
 }
 

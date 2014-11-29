@@ -1,0 +1,24 @@
+/*
+ * CSS for list pages
+ */
+
+.container table {
+  margin: 0 auto;
+  font-size: 80%;
+  border-collapse: collapse;
+}
+
+.container thead {
+  border: 1px solid #999;
+}
+
+.container thead th {
+  padding: 0 2px;
+  text-align: center;
+  border: 1px solid #999;
+}
+
+.container tbody, td {
+  padding: 0 2px;
+  border: 1px solid #999;
+}

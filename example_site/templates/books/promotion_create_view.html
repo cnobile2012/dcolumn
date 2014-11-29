@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load autodisplay %}
+{% block title %}Promotion{% endblock %}
+{% block head_extras %}
+    {{ form.media }}
+{% endblock %}
+{% block header %}
+  <div class="header">
+    <h2>Author</h2>
+    <div class="dashboard">
+      <ul>
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'author-create' %}">Create Author</a></li>
+        <li><a href="{% url 'publisher-create' %}">Create Publisher</a></li>
+        <li><a href="{% url 'book-create' %}">Create Book</a></li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}
+{% block content %}
+  <div class="wrapper">
+{% if object %}
+    <form name="promotion-update" method="post"
+          action="{% url 'promotion-update' object.pk %}">
+{% else %}
+    <form name="promotion-update" method="post"
+          action="{% url 'promotion-create' %}">
+{% endif %}
+      <div class="container">
+        {% csrf_token %}
+        <div id="message">
+{% if form.errors %}
+          <ul class="errorlist">
+            <li>Invalid data, please see below for details.</li>
+          </ul>
+{% endif %}
+        </div>
+        <div class="dynamic-container">
+          <ul>
+            <li>
+              {{ form.name.label_tag }}
+              {{ form.name.as_widget }}
+              {{ form.name.errors }}
+            </li>
+            <li>
+              {{ form.description.label_tag }}
+              {{ form.description.as_widget }}
+              {{ form.description.errors }}
+            </li>
+            <li>
+              {{ form.start_date.label_tag }}
+              {{ form.start_date.as_widget }}
+              {{ form.start_date.errors }}
+            </li>
+            <li>
+              {{ form.end_date.label_tag }}
+              {{ form.end_date.as_widget }}
+              {{ form.end_date.errors }}
+            </li>
+            <li>
+              {{ form.active.label_tag }}
+              {{ form.active.as_widget }}
+              {{ form.active.errors }}
+            </li>
+          </ul>
+        </div>
+      </div> <!-- div.container -->
+      <div id="submit">
+{% if object %}
+        <button type="submit"
+                class="author-submit"
+                formaction="{% url 'author-update' object.pk %}">Update</button>
+{% else %}
+        <button type="submit"
+                class="author-submit"
+                formaction="{% url 'author-create' %}">Save</button>
+{% endif %}
+      </div> <!-- div#submit -->
+    </form>
+  </div> <!-- div.wrapper -->
+{% endblock %}

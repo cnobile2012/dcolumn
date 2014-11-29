@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load url from future %}
 {% load autodisplay %}
 {% block title %}Publisher Detail{% endblock %}
 {% block header %}
@@ -10,6 +9,7 @@
         <li><a href="{% url 'home' %}">Home</a></li>
         <li><a href="{% url 'author-create' %}">Create Author</a></li>
         <li><a href="{% url 'book-create' %}">Create Book</a></li>
+        <li><a href="{% url 'promotion-create' %}">Create Promotion</a></li>
       </ul>
     </div>
   </div>
@@ -38,7 +38,7 @@
           <div>The record has been updated and is displayed below.</div>
 {% endif %}
         </div>
-        <div class="dynamic-container top-container">
+        <div class="dynamic-container {{ css.top }}">
           <ul>
             <li>
               <label>Name</label>
@@ -54,7 +54,7 @@
 {% endfor %}
           </ul>
         </div>
-        <div class="dynamic-container center-container">
+        <div class="dynamic-container {{ css.center }}">
           <ul>
 {% for relation in relations.values %}
 {% if relation.location == css.center %}
@@ -66,7 +66,7 @@
 {% endfor %}
           </ul>
         </div>
-        <div class="dynamic-container bottom-container">
+        <div class="dynamic-container {{ css.bottom }}">
           <ul>
 {% for relation in relations.values %}
 {% if relation.location == css.bottom %}
