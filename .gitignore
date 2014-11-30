@@ -19,9 +19,9 @@ old
 *.so
 
 # Packages
-*.egg
-*.egg-info
-dist
+/*.egg
+/*.egg-info
+/dist/
 build
 eggs
 parts

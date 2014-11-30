@@ -2,4 +2,3 @@ include LICENSE.txt
 include README.md
 recursive-include dcolumn/dcolumns/static *
 recursive-include dcolumn/dcolumns/templatetags *
-recursive-include docs *
