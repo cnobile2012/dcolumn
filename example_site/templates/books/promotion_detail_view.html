@@ -3,7 +3,7 @@
 {% block title %}Book Detail{% endblock %}
 {% block header %}
   <div class="header">
-    <h2>Book Detail</h2>
+    <h2>Promotion Detail</h2>
     <div class="dashboard">
       <ul>
         <li><a href="{% url 'home' %}">Home</a></li>
@@ -22,9 +22,6 @@
         <ul>
 {% for action in actions %}
           <li><a href="{{ action.url }}">{{ action.name }}</a></li>
-{% if not forloop.last %}
-          <li><span>,&nbsp;&nbsp;</span></li>
-{% endif %}
 {% endfor %}
         </ul>        
 {% endif %}

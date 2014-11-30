@@ -5,13 +5,8 @@
     <title>{% block title %}Django Tests{% endblock %}</title>
     <link rel="stylesheet"
           href="{{ STATIC_URL }}css/common.css">
-    <!--[if IE]>
-      <!-- script src="{{ STATIC_URL }}js/better-dom-legacy.js"></script -->
-    <![endif]-->
 
     <script src="{{ STATIC_URL }}dcolumn/js/jquery-1.11.1.min.js"></script>
-    <!-- script src="{{ STATIC_URL }}js/better-dom.js"></script -->
-    <!-- script src="{{ STATIC_URL }}js/better-dateinput-polyfill.js"></script -->
     {% block head_extras %}{% endblock %}
   </head>
   <body>

@@ -16,6 +16,8 @@ dcolumn_manager.register_choice(Author, 3, u'name')
 dcolumn_manager.register_choice(Publisher, 4, u'name')
 dcolumn_manager.register_choice(Book, 5, u'title')
 
+log = logging.getLogger('example_site.views')
+
 
 #
 # Promotion
@@ -24,6 +26,7 @@ class PromotionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(PromotionForm, self).__init__(*args, **kwargs)
+        log.debug("args: %s, kwargs: %s", args, kwargs)
         self.fields[u'name'].widget = forms.TextInput(
             attrs={u'size': 100, u'maxlength': 250})
         # Gets rid of the annoying colon afer every label, but only works on
@@ -32,7 +35,7 @@ class PromotionForm(forms.ModelForm):
 
     class Meta:
         model = Promotion
-        exclude = ()
+        exclude = ('creator', 'updater', 'created', 'updated',)
 
     class Media:
         css = {

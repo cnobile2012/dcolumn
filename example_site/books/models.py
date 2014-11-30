@@ -36,7 +36,7 @@ class PromotionManager(BaseChoiceModelManager, StatusModelManagerMixin):
                      for obj in self.dynamic_column(active=active)])
 
 
-class Promotion(UserModelMixin, TimeModelMixin, StatusModelMixin):
+class Promotion(TimeModelMixin, UserModelMixin, StatusModelMixin):
     name = models.CharField(
         verbose_name=_(u"Promotion's Name"), max_length=250,
         help_text=_(u"Enter the name of the promotion."))

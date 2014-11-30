@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load autodisplay %}
 {% block title %}Book{% endblock %}
-{% block head_extras %}{% endblock %}
+{% block head_extras %}{{ form.media }}{% endblock %}
 {% block header %}
   <div class="header">
     <h2>Book</h2>

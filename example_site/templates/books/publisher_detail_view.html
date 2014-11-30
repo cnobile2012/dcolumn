@@ -22,9 +22,6 @@
         <ul>
 {% for action in actions %}
           <li><a href="{{ action.url }}">{{ action.name }}</a></li>
-{% if not forloop.last %}
-          <li><span>,&nbsp;&nbsp;</span></li>
-{% endif %}
 {% endfor %}
         </ul>        
 {% endif %}

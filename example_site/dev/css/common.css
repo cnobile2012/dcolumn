@@ -72,7 +72,7 @@ h2 {
   width: 96%;
   margin: 5px auto;
   padding: .25em .75em;
-  font-size: 100%;
+  font-size: 90%;
   border: 1px solid #999;
   -moz-border-radius: 10px;
   -webkit-border-radius: 10px;
@@ -89,15 +89,25 @@ h2 {
 
 .actions ul li {
   display: inline-block;
+  margin: 0 2px;
 }
 
 .actions span,
 .actions a {
+  display: block;
+  width: 210px;
   margin: 0;
+  padding: .25em .75em;
   text-align: center;
   font-weight: bold;
-  color: rgb(146, 113, 28);
+  color: rgb(118, 90, 17);
+  background-color: rgb(237, 226, 196);
   text-decoration: none;
+  border: 1px solid rgb(146, 113, 28);
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -khtml-border-radius: 10px;
+  border-radius: 10px;
 }
 
 .actions a:hover {

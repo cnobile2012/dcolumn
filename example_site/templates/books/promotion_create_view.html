@@ -49,12 +49,12 @@
             </li>
             <li>
               {{ form.start_date.label_tag }}
-              <input id="id_start_date" type="date" name="start_date" />
+              {{ form.start_date.as_widget }}
               {{ form.start_date.errors }}
             </li>
             <li>
               {{ form.end_date.label_tag }}
-              <input id="id_end_date" type="date" name="end_date" />
+              {{ form.end_date.as_widget }}
               {{ form.end_date.errors }}
             </li>
             <li>
@@ -68,12 +68,14 @@
       <div class="actions">
 {% if object %}
         <button type="submit"
-                class="author-submit"
-                formaction="{% url 'author-update' object.pk %}">Update</button>
+                class="promotion-submit"
+                formaction="{% url 'promotion-update' object.pk %}">
+          Update
+        </button>
 {% else %}
         <button type="submit"
-                class="author-submit"
-                formaction="{% url 'author-create' %}">Save</button>
+                class="promotion-submit"
+                formaction="{% url 'promotion-create' %}">Save</button>
 {% endif %}
       </div> <!-- div.actions -->
     </form>

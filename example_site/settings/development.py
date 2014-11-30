@@ -64,8 +64,10 @@ LOGGING.get('handlers', {}).get(
 
 
 LOGGING.get('loggers', {}).get('django.request', {})['level'] = 'DEBUG'
+LOGGING.get('loggers', {}).get('example_site.views', {})['level'] = 'DEBUG'
+LOGGING.get('loggers', {}).get('example_site.models', {})['level'] = 'DEBUG'
+LOGGING.get('loggers', {}).get('example_site.templates', {})['level'] = 'DEBUG'
 LOGGING.get('loggers', {}).get('dcolumn.views', {})['level'] = 'DEBUG'
 LOGGING.get('loggers', {}).get('dcolumn.models', {})['level'] = 'DEBUG'
-LOGGING.get('loggers', {}).get('dcolumn.templates', {})['level'] = 'DEBUG'
 LOGGING.get('loggers', {}).get('dcolumn.manager', {})['level'] = 'DEBUG'
 LOGGING.get('loggers', {}).get('dcolumn.choice', {})['level'] = 'DEBUG'

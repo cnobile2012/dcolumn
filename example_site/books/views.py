@@ -13,6 +13,8 @@ from dcolumn.dcolumns.views import (
 from .models import Book, Publisher, Author, Promotion
 from .forms import BookForm, PublisherForm, AuthorForm, PromotionForm
 
+log = logging.getLogger('example_site.views')
+
 
 #
 # BookCreateView
