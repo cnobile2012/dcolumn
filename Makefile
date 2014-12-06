@@ -35,5 +35,5 @@ clean	:
 	$(shell cleanDirs.sh clean)
 
 clobber	: clean
-	@rm -rf dist *.egg-info
+	@rm -rf dist build *.egg-info
 	@(cd $(DOCS_DIR); make clobber)
