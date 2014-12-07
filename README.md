@@ -1,6 +1,10 @@
 Django Tool to Create Dynamic Fields
 ====================================
 
+*** WARNING *** Version 0.3.0 breaks the previous two versions, but is easy to
+fix. You will need to reassign most 'Value Types' in the Dynamic Column model
+records in the admin. Until version 1.0.0 is reached this may happen again.
+
 Have you ever wanted to add new fields to a model, but you didn't have time to
 make the code and model changes required? Well this may be a solution to that
 often occurring scenario.
@@ -37,6 +41,7 @@ Basic Installation
                 u'Book': u'Book Current',
                 u'Author': u'Author Current',
                 u'Publisher': u'Publisher Current',
+                u'Promotion': u'Promotion Current',
                 },
             # To allow anybody to access the API set to True.
             u'INACTIVATE_API_AUTH': False,
@@ -48,17 +53,19 @@ Basic Installation
         # Change the URL below to your login path.
         LOGIN_URL = u"/admin/"
 
- 4. There are two ways to define page location of each new field that you
-    enter into the system. The 1st way is to just pass a tuple of each CSS
+ 4. There are two methods to define page location of each new field that you
+    enter into the system. The 1st method is to just pass a tuple of each CSS
     class. They are enumerated starting with 0 (zero). They would be
-    referenced as `css.0`, `css.1`, etc. The 2nd way is to pass a tuple of
+    referenced as `css.0`, `css.1`, etc. The 2nd method is to pass a tuple of
     tuples with the first variable as the key and the second variable as the
     value. They would be reference as `css.top`, `css.center`, etc.
 
+        # First method
         dcolumn_manager.register_css_containers(
                (u'top-container', u'center-container', u'bottom-container')
         )
 
+        # Second method
         dcolumn_manager.register_css_containers(
                ((u'top', u'top-container'),
                 (u'center', u'center-container'),
@@ -67,8 +74,8 @@ Basic Installation
 
  5. The models need to subclass the `CollectionBase` model base class from
     dcolumn. The model manager needs to subclass `StatusModelManagerMixin` and
-    also needs to implement a method named `dynamic_column`. See the example
-    code.
+    also needs to implement two methods named `dynamic_column` and
+    `get_choice_map`. See the example code.
 
  6. The `CollectionBaseManagerBase` manager base class from dcolumn should also
     be sub-classed to pick up a few convenience methods. This is not mandatory.
@@ -80,11 +87,6 @@ Basic Installation
  8. Any views need to subclass `CollectionCreateUpdateViewMixin` which must be
     before the class-based view that you will use. Once again see the example
     code.
-
-Functional Details
-------------------
-
-*** TO DO ***
 
 Do Not's
 --------
@@ -102,8 +104,8 @@ definitely need to set the 'Preferred Slug' field to your desired slug. If you
 do not do this the slug will track any changes made to the 'Name' fields
 breaking your code. The only caveat is that the slug will now track the
 'Preferred Slug' field, so don't change it after your code is using the slug
-value. I've put this out of the way in the admin 'Status' section of the
-'Dynamic Columns' entries.
+value. I've put this out of the way and hidden in the admin 'Status' section
+of the 'Dynamic Columns' entries.
 
 
 API Details
@@ -118,7 +120,10 @@ API Details
      These include all Django models and the Choice models.
 
 #### DynamicColumn
-There are no user methods on the `DynamicColumn` model at this time.
+ 1. get_choice_relation_object_and_field
+   * Takes no arguments
+   * Returns the model object and the field used in the HTML select option
+     text value.
 
 #### ColumnCollectionManager
  1. get_column_collection `method`
@@ -154,19 +159,30 @@ There are no user methods on the `ColumnCollection` model at this time.
  2. get_all_fields `method`
    * Takes no arguments
    * Returns a list of all model fields.
- 3. get_all_fields_and_slugs
-   * Takes no arguments `method`
+ 3. get_all_fields_and_slugs `method`
+   * Takes no arguments
    * Returns a list of all model fields and slugs.
 
 #### CollectionBase
- 1. serialize_key_value_pairs
-   * Takes no arguments `method`
+ 1. serialize_key_value_pairs `method`
+   * Takes no arguments
    * Returns a dictionary where the key is the pk of a DynamicColumn instance
      and the value of the KeyValue instance associated with the DynamicColumn
      instance.
- 2. set_key_value_pair `method`
-   * `slug` positional argument and is the slug of any dynamic column object.
-   * `value` positional argument and is a value to be set on a keyvalue pair.
+ 2. get_dynamic_column `method`
+   * `slug` positional argument, is the slug of any dynamic column object.
+   * Returns the DynamicColumn instance relitive to this model instance.
+ 3. get_key_value_pair `method`
+   * `slug` positional argument, is the slug of any dynamic column object.
+   * `field` positional argument indicating the field to use in a choice or
+      model.
+   * Returns the value of the dynamic column.
+ 4. set_key_value_pair `method`
+   * `slug` positional argument, is the slug of any dynamic column object.
+   * `value` positional argument, is a value to be set on a keyvalue pair.
+   * `field` keyword argument, is the field used to get the value on the object.
+   * `force` keyword argument, default is False, do not save empty strings or
+     None objects else True save empty strings only.
    * Returns nothing. Sets a value on a keyValue object.
 
 #### KeyValueManager
@@ -201,6 +217,7 @@ when you need to know something about the system.
    * `container_list` positional argument and is a list of the CSS classes or
      ids that will determine the location on the page of the various dynamic
      columns.
+   * Returns nothing.
  6. css_containers `property`
    * Takes no arguments
    * Returns a list of tuples where the tuple is (num, text)
@@ -210,7 +227,7 @@ when you need to know something about the system.
  8. get_collection_name `method`
    * `model_name` positional argument and is the key name used in the
      settings.DYNAMIC_COLUMNS.COLLECTIONS.
-   * The `ColumnCollection` instance name.
+   * Returns the `ColumnCollection` instance name.
  9. get_api_auth_state `method`
    * Takes no arguments
    * Returns the value of settings.DYNAMIC_COLUMNS.INACTIVATE_API_AUTH
@@ -220,7 +237,7 @@ when you need to know something about the system.
    * Returns the field used in the HTML select option text value.
 
 ### Template Tags
-There are only three template tags that can be used. These tags will help with
+There are three template tags that can be used. These tags will help with
 displaying the proper type of fields in your templates.
 
 #### auto_display
