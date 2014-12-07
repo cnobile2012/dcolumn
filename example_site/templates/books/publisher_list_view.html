@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% load autodisplay %}
-{% block title %}Book List{% endblock %}
+{% block title %}Publisher List{% endblock %}
 {% block head_extras %}
     <link rel="stylesheet" href="{{ STATIC_URL }}css/list_views.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/list_pagination.css">
 {% endblock %}
 {% block header %}
   <div class="header">
-    <h2>Book List</h2>
+    <h2>Publisher List</h2>
     <div class="dashboard">
       <ul>
         <li><a href="{% url 'home' %}">Home</a></li>
-        <li><a href="{% url 'publisher-create' %}">Create Publisher</a></li>
-        <li><a href="{% url 'book-create' %}">Create Book</a></li>
-        <li><a href="{% url 'promotion-create' %}">Create Promotion</a></li>
-      </ul>
+        <li><a href="{% url 'author-list' %}">Author List</a></li>
+        <li><a href="{% url 'book-list' %}">Book List</a></li>
+        <li><a href="{% url 'promotion-list' %}">Promotion List</a></li>
+       </ul>
     </div>
   </div>
 {% endblock %}
