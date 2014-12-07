@@ -59,6 +59,7 @@
             <th>ISBN-13</th>
             <th>Language</th>
             <th>Promotion</th>
+            <th>Active</th>
           </tr>
         </thead>
         <tbody>
@@ -87,6 +88,7 @@
             <td>{{ language }}</td>
 {% single_display object promotion as promotion %}
             <td>{{ promotion }}</td>
+            <td>{{ object.active|yesno }}</td>
           </tr>
 {% endfor %}
         </tbody>

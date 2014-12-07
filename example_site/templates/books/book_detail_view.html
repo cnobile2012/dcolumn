@@ -73,6 +73,10 @@
             </li>
 {% endif %}
 {% endfor %}
+            <li>
+              <label>Active</label>
+              <span>{{ object.active|yesno }}</span>
+            </li>
           </ul>
         </div>
       </div> <!-- div.container -->

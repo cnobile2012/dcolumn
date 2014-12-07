@@ -62,6 +62,11 @@
             </li>
 {% endif %}
 {% endfor %}
+            <li>
+              {{ form.active.label_tag }}
+              {{ form.active.as_widget }}
+              {{ form.active.errors }}
+            </li>
           </ul>
         </div>
       </div> <!-- div.container -->

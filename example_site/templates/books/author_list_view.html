@@ -50,6 +50,7 @@
           <tr>
             <th>Name</th>
             <th>Web Site</th>
+            <th>Active</th>
           </tr>
         </thead>
         <tbody>
@@ -64,6 +65,7 @@
             <td>
               <a href="http://{{ web }}">{{ web }}</a>
             </td>
+            <td>{{ object.active|yesno }}</td>
           </tr>
 {% endfor %}
         </tbody>

@@ -61,18 +61,10 @@
             </li>
 {% endif %}
 {% endfor %}
-          </ul>
-        </div>
-        <div class="dynamic-container {{ css.bottom }}">
-          <ul>
-{% for relation in relations.values %}
-{% if relation.location == css.bottom %}
             <li>
-              <label>{{ relation.name }}</label>
-              {% auto_display relation options=dynamicColumns display=True %}
+              <label>Active</label>
+              <span>{{ object.active|yesno }}</span>
             </li>
-{% endif %}
-{% endfor %}
           </ul>
         </div>
       </div> <!-- div.container -->
