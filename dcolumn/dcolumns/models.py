@@ -323,7 +323,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         Arguments:
           slug  -- The slug associated with the key value pair.
-          value -- The value can be textor an object to get the value from.
+          value -- The value can be text or an object to get the value from.
           field -- The field used to get the value on the object.
           force -- Default is False, do not save empty strings or None objects
                    else True save empty strings only.
