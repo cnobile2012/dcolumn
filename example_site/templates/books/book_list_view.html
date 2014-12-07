@@ -68,7 +68,7 @@
             <td>
               <a href="{% url 'book-detail' object.id %}">{{ object.title }}</a>
             </td>
-{% single_display object stock-unit-id as sku %}
+{% single_display object book-sku as sku %}
             <td style="text-align: right;">{{ sku }}</td>
 {% single_display object author as author %}
             <td>{{ author }}</td>
