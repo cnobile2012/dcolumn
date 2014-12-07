@@ -112,6 +112,7 @@ DYNAMIC_COLUMNS = {
         u'Book': u'Book Current',
         u'Author': u'Author Current',
         u'Publisher': u'Publisher Current',
+        u'Promotion': u'Promotion Current',
         },
     # To allow anybody to access the API set to True.
     u'INACTIVATE_API_AUTH': False,

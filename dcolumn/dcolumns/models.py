@@ -46,18 +46,22 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
     BOOLEAN = 1
     CHOICE = 2
     DATE = 3
-    FLOAT = 4
-    NUMBER = 5
-    TEXT = 6
-    TEXT_BLOCK = 7
+    DATETIME = 4
+    FLOAT = 5
+    NUMBER = 6
+    TEXT = 7
+    TEXT_BLOCK = 8
+    TIME = 9
     VALUE_TYPES = (
         (BOOLEAN, _("Boolean")),
         (CHOICE, _("Choice")),
         (DATE, _("Date")),
+        (DATETIME, ("Date Time")),
         (FLOAT, _("Floating Point")),
         (NUMBER, _("Number")),
         (TEXT, _("Text")),
         (TEXT_BLOCK, _("Text Block")),
+        (TIME, ("Time")),
         )
     VALUE_TYPES_MAP = dict(VALUE_TYPES)
     NO = False
@@ -238,6 +242,10 @@ class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
     def __unicode__(self):
         return u"{}-{}".format(self.name, self.updated.isoformat())
+
+    def save(self, *args, **kwargs):
+        log.debug("kwargs: %s", kwargs)
+        super(ColumnCollection, self).save(*args, **kwargs)
 
 
 #

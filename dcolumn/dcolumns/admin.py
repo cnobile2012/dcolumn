@@ -63,7 +63,7 @@ class DynamicColumnAdmin(UserAdminMixin):
                                   'updated',)}),
         )
     readonly_fields = ('creator', 'slug', 'updater', 'created', 'updated',)
-    list_display = ('name', '_collection_producer', 'value_type',
+    list_display = ('name', '_collection_producer', 'slug', 'value_type',
                     '_relation_producer', 'store_relation', 'required',
                     'location', 'order', 'updated', 'active',)
     list_editable = ('location', 'order', 'active',)

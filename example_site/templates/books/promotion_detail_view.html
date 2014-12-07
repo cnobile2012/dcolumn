@@ -35,24 +35,20 @@
           <div>The record has been updated and is displayed below.</div>
 {% endif %}
         </div>
-        <div class="dynamic-container">
+        <div class="dynamic-container {{ css.top }}">
           <ul>
             <li>
               <label>Name</label>
               <span>{{ object.name }}</span>
             </li>
+{% for relation in relations.values %}
+{% if relation.location == css.top %}
             <li>
-              <label>Description</label>
-              <span>{{ object.description }}</span>
+              <label>{{ relation.name }}</label>
+              {% auto_display relation options=dynamicColumns display=True %}
             </li>
-            <li>
-              <label>Start Date</label>
-              <span>{{ object.start_date }}</span>
-            </li>
-            <li>
-              <label>End Date</label>
-              <span>{{ object.end_date }}</span>
-            </li>
+{% endif %}
+{% endfor %}
             <li>
               <label>Active</label>
               <span>{{ object.active|yesno }}</span>

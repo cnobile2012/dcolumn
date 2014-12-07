@@ -22,7 +22,8 @@ log = logging.getLogger('example_site.models')
 #
 # Promotion
 #
-class PromotionManager(BaseChoiceModelManager, StatusModelManagerMixin):
+class PromotionManager(CollectionBaseManagerBase, StatusModelManagerMixin,
+                       BaseChoiceModelManager):
 
     def dynamic_column(self, active=True):
         """
@@ -36,24 +37,15 @@ class PromotionManager(BaseChoiceModelManager, StatusModelManagerMixin):
                      for obj in self.dynamic_column(active=active)])
 
 
-class Promotion(TimeModelMixin, UserModelMixin, StatusModelMixin):
+class Promotion(CollectionBase):
     name = models.CharField(
         verbose_name=_(u"Promotion's Name"), max_length=250,
         help_text=_(u"Enter the name of the promotion."))
-    description = models.TextField(
-        verbose_name=_(u"Description"),
-        help_text=_(u"Enter a description of the book promotion."))
-    start_date = models.DateTimeField(
-        verbose_name=_(u"Start Date & Time"), null=True, blank=True,
-        help_text=_(u"Enter the start date and time of this promotion."))
-    end_date = models.DateTimeField(
-        verbose_name=_(u"End Date & Time"), null=True, blank=True,
-        help_text=_(u"Enter the end date and time of this promotion."))
 
     objects = PromotionManager()
 
     class Meta:
-        ordering = ('-start_date', 'name',)
+        ordering = ('name',)
         verbose_name = _(u"Promotion")
         verbose_name_plural = _(u"Promotions")
 
@@ -61,7 +53,7 @@ class Promotion(TimeModelMixin, UserModelMixin, StatusModelMixin):
         super(Promotion, self).save(*args, **kwargs)
 
     def __unicode__(self):
-        return u"{}-{}".format(self.name, self.start_date.isoformat())
+        return u"{}".format(self.name)
 
     def get_absolute_url(self):
         return reverse('promotion-detail', kwargs={u'pk': self.pk})

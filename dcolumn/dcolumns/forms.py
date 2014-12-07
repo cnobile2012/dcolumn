@@ -78,15 +78,21 @@ class DynamicColumnForm(forms.ModelForm):
 # CollectionFormMixin
 #
 class CollectionFormMixin(forms.ModelForm):
-    SPECIAL_CASE_MAP = {DynamicColumn.BOOLEAN: u'1',
-                        DynamicColumn.CHOICE: u'0'}
-    MAX_LENGTH_MAP = {DynamicColumn.NUMBER: 20,
-                      DynamicColumn.TEXT: 250,
-                      DynamicColumn.TEXT_BLOCK: 2000,
-                      DynamicColumn.DATE: 20,
-                      DynamicColumn.BOOLEAN: 1,
-                      DynamicColumn.FLOAT: 305,
-                      DynamicColumn.CHOICE: 12}
+    SPECIAL_CASE_MAP = {
+        DynamicColumn.BOOLEAN: u'1',
+        DynamicColumn.CHOICE: u'0',
+        }
+    MAX_LENGTH_MAP = {
+        DynamicColumn.BOOLEAN: 1,
+        DynamicColumn.CHOICE: 12,
+        DynamicColumn.DATE: 20,
+        DynamicColumn.DATETIME: 20,
+        DynamicColumn.FLOAT: 305,
+        DynamicColumn.NUMBER: 20,
+        DynamicColumn.TEXT: 250,
+        DynamicColumn.TEXT_BLOCK: 2000,
+        DynamicColumn.TIME: 20,
+        }
 
     class Meta:
         exclude = ['creator', 'updater', 'created', 'updated']
@@ -241,10 +247,10 @@ class CollectionFormMixin(forms.ModelForm):
 
         if request:
             inst.updater = request.user
-            inst.active = True
 
             if not hasattr(inst, u'creator') or not inst.creator:
                 inst.creator = request.user
+                inst.active = True
 
         if commit:
             inst.save()

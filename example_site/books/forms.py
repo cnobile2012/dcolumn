@@ -22,7 +22,7 @@ log = logging.getLogger('example_site.views')
 #
 # Promotion
 #
-class PromotionForm(forms.ModelForm):
+class PromotionForm(CollectionFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(PromotionForm, self).__init__(*args, **kwargs)
@@ -50,6 +50,7 @@ class AuthorForm(CollectionFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(AuthorForm, self).__init__(*args, **kwargs)
+        log.debug("args: %s, kwargs: %s", args, kwargs)
         self.fields[u'name'].widget = forms.TextInput(
             attrs={u'size': 50, u'maxlength': 250})
         # Gets rid of the annoying colon afer every label, but only works on
@@ -68,6 +69,7 @@ class PublisherForm(CollectionFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(PublisherForm, self).__init__(*args, **kwargs)
+        log.debug("args: %s, kwargs: %s", args, kwargs)
         self.fields[u'name'].widget = forms.TextInput(
             attrs={u'size': 50, u'maxlength': 250})
         # Gets rid of the annoying colon afer every label, but only works on
@@ -86,6 +88,7 @@ class BookForm(CollectionFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(BookForm, self).__init__(*args, **kwargs)
+        log.debug("args: %s, kwargs: %s", args, kwargs)
         self.fields[u'title'].widget = forms.TextInput(
             attrs={u'size': 50, u'maxlength': 250})
         # Gets rid of the annoying colon afer every label, but only works on

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load autodisplay %}
-{% block title %}Book List{% endblock %}
+{% block title %}Promotion List{% endblock %}
 {% block head_extras %}
     <link rel="stylesheet" href="{{ STATIC_URL }}css/list_views.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/list_pagination.css">
 {% endblock %}
 {% block header %}
   <div class="header">
-    <h2>Book List</h2>
+    <h2>Promotion List</h2>
     <div class="dashboard">
       <ul>
         <li><a href="{% url 'home' %}">Home</a></li>
@@ -51,7 +51,9 @@
             <th>Name</th>
             <th>Description</th>
             <th>Start Date</th>
+            <th>Start Time</th>
             <th>End Date</th>
+            <th>End Time</th>
             <th>Active</th>
          </tr>
         </thead>
@@ -63,9 +65,16 @@
                 {{ object.name }}
               </a>
             </td>
-            <td>{{ object.description }}</td>
-            <td>{{ object.start_date|date:"Y-m-d" }}</td>
-            <td>{{ object.end_date|date:"Y-m-d" }}</td>
+{% single_display object promotion-description as description %}
+            <td>{{ description }}</td>
+{% single_display object promotion-start-date as start_date %}
+            <td>{{ start_date|date:"Y-m-d" }}</td>
+{% single_display object promotion-start-time as start_time %}
+            <td>{{ start_time|date:"H:i:s" }}</td>
+{% single_display object promotion-end-date as end_date %}
+            <td>{{ end_date|date:"Y-m-d" }}</td>
+{% single_display object promotion-end-time as end_time %}
+            <td>{{ end_time|date:"H:i:s" }}</td>
             <td>{{ object.active|yesno }}</td>
           </tr>
 {% endfor %}

@@ -17,16 +17,16 @@ from .forms import PromotionForm, BookForm, AuthorForm, PublisherForm
 #
 class PromotionAdmin(UserAdminMixin):
     fieldsets = (
-        (None, {'fields': ('name', 'description', 'active', 'start_date',
-                           'end_date',)}),
+        (None, {'fields': ('name',)}),
         (_('Status'), {'classes': ('collapse',),
-                       'fields': ('creator', 'created', 'updater',
-                                  'updated',)}),
+                       'fields': ('column_collection', 'active', 'creator',
+                                  'created', 'updater', 'updated',)}),
         )
     readonly_fields = ('creator', 'created', 'updater', 'updated',)
-    list_display = ('name', 'description', 'active', 'start_date', 'end_date',
-                    'updated',) # '_detail_producer',)
+    list_display = ('name', 'column_collection', 'active', 'updater', 'updated',
+                    '_detail_producer',)
     list_editable = ('active',)
+    inlines = (KeyValueInline,)
     form = PromotionForm
 
 

@@ -182,25 +182,31 @@ var DynamicColumn = Class.extend({
         break;
       case 3: // Date
         $obj = $('<input class="vDateField" id="' + id + '" name="' + name +
-          '" size="12" type="text" />');
+          '" type="date" />');
         break;
-      case 4: // Float
+      case 4:
+        $obj = $('<input class="vDateField" id="' + id + '" name="' + name +
+          '" type="datetime" />');
+        break;
+      case 5: // Float
         $obj = $('<input id="' + id + '" name="' + name + '" type="text" />');
         break;
-      case 5: // Number
+      case 6: // Number
         $obj = $('<input id="' + id + '" name="' + name + '" type="number" />');
         break;
-      case 6: // Text
-        $obj = $('<input id="' + id + '" name="' + name + '" size="50"' +
-          ' type="text" />');
+      case 7: // Text
+        $obj = $('<input id="' + id + '" name="' + name + '" type="text" />');
         break;
-      case 7: // Text Block
+      case 8: // Text Block
         $obj = $('<textarea class="vLargeTextField" id="' + id +
           '" name="' + name + '" cols="40" rows="10"></textarea>');
         break;
+      case 9:
+        $obj = $('<input class="vTimeField" id="' + id + '" name="' + name +
+          '" type="time" />');
+        break;
       default: // Text
-        $obj = $('<input id="' + id + '" name="' + name + '" size="50"' +
-          ' type="text" />');
+        $obj = $('<input id="' + id + '" name="' + name + ' type="text" />');
         break;
     }
 

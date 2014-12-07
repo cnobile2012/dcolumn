@@ -250,7 +250,7 @@ author_list_view = AuthorListView.as_view()
 #
 # PromotionCreateView
 #
-class PromotionCreateView(CreateView):
+class PromotionCreateView(CollectionCreateUpdateViewMixin, CreateView):
     template_name = u'books/promotion_create_view.html'
     form_class = PromotionForm
     model = Promotion
@@ -266,7 +266,7 @@ promotion_create_view = PromotionCreateView.as_view()
 #
 # PromotionUpdateView
 #
-class PromotionUpdateView(UpdateView):
+class PromotionUpdateView(CollectionCreateUpdateViewMixin, UpdateView):
     template_name = u'books/promotion_create_view.html'
     form_class = PromotionForm
     model = Promotion
@@ -282,7 +282,7 @@ promotion_update_view = PromotionUpdateView.as_view()
 #
 # PromotionDetailView
 #
-class PromotionDetailView(DetailView):
+class PromotionDetailView(CollectionDetailViewMixin, DetailView):
     template_name = u'books/promotion_detail_view.html'
     model = Promotion
 

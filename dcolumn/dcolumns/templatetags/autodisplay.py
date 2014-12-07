@@ -14,6 +14,7 @@ __docformat__ = "restructuredtext en"
 import os, logging
 import datetime
 from StringIO import StringIO
+from dateutil import parser
 
 from django import template
 from django.utils.safestring import mark_safe
@@ -133,6 +134,14 @@ class AutoDisplayNode(template.Node):
     DISPLAY_TAG = u'<span id="{}">{}</span>'
     STORE_WRAPPER = u'<div class="storage-wrapper">{}{}</div>'
     ELEMENT_TYPES = {
+        DynamicColumn.BOOLEAN: u'<select id="{}" name="{}">\n',
+        DynamicColumn.CHOICE: u'<select id="{}" name="{}">\n',
+        DynamicColumn.DATE: (u'<input id="{}" type="date" name="{}" '
+                             u'value="{}" />'),
+        DynamicColumn.DATETIME: (u'<input id="{}" type="datetime" name="{}" '
+                                 u'value="{}" />'),
+        DynamicColumn.FLOAT: (u'<input id="{}" name="{}" type="text" '
+                              u'value="{}" />'),
         DynamicColumn.NUMBER: (u'<input id="{}" name="{}" type="number" '
                                u'value="{}" />'),
         DynamicColumn.TEXT: (u'<input id="{}" name="{}" size="50" type="text" '
@@ -140,12 +149,8 @@ class AutoDisplayNode(template.Node):
         DynamicColumn.TEXT_BLOCK: (u'<textarea class="large-text-field" '
                                    u'id="{}" name="{}" cols="40" rows="10"'
                                    u'>{}</textarea>\n'),
-        DynamicColumn.DATE: (u'<input id="{}" type="date" name="{}" '
+        DynamicColumn.TIME: (u'<input id="{}" type="time" name="{}" '
                              u'value="{}" />'),
-        DynamicColumn.BOOLEAN: u'<select id="{}" name="{}">\n',
-        DynamicColumn.FLOAT: (u'<input id="{}" name="{}" type="text" '
-                              u'value="{}" />'),
-        DynamicColumn.CHOICE: u'<select id="{}" name="{}">\n',
         }
 
     def __init__(self, tag_name, relation, prefix=u'', options=None,
@@ -396,7 +401,12 @@ class SingleDisplayNode(template.Node):
         return (value != 0) and value or u''
 
     def _fix_date(self, dc, value):
-        return datetime.date(*[int(v) for v in value.split('-') if v.isdigit()])
+        # 1985-04-12 RFC-3339
+        return datetime.date(*self._split_date(value))
+
+    def _fix_datetime(self, dc, value):
+        # 1985-04-12T23:20:50.52<+/-00:00>/Z RFC-3339
+        return parser.parse(value)
 
     def _fix_float(self, dc, value):
         return float(value)
@@ -410,14 +420,23 @@ class SingleDisplayNode(template.Node):
     def _fix_text_block(self, dc, value):
         return value
 
+    def _fix_time(self, dc, value):
+        # 23:20:50.52<+/-00:00>/Z RFC-3339
+        return parser.parse(value).timetz()
+
+    def _split_date(self, value):
+        return [int(v) for v in value.split('-') if v.isdigit()]
+
     METHOD_MAP = {
         DynamicColumn.BOOLEAN: _fix_boolean,
         DynamicColumn.CHOICE: _fix_choice,
         DynamicColumn.DATE: _fix_date,
+        DynamicColumn.DATETIME: _fix_datetime,
         DynamicColumn.FLOAT: _fix_float,
         DynamicColumn.NUMBER: _fix_number,
         DynamicColumn.TEXT: _fix_text,
         DynamicColumn.TEXT_BLOCK: _fix_text_block,
+        DynamicColumn.TIME: _fix_time,
         }
 
     def render(self, context):

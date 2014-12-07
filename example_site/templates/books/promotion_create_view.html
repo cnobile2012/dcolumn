@@ -35,28 +35,22 @@
           </ul>
 {% endif %}
         </div>
-        <div class="dynamic-container">
+        <div class="dynamic-container {{ css.top }}">
           <ul>
             <li>
               {{ form.name.label_tag }}
               {{ form.name.as_widget }}
               {{ form.name.errors }}
             </li>
+{% for relation in relations.values %}
+{% if relation.location == css.top %}
             <li>
-              {{ form.description.label_tag }}
-              {{ form.description.as_widget }}
-              {{ form.description.errors }}
+              <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
+              {% auto_display relation options=dynamicColumns %}
+              {% combine_contexts form.errors relation.slug %}
             </li>
-            <li>
-              {{ form.start_date.label_tag }}
-              {{ form.start_date.as_widget }}
-              {{ form.start_date.errors }}
-            </li>
-            <li>
-              {{ form.end_date.label_tag }}
-              {{ form.end_date.as_widget }}
-              {{ form.end_date.errors }}
-            </li>
+{% endif %}
+{% endfor %}
             <li>
               {{ form.active.label_tag }}
               {{ form.active.as_widget }}
