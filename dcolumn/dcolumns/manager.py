@@ -15,7 +15,7 @@ class DynamicColumnManager(object):
     This class manages the dynamic columns.
     """
     __shared_state = {}
-    _relations = [(0, _("---------"))]
+    _relations = [(0, "---------")]
     _relation_map = None
     _relation_numbers = set()
     _choice_map = {}
@@ -209,14 +209,15 @@ class DynamicColumnManager(object):
 
     def get_relation_model_field(self, relation):
         """
-        Gets the field used in the HTML select option text value.
+        Gets the model object and the field used in the HTML select option
+        text value. e.g. (example_site.books.models.Author, u'name')
 
         :Parameters:
           relation : int
             The value in the `DynamicColumn` relation field.
 
         :Returns:
-          The field used in the HTML select option text value.
+          The model object and field used in the HTML select option text value.
         """
         return self.choice_map.get(self.choice_relation_map.get(relation))
 
