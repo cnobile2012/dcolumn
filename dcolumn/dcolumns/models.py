@@ -143,8 +143,7 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
     _collection_producer.allow_tags = True
 
     def get_choice_relation_object_and_field(self):
-        return dcolumn_manager.get_relation_model_field(self.value_type)
-
+        return dcolumn_manager.get_relation_model_field(self.relation)
 
 
 #
