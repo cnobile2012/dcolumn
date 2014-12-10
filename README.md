@@ -174,8 +174,8 @@ There are no user methods on the `ColumnCollection` model at this time.
    * Returns the DynamicColumn instance relitive to this model instance.
  3. get_key_value_pair `method`
    * `slug` positional argument, is the slug of any dynamic column object.
-   * `field` positional argument indicating the field to use in a choice or
-      model.
+   * `field` keyword argument indicating the field to use in a choice or
+      model. Defaults to a field named `value`.
    * Returns the value of the dynamic column.
  4. set_key_value_pair `method`
    * `slug` positional argument, is the slug of any dynamic column object.

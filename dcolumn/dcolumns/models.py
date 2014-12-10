@@ -294,7 +294,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return dc
 
-    def get_key_value_pair(self, slug, field):
+    def get_key_value_pair(self, slug, field='value'):
         dc = self.get_dynamic_column(slug)
 
         try:
