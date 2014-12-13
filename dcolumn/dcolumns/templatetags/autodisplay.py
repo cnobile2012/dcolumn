@@ -147,8 +147,7 @@ class AutoDisplayNode(template.Node):
         DynamicColumn.TEXT: (u'<input id="{}" name="{}" size="50" type="text" '
                              u'value="{}" />'),
         DynamicColumn.TEXT_BLOCK: (u'<textarea class="large-text-field" '
-                                   u'id="{}" name="{}" cols="40" rows="10"'
-                                   u'>{}</textarea>\n'),
+                                   u'id="{}" name="{}">{}</textarea>\n'),
         DynamicColumn.TIME: (u'<input id="{}" type="time" name="{}" '
                              u'value="{}" />'),
         }

@@ -196,6 +196,7 @@ ul.errorlist li {
 .dynamic-container textarea,
 .dynamic-container input {
   margin-left: 5px;
+  min-width: 200px;
 }
 
 .dynamic-container input[type=text] {
@@ -233,5 +234,6 @@ ul.errorlist li {
 }
 
 .large-text-field {
-  width: 610px;
+  min-width: 68% !important;
+  height: 150px;
 }
