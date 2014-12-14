@@ -127,6 +127,7 @@ class Publisher(CollectionBase):
     objects = PublisherManager()
 
     class Meta:
+        ordering = ('name',)
         verbose_name = _("Publisher")
         verbose_name_plural = _("Publishers")
 
@@ -166,6 +167,7 @@ class Book(CollectionBase):
     objects = BookManager()
 
     class Meta:
+        ordering = ('title',)
         verbose_name = _("Book")
         verbose_name_plural = _("Books")
 
