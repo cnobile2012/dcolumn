@@ -94,7 +94,8 @@ Once you have registered the choices/models with
 `dcolumn_manager.register_choice()` do not change it, as the numeric value is
 stored in the `DynamicColumn` table. So obviously if you really really really
 need to change it you can, but you must manually modify the `Relation` in all
-the affected rows in the `DynamicColumn` table.
+the affected rows in the `DynamicColumn` table. This needs to be done as new
+features are added to the app.
 
 You will see that this is all rather simple and you'll need to write very
 little code to support DynamicColumns.
