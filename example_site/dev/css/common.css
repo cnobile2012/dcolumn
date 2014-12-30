@@ -196,7 +196,6 @@ ul.errorlist li {
 .dynamic-container textarea,
 .dynamic-container input {
   margin-left: 5px;
-  min-width: 200px;
 }
 
 .dynamic-container input[type=text] {
@@ -205,6 +204,10 @@ ul.errorlist li {
 
 .dynamic-container input[type=number] {
   width: 100px;
+}
+
+.dynamic-container input[type=checkbox] {
+  width: 20px !important;
 }
 
 .dynamic-container span {
