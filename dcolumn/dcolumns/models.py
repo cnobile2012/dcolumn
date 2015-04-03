@@ -30,8 +30,17 @@ log = logging.getLogger('dcolumn.models')
 # DynamicColumn
 #
 class DynamicColumnManager(StatusModelManagerMixin):
+    """
+    Supplies methods to the DynamicColumn objects instance.
+    """
 
     def get_fk_slugs(self):
+        """
+        This method returns a dict of the relation class name and slug.
+
+        :Returns:
+          A dict of {<relation class name>: <slug>, ...}
+        """
         result = {}
 
         for record in self.active():
@@ -43,6 +52,10 @@ class DynamicColumnManager(StatusModelManagerMixin):
 
 
 class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
+    """
+    This model defines all the fields used in models that implement dynamic
+    columns.
+    """
     BOOLEAN = 1
     CHOICE = 2
     DATE = 3
@@ -154,7 +167,7 @@ class ColumnCollectionManager(StatusModelManagerMixin):
     def get_column_collection(self, name, unassigned=False):
         """
         Get the query set for the named collection. If unassigned is True add
-        the unassigned dynamic colums to the query set.
+        the unassigned dynamic columns to the query set.
 
         :Parameters:
             name : `str`
@@ -217,7 +230,7 @@ class ColumnCollectionManager(StatusModelManagerMixin):
     def get_collection_choices(self, name, use_pk=False):
         """
         Returns a set of choices for a list of options on an HTML select tag.
-        Normally the slug is returnd as the option value, however if `use_pk`
+        Normally the slug is returned as the option value, however if `use_pk`
         is `True` then the value attribute will get the pk of the record.
         """
         records = self.get_column_collection(name)
