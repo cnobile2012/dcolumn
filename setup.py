@@ -10,7 +10,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 setup(
     name='django-dcolumns',
     version='0.4.0',
-    packages=['dcolumn',],
+    packages=['dcolumn', 'dcolumn.dcolumns', 'dcolumn.common',],
     include_package_data=True,
     license='MIT',
     description=('An app to give any Django database model the ability to '
