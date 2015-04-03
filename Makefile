@@ -27,7 +27,7 @@ build	: clean
 	python setup.py sdist
 
 upload	: clobber
-	python setup.py sdist upload
+	python setup.py sdist upload -r pypi
 
 #----------------------------------------------------------------------
 
