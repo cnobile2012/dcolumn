@@ -38,11 +38,11 @@ class UserModelMixin(models.Model):
 
     updater = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name=_("Updater"), editable=False,
-        related_name="%(app_label)s_%(class)s_updater_related+",
+        related_name="%(app_label)s_%(class)s_updater_related",
         help_text=_("The last user to update this record."))
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name=_("Creator"), editable=False,
-        related_name="%(app_label)s_%(class)s_creator_related+",
+        related_name="%(app_label)s_%(class)s_creator_related",
         help_text=_("The user  who created this record."))
 
     class Meta:
