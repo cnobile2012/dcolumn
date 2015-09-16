@@ -18,8 +18,9 @@ from dateutil.tz import tzutc
 
 from django.db import models
 from django.db.models import Q
-from django.contrib.auth.models import User
+#from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 
 from dcolumn.common import ChoiceManagerImplementation
 
@@ -36,12 +37,12 @@ class UserModelMixin(models.Model):
     """
 
     updater = models.ForeignKey(
-        User, verbose_name=_("Updater"), db_index=True, editable=False,
-        related_name="%(app_label)s_%(class)s_updater_related",
+        settings.AUTH_USER_MODEL, verbose_name=_("Updater"), editable=False,
+        related_name="%(app_label)s_%(class)s_updater_related+",
         help_text=_("The last user to update this record."))
     creator = models.ForeignKey(
-        User, verbose_name=_("Creator"), db_index=True, editable=False,
-        related_name="%(app_label)s_%(class)s_creator_related",
+        settings.AUTH_USER_MODEL, verbose_name=_("Creator"), editable=False,
+        related_name="%(app_label)s_%(class)s_creator_related+",
         help_text=_("The user  who created this record."))
 
     class Meta:
