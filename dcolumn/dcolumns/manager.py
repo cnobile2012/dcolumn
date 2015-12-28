@@ -7,7 +7,7 @@ import logging
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
-log = logging.getLogger(u'dcolumn.manager')
+log = logging.getLogger('dcolumns.dcolumns.manager')
 
 
 class DynamicColumnManager(object):
@@ -46,15 +46,15 @@ class DynamicColumnManager(object):
             option text.
         """
         if relation_num in self._relation_numbers:
-            msg = (u"Invalid relation number {} is already used. [choice: {}, "
-                   u"field: {}]").format(relation_num, choice, field)
+            msg = ("Invalid relation number {} is already used. [choice: {}, "
+                   "field: {}]").format(relation_num, choice, field)
             log.critical(msg)
             raise ValueError(msg)
 
         if (not hasattr(choice, 'objects') or
             not hasattr(choice.objects, 'dynamic_column')):
-            msg = (u"Invalid 'choice' object '{}', must have a "
-                   u"'dynamic_column' manager class method.").format(choice)
+            msg = ("Invalid 'choice' object '{}', must have a "
+                   "'dynamic_column' manager class method.").format(choice)
             log.critical(msg)
             raise AttributeError(msg)
 
@@ -83,7 +83,7 @@ class DynamicColumnManager(object):
         obj = choice()
 
         if not hasattr(obj, field):
-            msg = u"The '{}' object does not have the field '{}'".format(
+            msg = "The '{}' object does not have the field '{}'".format(
                 choice.__name__, field)
             log.critical(msg)
             raise AttributeError(msg)
@@ -135,11 +135,11 @@ class DynamicColumnManager(object):
         """
         if isinstance(container_list, (list, tuple)):
             if len(container_list) <= 0:
-                msg = (u"Must supply at least one CSS container. The format "
-                       u"can be in either of these formats: "
-                       u"(u'container_top', u'container_bottom',) or "
-                       u"((u'top', u'container_top'), "
-                       u"(u'bottom', u'container_bottom'))")
+                msg = ("Must supply at least one CSS container. The format "
+                       "can be in either of these formats: "
+                       "('container_top', 'container_bottom',) or "
+                       "(('top', 'container_top'), "
+                       "('bottom', 'container_bottom'))")
                 log.critical(msg)
                 raise TypeError(msg)
 
@@ -193,24 +193,24 @@ class DynamicColumnManager(object):
         model_name = model_name.lower()
         item_names = dict([
             (k.lower(), v)
-            for k, v in settings.DYNAMIC_COLUMNS.get(u'COLLECTIONS').items()])
+            for k, v in settings.DYNAMIC_COLUMNS.get('COLLECTIONS').items()])
 
         if model_name not in item_names:
             msg = _("Invalid model name: {}".format(model_name))
             raise KeyError(msg)
 
-        return item_names.get(model_name, u'')
+        return item_names.get(model_name, '')
 
     def get_api_auth_state(self):
         """
         Gets the value of settings.DYNAMIC_COLUMNS.INACTIVATE_API_AUTH.
         """
-        return settings.DYNAMIC_COLUMNS.get(u'INACTIVATE_API_AUTH', False)
+        return settings.DYNAMIC_COLUMNS.get('INACTIVATE_API_AUTH', False)
 
     def get_relation_model_field(self, relation):
         """
         Gets the model object and the field used in the HTML select option
-        text value. e.g. (example_site.books.models.Author, u'name')
+        text value. e.g. (example_site.books.models.Author, 'name')
 
         :Parameters:
           relation : int

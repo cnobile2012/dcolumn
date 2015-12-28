@@ -14,12 +14,12 @@ from dcolumn.common.decorators import dcolumn_login_required
 from .models import DynamicColumn, ColumnCollection
 from .manager import dcolumn_manager
 
-log = logging.getLogger('dcolumn.views')
+log = logging.getLogger('dcolumns.dcolumns.views')
 
 
 class ContextDataMixin(object):
 
-    def get_dynamic_column_context_data(self, class_name=u'', **kwargs):
+    def get_dynamic_column_context_data(self, class_name='', **kwargs):
         context = {}
         fk_slugs = DynamicColumn.objects.get_fk_slugs()
         name = dcolumn_manager.get_collection_name(class_name)
@@ -27,7 +27,7 @@ class ContextDataMixin(object):
         for model_name in ColumnCollection.objects.get_active_relation_items(
             name):
             model, field = dcolumn_manager.choice_map.get(model_name)
-            objects = context.setdefault(u'dynamicColumns', {})
+            objects = context.setdefault('dynamicColumns', {})
             values = [(r.pk, getattr(r, field))
                       for r in model.objects.dynamic_column()]
             values.insert(0, (0, "Choose a value"))
@@ -38,8 +38,8 @@ class ContextDataMixin(object):
         log.debug("context: %s", context)
         return context
 
-    def get_relation_context_data(self, class_name=u'', obj=None, **kwargs):
-        form = kwargs.get(u'form')
+    def get_relation_context_data(self, class_name='', obj=None, **kwargs):
+        form = kwargs.get('form')
 
         if form:
             relations = form.get_display_data()
@@ -49,7 +49,7 @@ class ContextDataMixin(object):
                 name, obj=obj)
 
         log.debug("relations: %s", relations)
-        return {u'relations': relations}
+        return {'relations': relations}
 
 
 #
@@ -70,15 +70,15 @@ class CollectionAJAXView(JSONResponseMixin, TemplateView, ContextDataMixin):
         which is not valid JSON.
         """
         log.debug("kwargs: %s", kwargs)
-        context = {u'valid': True}
+        context = {'valid': True}
 
         try:
             context.update(self.get_dynamic_column_context_data(**kwargs))
             context.update(self.get_relation_context_data(**kwargs))
         except Exception, e:
-            context[u'valid'] = False
-            context[u'message'] = "Error occured: {}".format(e)
-            log.error(context[u'message'], exc_info=True)
+            context['valid'] = False
+            context['message'] = "Error occured: {}".format(e)
+            log.error(context['message'], exc_info=True)
 
         return context
 
@@ -97,12 +97,12 @@ class CollectionCreateUpdateViewMixin(ContextDataMixin):
         """
         Get context data for the KeyValue objects.
         """
-        kwargs[u'class_name'] = self.model.__name__
+        kwargs['class_name'] = self.model.__name__
         context = super(CollectionCreateUpdateViewMixin,
                         self).get_context_data(**kwargs)
         context.update(self.get_dynamic_column_context_data(**kwargs))
         context.update(self.get_relation_context_data(**kwargs))
-        context.update({u'css': dcolumn_manager.css_container_map})
+        context.update({'css': dcolumn_manager.css_container_map})
         return context
 
 
@@ -115,11 +115,11 @@ class CollectionDetailViewMixin(ContextDataMixin):
         """
         Get context data for the KeyValue objects.
         """
-        kwargs[u'class_name'] = self.model.__name__
+        kwargs['class_name'] = self.model.__name__
         context = super(CollectionDetailViewMixin,
                         self).get_context_data(**kwargs)
         context.update(self.get_dynamic_column_context_data(**kwargs))
         context.update(self.get_relation_context_data(
             obj=self.object, **kwargs))
-        context.update({u'css': dcolumn_manager.css_container_map})
+        context.update({'css': dcolumn_manager.css_container_map})
         return context

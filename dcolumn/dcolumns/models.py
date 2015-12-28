@@ -23,7 +23,7 @@ from dcolumn.common.model_mixins import (
 
 from .manager import dcolumn_manager
 
-log = logging.getLogger('dcolumn.models')
+log = logging.getLogger('dcolumns.dcolumns.models')
 
 
 #
@@ -89,14 +89,14 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
         help_text=_("Enter a column name."))
     preferred_slug = models.SlugField(
         verbose_name=_("Preferred Slug"), null=True, blank=True,
-        help_text=_(u"If you don't want the slug to change when the name "
-                    u"changes enter a slug here. However, if you change this "
-                    u"field the slug will track it."))
+        help_text=_("If you don't want the slug to change when the name "
+                    "changes enter a slug here. However, if you change this "
+                    "field the slug will track it."))
     slug = models.SlugField(
         verbose_name=_("Slug"), editable=False,
-        help_text=_(u"This field is normally created from the name field, "
-                    u"however, if you want to prevent it from changing when "
-                    u"the name changes enter a preferred slug above."))
+        help_text=_("This field is normally created from the name field, "
+                    "however, if you want to prevent it from changing when "
+                    "the name changes enter a preferred slug above."))
     value_type = models.IntegerField(
         verbose_name=_("Value Type"), choices=VALUE_TYPES,
         help_text=_("Choose the value type."))
@@ -197,28 +197,28 @@ class ColumnCollectionManager(StatusModelManagerMixin):
             key_value_map = obj.serialize_key_value_pairs()
 
         if by_slug:
-            key = u'slug'
+            key = 'slug'
         else:
-            key = u'pk'
+            key = 'pk'
 
         for record in records:
             rec = result.setdefault(getattr(record, key), {})
-            rec[u'pk'] = record.pk
-            rec[u'name'] = record.name
-            rec[u'slug'] = record.slug
-            rec[u'value_type'] = record.value_type
+            rec['pk'] = record.pk
+            rec['name'] = record.name
+            rec['slug'] = record.slug
+            rec['value_type'] = record.value_type
 
             if record.relation:
-                rec[u'relation'] = record.relation
-                rec[u'store_relation'] = record.store_relation
+                rec['relation'] = record.relation
+                rec['store_relation'] = record.store_relation
 
-            rec[u'required'] = record.required
+            rec['required'] = record.required
             # We convert the list to a dict because css_container_map may
             # not be keyed with integers.
-            rec[u'location'] = dict(dcolumn_manager.css_containers).get(
-                record.location, u'')
-            rec[u'order'] = record.order
-            if obj: rec[u'value'] = key_value_map.get(record.pk, u'')
+            rec['location'] = dict(dcolumn_manager.css_containers).get(
+                record.location, '')
+            rec['order'] = record.order
+            if obj: rec['value'] = key_value_map.get(record.pk, '')
 
         return result
 
@@ -253,7 +253,7 @@ class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin):
         verbose_name_plural = _("Column Collections")
 
     def __unicode__(self):
-        return u"{}-{}".format(self.name, self.updated.isoformat())
+        return "{}-{}".format(self.name, self.updated.isoformat())
 
     def save(self, *args, **kwargs):
         log.debug("kwargs: %s", kwargs)
@@ -271,7 +271,7 @@ class CollectionBaseManagerBase(models.Manager):
     def get_all_fields(self):
         return [unicode(field)
                 for field in self.model._meta.get_all_field_names()
-                if u'collection' not in field and field != u'keyvalue_pairs']
+                if 'collection' not in field and field != 'keyvalue_pairs']
 
     def get_all_fields_and_slugs(self):
         result = self.get_all_slugs() + self.get_all_fields()
@@ -282,8 +282,8 @@ class CollectionBaseManagerBase(models.Manager):
 class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
     column_collection = models.ForeignKey(
         ColumnCollection, verbose_name=_("Column Collection"),
-        help_text=_(u"Choose the version of the dynamic columns you want "
-                    u"for all Collections."))
+        help_text=_("Choose the version of the dynamic columns you want "
+                    "for all Collections."))
 
     def save(self, *args, **kwargs):
         log.debug("kwargs: %s", kwargs)
@@ -322,7 +322,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                 value = obj.value
         except self.keyvalue_pairs.model.DoesNotExist as e:
             log.error("Could not find value for slug '%s'.", slug)
-            value = u''
+            value = ''
 
         return value
 
@@ -341,7 +341,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
           force -- Default is False, do not save empty strings or None objects
                    else True save empty strings only.
         """
-        if (force and value == u'') or value not in (None, u''):
+        if (force and value == '') or value not in (None, ''):
             dc = self.get_dynamic_column(slug)
 
             if dc:
@@ -349,18 +349,18 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                     value = getattr(value, field)
                 elif hasattr(value, field):
                     value = getattr(value, field)
-                elif hasattr(value, u'pk'):
+                elif hasattr(value, 'pk'):
                     value = value.pk
                 elif isinstance(value, (datetime.datetime, datetime.date)):
-                    value = value.strftime(u"%Y-%m-%d")
+                    value = value.strftime("%Y-%m-%d")
 
                 kv, created = self.keyvalue_pairs.get_or_create(
-                    dynamic_column=dc, defaults={u'value': value})
+                    dynamic_column=dc, defaults={'value': value})
 
                 if not created:
-                    if u'increment' == value and kv.value.isdigit():
+                    if 'increment' == value and kv.value.isdigit():
                         value = int(kv.value) + 1
-                    elif u'decrement' == value and kv.value.isdigit():
+                    elif 'decrement' == value and kv.value.isdigit():
                         value = int(kv.value) - 1
 
                     kv.value = value

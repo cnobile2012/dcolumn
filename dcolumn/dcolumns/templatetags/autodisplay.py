@@ -22,7 +22,7 @@ from django.utils.safestring import mark_safe
 from dcolumn.dcolumns.models import DynamicColumn, KeyValue
 from dcolumn.dcolumns.manager import dcolumn_manager
 
-log = logging.getLogger(u'dcolumn.templates')
+log = logging.getLogger('dcolumns.dcolumns.templatetags')
 register = template.Library()
 
 
@@ -94,8 +94,8 @@ def auto_display(parser, token):
     """
     tokens = token.split_contents()
     size = len(tokens)
-    keywords = (u'prefix', u'options', u'display')
-    kwargs = {u'prefix': u'', u'options': None, u'display': u'False'}
+    keywords = ('prefix', 'options', 'display')
+    kwargs = {'prefix': '', 'options': None, 'display': 'False'}
 
     if size == 2:
         tag_name, relation = tokens
@@ -113,12 +113,12 @@ def auto_display(parser, token):
         kwargs.update({k: v for k,d,v in [v.partition('=')
                                           for v in (value1, value2, value3)]})
     else:
-        msg = (u"Invalue number of arguments should be 1 - 4, "
-               u"found: {}").format(size-1)
+        msg = ("Invalue number of arguments should be 1 - 4, "
+               "found: {}").format(size-1)
         raise template.TemplateSyntaxError(msg)
 
     if size > 2 and not all([key in keywords for key in kwargs]):
-        msg = u"Invalid keyword name, should be one of {}".format(keywords)
+        msg = "Invalid keyword name, should be one of {}".format(keywords)
         raise template.TemplateSyntaxError(msg)
 
     return AutoDisplayNode(tag_name, relation, **kwargs)
@@ -128,31 +128,31 @@ class AutoDisplayNode(template.Node):
     """
     Node class for the `auto_display` tag.
     """
-    ERROR_MSG = (u"Invalid relation object--please note steps that "
-                 u"led to this error and file a bug report.")
-    YES_NO = ((1, u'Unknown'), (2, u'Yes'), (3, u'No'),)
-    DISPLAY_TAG = u'<span id="{}">{}</span>'
-    STORE_WRAPPER = u'<div class="storage-wrapper">{}{}</div>'
+    ERROR_MSG = ("Invalid relation object--please note steps that "
+                 "led to this error and file a bug report.")
+    YES_NO = ((1, 'Unknown'), (2, 'Yes'), (3, 'No'),)
+    DISPLAY_TAG = '<span id="{}">{}</span>'
+    STORE_WRAPPER = '<div class="storage-wrapper">{}{}</div>'
     ELEMENT_TYPES = {
-        DynamicColumn.BOOLEAN: u'<select id="{}" name="{}">\n',
-        DynamicColumn.CHOICE: u'<select id="{}" name="{}">\n',
-        DynamicColumn.DATE: (u'<input id="{}" type="date" name="{}" '
-                             u'value="{}" />'),
-        DynamicColumn.DATETIME: (u'<input id="{}" type="datetime" name="{}" '
-                                 u'value="{}" />'),
-        DynamicColumn.FLOAT: (u'<input id="{}" name="{}" type="text" '
-                              u'value="{}" />'),
-        DynamicColumn.NUMBER: (u'<input id="{}" name="{}" type="number" '
-                               u'value="{}" />'),
-        DynamicColumn.TEXT: (u'<input id="{}" name="{}" size="50" type="text" '
-                             u'value="{}" />'),
-        DynamicColumn.TEXT_BLOCK: (u'<textarea class="large-text-field" '
-                                   u'id="{}" name="{}">{}</textarea>\n'),
-        DynamicColumn.TIME: (u'<input id="{}" type="time" name="{}" '
-                             u'value="{}" />'),
+        DynamicColumn.BOOLEAN: '<select id="{}" name="{}">\n',
+        DynamicColumn.CHOICE: '<select id="{}" name="{}">\n',
+        DynamicColumn.DATE: ('<input id="{}" type="date" name="{}" '
+                             'value="{}" />'),
+        DynamicColumn.DATETIME: ('<input id="{}" type="datetime" name="{}" '
+                                 'value="{}" />'),
+        DynamicColumn.FLOAT: ('<input id="{}" name="{}" type="text" '
+                              'value="{}" />'),
+        DynamicColumn.NUMBER: ('<input id="{}" name="{}" type="number" '
+                               'value="{}" />'),
+        DynamicColumn.TEXT: ('<input id="{}" name="{}" size="50" type="text" '
+                             'value="{}" />'),
+        DynamicColumn.TEXT_BLOCK: ('<textarea class="large-text-field" '
+                                   'id="{}" name="{}">{}</textarea>\n'),
+        DynamicColumn.TIME: ('<input id="{}" type="time" name="{}" '
+                             'value="{}" />'),
         }
 
-    def __init__(self, tag_name, relation, prefix=u'', options=None,
+    def __init__(self, tag_name, relation, prefix='', options=None,
                  display='False'):
         self.tag_name = tag_name
         self.relation = template.Variable(relation)
@@ -179,14 +179,14 @@ class AutoDisplayNode(template.Node):
         log.debug("relation: %s, display: %s", relation, self.display)
 
         if relation:
-            value_type = relation.get(u'value_type')
+            value_type = relation.get('value_type')
 
             if self.display:
                 elem = self.DISPLAY_TAG
             else:
-                elem = self.ELEMENT_TYPES.get(value_type, u'')
+                elem = self.ELEMENT_TYPES.get(value_type, '')
 
-            attr = u"{}{}".format(self.prefix, relation.get(u'slug'))
+            attr = "{}{}".format(self.prefix, relation.get('slug'))
 
             # Choices are a special case since we need to determine
             # what the options will be.
@@ -203,10 +203,10 @@ class AutoDisplayNode(template.Node):
                 else:
                     elem = self._add_options(elem, attr, options, relation)
 
-                    if (relation.get(u'store_relation', False) and
-                        u'selected' not in elem):
+                    if (relation.get('store_relation', False) and
+                        'selected' not in elem):
                         tmp_elem = self._find_value(
-                            self.DISPLAY_TAG, u'store-' + attr, {}, relation)
+                            self.DISPLAY_TAG, 'store-' + attr, {}, relation)
                         elem = self.STORE_WRAPPER.format(elem, tmp_elem)
             elif value_type == DynamicColumn.BOOLEAN:
                 if self.display:
@@ -214,12 +214,12 @@ class AutoDisplayNode(template.Node):
                 else:
                     elem = self._add_options(elem, attr, self.YES_NO, relation)
             elif self.display:
-                elem = elem.format(u"id-" + attr, relation.get(u'value', u''))
+                elem = elem.format("id-" + attr, relation.get('value', ''))
             else:
-                elem = elem.format(u"id-" + attr, attr,
-                                   relation.get(u'value', u''))
+                elem = elem.format("id-" + attr, attr,
+                                   relation.get('value', ''))
         else:
-            elem = u"<span>{}</span>".format(self.ERROR_MSG)
+            elem = "<span>{}</span>".format(self.ERROR_MSG)
 
         return mark_safe(elem)
 
@@ -243,12 +243,12 @@ class AutoDisplayNode(template.Node):
         if isinstance(fk_options, (list, tuple,)):
             options = fk_options
         else:
-            slug = relation.get(u'slug')
+            slug = relation.get('slug')
 
             if slug:
                 options = fk_options.get(slug, {})
             else:
-                msg = u'Invalid key for relation, {}'.format(relation)
+                msg = 'Invalid key for relation, {}'.format(relation)
                 log.error(msg)
                 raise template.TemplateSyntaxError(msg)
 
@@ -277,24 +277,24 @@ class AutoDisplayNode(template.Node):
         elem = elem.format("id-" + attr, attr)
         buff = StringIO(elem)
         buff.seek(0, os.SEEK_END)
-        value = relation.get(u'value', u'')
+        value = relation.get('value', '')
 
         # Get the ID if the value is stored and not a pk.
-        if relation.get(u'store_relation', False):
+        if relation.get('store_relation', False):
             value = [k for k, v in options if v == value]
             value = len(value) >= 1 and value[0] or 0
 
         value = unicode(value).isdigit() and int(value) or value
 
         for k, v in options:
-            s = u""
+            s = ""
 
             if k == value and unicode(value).isdigit() and int(value) != 0:
-                s = u" selected"
+                s = " selected"
 
-            buff.write(u'<option value="{}"{}>{}</option>\n'.format(k, s, v))
+            buff.write('<option value="{}"{}>{}</option>\n'.format(k, s, v))
 
-        buff.write(u'</select>\n')
+        buff.write('</select>\n')
         elem = buff.getvalue()
         buff.close()
         return elem
@@ -319,15 +319,15 @@ class AutoDisplayNode(template.Node):
         """
         log.debug("elem: %s, attr: %s, options: %s, relation: %s",
                   elem, attr, options, relation)
-        value = relation.get(u'value', u'')
+        value = relation.get('value', '')
 
         # Get the value is the ID then get the value.
-        if relation.get(u'store_relation', False):
-            if value == u'0':
-                value = u''
+        if relation.get('store_relation', False):
+            if value == '0':
+                value = ''
         else:
             key = value.isdigit() and int(value) or value
-            value = dict(options).get(key, u'')
+            value = dict(options).get(key, '')
 
         elem = elem.format("id-" + attr, value)
         return elem
@@ -365,7 +365,7 @@ def single_display(parser, token):
         raise template.TemplateSyntaxError(
             msg.format(token.contents.split()[0]))
 
-    if delimiter != u'as':
+    if delimiter != 'as':
         raise template.TemplateSyntaxError(
             "The second argument must be the word 'as' found '{}'.".format(
                 delimiter))
@@ -385,7 +385,7 @@ class SingleDisplayNode(template.Node):
         self.name = name
 
     def _fix_boolean(self, dc, value):
-        return {0: u'Unknown', 1: u'Yes', 2: u'No'}.get(value, u'')
+        return {0: 'Unknown', 1: 'Yes', 2: 'No'}.get(value, '')
 
     def _fix_choice(self, dc, value):
         choice_name = dcolumn_manager.choice_relation_map[dc.relation]
@@ -393,11 +393,11 @@ class SingleDisplayNode(template.Node):
         value = int(value)
 
         for choice in obj.objects.dynamic_column():
-            if getattr(choice, u'pk') == value:
+            if getattr(choice, 'pk') == value:
                 value = getattr(choice, field)
                 break
 
-        return (value != 0) and value or u''
+        return (value != 0) and value or ''
 
     def _fix_date(self, dc, value):
         # 1985-04-12 RFC-3339
@@ -444,7 +444,7 @@ class SingleDisplayNode(template.Node):
         except template.VariableDoesNotExist:
             obj = None
 
-        value = u''
+        value = ''
 
         try:
             key_value = obj.keyvalue_pairs.get(dynamic_column__slug=self.slug)
@@ -460,7 +460,7 @@ class SingleDisplayNode(template.Node):
             log.warn("KeyValue pair does not exist for slug %s", self.slug)
 
         context[self.name] = value
-        return u''
+        return ''
 
 
 #
@@ -504,7 +504,7 @@ class CombineContextsNode(template.Node):
 
     def render(self, context):
         result = self.obj.resolve(context).get(self.variable.resolve(context))
-        return result and result or u''
+        return result and result or ''
 
 
 if __name__ == '__main__':
@@ -512,40 +512,40 @@ if __name__ == '__main__':
     from django.template import Template, Context
 
     context = {}
-    context.update({u'relation': {u'name': u"Project Name"}})
+    context.update({'relation': {'name': "Project Name"}})
 
     fk_options = {
-        u"dynamicColumns": {
-            u"book": [
-                [0, u"Choose a value"],
-                [2, u"HTML5 Pocket Reference"],
-                [1, u"SQL Pocket Guide"],
-                [3, u"Raspberry Pi Hacks"]
+        "dynamicColumns": {
+            "book": [
+                [0, "Choose a value"],
+                [2, "HTML5 Pocket Reference"],
+                [1, "SQL Pocket Guide"],
+                [3, "Raspberry Pi Hacks"]
                 ]
             },
         }
 
     for i in range(len(DynamicColumn.VALUE_TYPES)):
-        relation = context.get(u'relation')
-        relation[u'value_type'] = i
+        relation = context.get('relation')
+        relation['value_type'] = i
 
         if i == DynamicColumn.CHOICE:
-            rel = context.get(u'relation')
-            rel[u'key'] = u'book'
-            cmd = (u"{% auto_display relation prefix=test- "
-                   u"options=dynamicColumns %}")
+            rel = context.get('relation')
+            rel['key'] = 'book'
+            cmd = ("{% auto_display relation prefix=test- "
+                   "options=dynamicColumns %}")
             context.update(fk_options)
         else:
-            cmd = u"{% auto_display relation %}"
-            rel = context.get(u'relation')
-            rel.pop(u'key', None)
-            context.pop(u'dynamicColumns', None)
+            cmd = "{% auto_display relation %}"
+            rel = context.get('relation')
+            rel.pop('key', None)
+            context.pop('dynamicColumns', None)
 
         try:
             print 'Test {}--{}'.format(i+1, cmd)
             c = Context(context)
-            command = u"Element: {}".format(cmd)
-            t = Template(u"{% load autodisplay %}" + command)
+            command = "Element: {}".format(cmd)
+            t = Template("{% load autodisplay %}" + command)
             print 'Context Data:', c
             print t.render(c)
             print

@@ -16,7 +16,7 @@ from dcolumn.dcolumns.models import CollectionBase, CollectionBaseManagerBase
 from .choices import Language
 
 
-log = logging.getLogger('example_site.models')
+log = logging.getLogger('examples.books.models')
 
 
 #
@@ -28,7 +28,7 @@ class PromotionManager(CollectionBaseManagerBase, StatusModelManagerMixin,
     def dynamic_column(self, active=True):
         """
         We need to return all choices even if some are inactive, because
-        the store_relation field in DynamicColumn' is acive for this model.
+        the store_relation field in DynamicColumn' is active for this model.
         """
         return self.active(active=active)
 
@@ -39,28 +39,28 @@ class PromotionManager(CollectionBaseManagerBase, StatusModelManagerMixin,
 
 class Promotion(CollectionBase):
     name = models.CharField(
-        verbose_name=_(u"Promotion's Name"), max_length=250,
-        help_text=_(u"Enter the name of the promotion."))
+        verbose_name=_("Promotion's Name"), max_length=250,
+        help_text=_("Enter the name of the promotion."))
 
     objects = PromotionManager()
 
     class Meta:
         ordering = ('name',)
-        verbose_name = _(u"Promotion")
-        verbose_name_plural = _(u"Promotions")
+        verbose_name = _("Promotion")
+        verbose_name_plural = _("Promotions")
 
     def save(self, *args, **kwargs):
         super(Promotion, self).save(*args, **kwargs)
 
     def __unicode__(self):
-        return u"{}".format(self.name)
+        return "{}".format(self.name)
 
     def get_absolute_url(self):
-        return reverse('promotion-detail', kwargs={u'pk': self.pk})
+        return reverse('promotion-detail', kwargs={'pk': self.pk})
 
     def _detail_producer(self):
-        return u'<a href="{}">View Page</a>'.format(self.get_absolute_url())
-    _detail_producer.short_description = _(u"View Detail")
+        return '<a href="{}">View Page</a>'.format(self.get_absolute_url())
+    _detail_producer.short_description = _("View Detail")
     _detail_producer.allow_tags = True
 
 
@@ -97,11 +97,11 @@ class Author(CollectionBase):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('author-detail', kwargs={u'pk': self.pk})
+        return reverse('author-detail', kwargs={'pk': self.pk})
 
     def _detail_producer(self):
-        return u'<a href="{}">View Page</a>'.format(self.get_absolute_url())
-    _detail_producer.short_description = _(u"View Detail")
+        return '<a href="{}">View Page</a>'.format(self.get_absolute_url())
+    _detail_producer.short_description = _("View Detail")
     _detail_producer.allow_tags = True
 
 
@@ -138,11 +138,11 @@ class Publisher(CollectionBase):
         return unicode("{}".format(self.name))
 
     def get_absolute_url(self):
-        return reverse('publisher-detail', kwargs={u'pk': self.pk})
+        return reverse('publisher-detail', kwargs={'pk': self.pk})
 
     def _detail_producer(self):
-        return u'<a href="{}">View Page</a>'.format(self.get_absolute_url())
-    _detail_producer.short_description = _(u"View Detail")
+        return '<a href="{}">View Page</a>'.format(self.get_absolute_url())
+    _detail_producer.short_description = _("View Detail")
     _detail_producer.allow_tags = True
 
 #
@@ -178,9 +178,9 @@ class Book(CollectionBase):
         return unicode("{}".format(self.title))
 
     def get_absolute_url(self):
-        return reverse('book-detail', kwargs={u'pk': self.pk})
+        return reverse('book-detail', kwargs={'pk': self.pk})
 
     def _detail_producer(self):
-        return u'<a href="{}">View Page</a>'.format(self.get_absolute_url())
-    _detail_producer.short_description = _(u"View Detail")
+        return '<a href="{}">View Page</a>'.format(self.get_absolute_url())
+    _detail_producer.short_description = _("View Detail")
     _detail_producer.allow_tags = True

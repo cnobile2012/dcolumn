@@ -9,7 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from dcolumn.common import ChoiceManagerImplementation
 
-log = logging.getLogger('dcolumn.choices')
+log = logging.getLogger('dcolumns.common.choices')
 
 
 #
@@ -38,7 +38,7 @@ class InspectChoice(object):
         start = 0 + skip
 
         if len(stack) < start + 1:
-            return u''
+            return ''
 
         parentframe = stack[start][0]    
         name_list = []
@@ -50,15 +50,15 @@ class InspectChoice(object):
             name_list.append(module.__name__)
 
         # detect classname
-        if u'self' in parentframe.f_locals:
+        if 'self' in parentframe.f_locals:
             # I don't know any way to detect call from the object method
             # XXX: there seems to be no way to detect static method call--it
             # will be just a function call
-            name_list.append(parentframe.f_locals[u'self'].__class__.__name__)
+            name_list.append(parentframe.f_locals['self'].__class__.__name__)
 
         codename = parentframe.f_code.co_name
 
-        if codename != u'<module>':  # top level usually
+        if codename != '<module>':  # top level usually
             name_list.append( codename ) # function or a method
 
         del parentframe
@@ -96,12 +96,12 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
         self.container_map = {}
 
         if not self.VALUES:
-            raise TypeError(_(u"Must set the '_VALUES' object to valid "
-                              u"choices for the container object."))
+            raise TypeError(_("Must set the '_VALUES' object to valid "
+                              "choices for the container object."))
 
         if not self.FIELD_LIST and len(self.FIELD_LIST) > 1:
-            raise TypeError(_(u"Must provide fields to populate for your "
-                              u"choices."))
+            raise TypeError(_("Must provide fields to populate for your "
+                              "choices."))
 
     @InspectChoice.set_model
     def dynamic_column(self):
@@ -125,7 +125,7 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
 
     def get_value_by_pk(self, pk, field=None):
         self.dynamic_column()
-        value = u''
+        value = ''
         pk = int(pk)
 
         if pk != 0:

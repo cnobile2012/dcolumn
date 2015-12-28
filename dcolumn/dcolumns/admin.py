@@ -46,7 +46,7 @@ class ColumnCollectionAdmin(UserAdminMixin):
     class Media:
         js = ('dcolumn/js/jquery-1.11.1.min.js', 'dcolumn/js/inheritance.js',
               'dcolumn/js/column-collection.js',)
-        css = {u'all': ('dcolumn/css/column-collection.css',)}
+        css = {'all': ('dcolumn/css/column-collection.css',)}
 
 
 #

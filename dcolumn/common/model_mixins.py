@@ -24,7 +24,7 @@ from django.conf import settings
 
 from dcolumn.common import ChoiceManagerImplementation
 
-log = logging.getLogger('dcolumn.models')
+log = logging.getLogger('dcolumns.common.models')
 
 
 #
@@ -92,10 +92,10 @@ class TimeModelMixin(models.Model):
         """
         Permit the disabling of the created and updated date times.
         """
-        if not kwargs.pop(u'disable_created', False) and self.created is None:
+        if not kwargs.pop('disable_created', False) and self.created is None:
             self.created = datetime.now(tzutc())
 
-        if not kwargs.pop(u'disable_updated', False):
+        if not kwargs.pop('disable_updated', False):
             self.updated = datetime.now(tzutc())
 
         log.debug("kwargs: %s, created: %s, updated: %s",
@@ -153,7 +153,7 @@ class StatusModelMixin(models.Model):
 class BaseChoiceModelManager(models.Manager, ChoiceManagerImplementation):
 
     def get_value_by_pk(self, pk, field=None):
-        value = u''
+        value = ''
 
         if int(pk) != 0:
             try:

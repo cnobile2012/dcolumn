@@ -1,10 +1,11 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html lang="en-US">
   <head>
     <meta charset="utf-8" />
     <title>{% block title %}Django Tests{% endblock %}</title>
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/common.css">
-    <script src="{{ STATIC_URL }}dcolumn/js/jquery-1.11.1.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/common.css'%}">
+    <script src="{% static 'dcolumn/js/jquery-1.11.1.min.js'%}"></script>
     {% block head_extras %}{% endblock %}
   </head>
   <body>

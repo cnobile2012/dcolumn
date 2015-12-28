@@ -22,23 +22,8 @@ SECRET_KEY = 'gsx-ua^+oo7aqw=jn2ln2jiy3w4sl+5q$lxb2k-5tqasw+sxl*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-TEMPLATE_DEBUG = DEBUG
 
 ALLOWED_HOSTS = []
-
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-    #'django.template.loaders.eggs.Loader',
-    )
-
-# Put strings here, like "/home/html/django_templates" or
-#                        "C:/www/django/templates".
-# Always use forward slashes, even on Windows.
-# Don't forget to use absolute paths, not relative paths.
-TEMPLATE_DIRS = (
-    os.path.abspath(os.path.join(SITE_ROOT, 'templates')),
-    )
 
 # Application definition
 INSTALLED_APPS = [
@@ -52,6 +37,31 @@ INSTALLED_APPS = [
     'dcolumn.dcolumns',
     'example_site.books',
     ]
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(SITE_ROOT, 'templates'),
+            ],
+#        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                'django.core.context_processors.static',
+                ],
+            'debug': DEBUG,
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+                #'django.template.loaders.eggs.Loader',
+                ],
+        },
+    },
+]
 
 MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -93,7 +103,7 @@ STATIC_ROOT = os.path.abspath(os.path.join(SITE_ROOT, 'static/'))
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = os.path.join(SITE_URL, 'static/')
+STATIC_URL = SITE_URL + 'static/'
 
 # Additional locations of static files
 # Put strings here, like "/home/html/static" or "C:/www/django/static".
@@ -108,24 +118,24 @@ DYNAMIC_COLUMNS = {
     # The default key/value pairs for the ColumnCollection object to use for
     # all tables that use dcolumn. The key is the table name and the value is
     # the name used in the ColumnCollection record.
-    u'COLLECTIONS': {
-        u'Book': u'Book Current',
-        u'Author': u'Author Current',
-        u'Publisher': u'Publisher Current',
-        u'Promotion': u'Promotion Current',
+    'COLLECTIONS': {
+        'Book': 'Book Current',
+        'Author': 'Author Current',
+        'Publisher': 'Publisher Current',
+        'Promotion': 'Promotion Current',
         },
     # To allow anybody to access the API set to True.
-    u'INACTIVATE_API_AUTH': False,
+    'INACTIVATE_API_AUTH': False,
     }
 #dcolumn_manager.register_css_containers(
-#    (u'top-container', u'center-container', u'bottom-container'))
+#    ('top-container', 'center-container', 'bottom-container'))
 dcolumn_manager.register_css_containers(
-    ((u'top', u'top-container'),
-     (u'center', u'center-container'),
-     (u'bottom', u'bottom-container')))
+    (('top', 'top-container'),
+     ('center', 'center-container'),
+     ('bottom', 'bottom-container')))
 
 # Change the URL below to your login path.
-LOGIN_URL = u"/admin/"
+LOGIN_URL = "/admin/"
 
 # A sample logging configuration. The only tangible logging performed by this
 # configuration is to send an email to the site admins on every HTTP 500 error
@@ -163,7 +173,7 @@ LOGGING = {
             'class':'logging.StreamHandler',
             'formatter': 'simple'
             },
-        'views_file': {
+        'examples_file': {
             'class': ('example_site.common.loghandlers'
                       '.DeferredRotatingFileHandler'),
             'level': 'DEBUG',
@@ -172,34 +182,7 @@ LOGGING = {
             'maxBytes': 50000000, # 50 Meg bytes
             'backupCount': 5,
             },
-        'models_file': {
-            'class': ('example_site.common.loghandlers'
-                      '.DeferredRotatingFileHandler'),
-            'level': 'DEBUG',
-            'formatter': 'verbose',
-            'filename': '/dev/null',
-            'maxBytes': 50000000, # 50 Meg bytes
-            'backupCount': 5,
-            },
-        'templates_file': {
-            'class': ('example_site.common.loghandlers'
-                      '.DeferredRotatingFileHandler'),
-            'level': 'DEBUG',
-            'formatter': 'verbose',
-            'filename': '/dev/null',
-            'maxBytes': 50000000, # 50 Meg bytes
-            'backupCount': 5,
-            },
-        'manager_file': {
-            'class': ('example_site.common.loghandlers'
-                      '.DeferredRotatingFileHandler'),
-            'level': 'DEBUG',
-            'formatter': 'verbose',
-            'filename': '/dev/null',
-            'maxBytes': 50000000, # 50 Meg bytes
-            'backupCount': 5,
-            },
-        'choice_file': {
+        'dcolumns_file': {
             'class': ('example_site.common.loghandlers'
                       '.DeferredRotatingFileHandler'),
             'level': 'DEBUG',
@@ -215,43 +198,18 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
             },
-        'example_site.views': {
-            'handlers': ('views_file', 'console', 'mail_admins',),
+        'examples': {
+            'handlers': ('examples_file', 'console', 'mail_admins',),
             'level': 'ERROR',
             'propagate': True,
             },
-        'example_site.models': {
-            'handlers': ('models_file', 'console', 'mail_admins',),
+        'dcolumns': {
+            'handlers': ('dcolumns_file', 'console', 'mail_admins',),
             'level': 'ERROR',
             'propagate': True,
             },
-        'example_site.templates': {
-            'handlers': ('templates_file', 'console', 'mail_admins',),
-            'level': 'ERROR',
-            'propagate': True,
-            },
-        'dcolumn.views': {
-            'handlers': ('views_file', 'console', 'mail_admins',),
-            'level': 'ERROR',
-            'propagate': True,
-            },
-        'dcolumn.models': {
-            'handlers': ('models_file', 'console', 'mail_admins',),
-            'level': 'ERROR',
-            'propagate': True,
-            },
-        'dcolumn.templates': {
-            'handlers': ('templates_file', 'console', 'mail_admins',),
-            'level': 'ERROR',
-            'propagate': True,
-            },
-        'dcolumn.manager': {
-            'handlers': ('manager_file', 'console', 'mail_admins',),
-            'level': 'ERROR',
-            'propagate': True,
-            },
-        'dcolumn.choices': {
-            'handlers': ('choice_file', 'console', 'mail_admins',),
+        'dcolumns.dcolumns.manager': {
+            'handlers': ('dcolumns_file', 'mail_admins',),
             'level': 'ERROR',
             'propagate': True,
             },

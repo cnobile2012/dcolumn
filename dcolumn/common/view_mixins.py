@@ -5,7 +5,7 @@
 import logging, json
 from django.http import HttpResponse
 
-log = logging.getLogger('dcolumn.views')
+log = logging.getLogger('dcolumns.common.views')
 
 
 class JSONResponseMixin(object):

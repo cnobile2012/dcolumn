@@ -15,8 +15,8 @@ from dcolumn.dcolumns.manager import dcolumn_manager
 # Language
 #
 class LanguageManager(BaseChoiceManager):
-    VALUES = (u'Chinese', u'English', u'Portuguese', u'Russian', u'Japanese',)
-    FIELD_LIST = (u'pk', u'name',)
+    VALUES = ('Chinese', 'English', 'Portuguese', 'Russian', 'Japanese',)
+    FIELD_LIST = ('pk', 'name',)
 
     def __init__(self):
         super(LanguageManager, self).__init__()
@@ -24,8 +24,8 @@ class LanguageManager(BaseChoiceManager):
 
 class Language(object):
     pk = 0
-    name = u''
+    name = ''
 
     objects = LanguageManager()
 
-dcolumn_manager.register_choice(Language, 1, u'name')
+dcolumn_manager.register_choice(Language, 1, 'name')

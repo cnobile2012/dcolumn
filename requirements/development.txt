@@ -6,3 +6,6 @@ django_debug_toolbar
 
 # SlimIt - JavaScript minifier
 slimit
+
+# Extensions
+django-extensions

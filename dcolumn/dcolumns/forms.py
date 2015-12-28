@@ -11,7 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from .manager import dcolumn_manager
 from .models import DynamicColumn, ColumnCollection, KeyValue
 
-log = logging.getLogger('dcolumn.views')
+log = logging.getLogger('dcolumns.dcolumns.views')
 
 
 #
@@ -24,7 +24,7 @@ class ColumnCollectionForm(forms.ModelForm):
         log.debug("args: %s, kwargs: %s", args, kwargs)
         self.columns = ColumnCollection.objects.get_column_collection(
             self.instance.name, unassigned=True)
-        self.fields[u'dynamic_column'].queryset = self.columns
+        self.fields['dynamic_column'].queryset = self.columns
 
     class Meta:
         model = ColumnCollection
@@ -36,7 +36,7 @@ class ColumnCollectionForm(forms.ModelForm):
                    "in the Dynamic Columns model to be used for this "
                    "collection type.")
             log.error(msg)
-            raise forms.ValidationError({u'dynamic_column': [msg]})
+            raise forms.ValidationError({'dynamic_column': [msg]})
 
         return self.cleaned_data
 
@@ -48,9 +48,9 @@ class DynamicColumnForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(DynamicColumnForm, self).__init__(*args, **kwargs)
-        self.fields[u'relation'] = forms.ChoiceField(
+        self.fields['relation'] = forms.ChoiceField(
             widget=forms.Select, choices=dcolumn_manager.choice_relations)
-        self.fields[u'relation'].required = False
+        self.fields['relation'].required = False
 
     class Meta:
         model = DynamicColumn
@@ -58,18 +58,18 @@ class DynamicColumnForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super(DynamicColumnForm, self).clean()
-        value_type = cleaned_data.get(u'value_type')
-        relation = cleaned_data.get(u'relation', u'0')
+        value_type = cleaned_data.get('value_type')
+        relation = cleaned_data.get('relation', '0')
         relation = int(relation)
         log.debug("value_type: %s, relation: %s", value_type, relation)
 
         if value_type == DynamicColumn.CHOICE:
             if not relation:
-                self._errors[u'relation'] = self.error_class(
-                        [_(u"If the Value Type is a Choice then a relation "
-                           u"must be entered.")])
+                self._errors['relation'] = self.error_class(
+                        [_("If the Value Type is a Choice then a relation "
+                           "must be entered.")])
         else:
-            cleaned_data[u'relation'] = None
+            cleaned_data['relation'] = None
 
         return cleaned_data
 
@@ -79,8 +79,8 @@ class DynamicColumnForm(forms.ModelForm):
 #
 class CollectionFormMixin(forms.ModelForm):
     SPECIAL_CASE_MAP = {
-        DynamicColumn.BOOLEAN: u'1',
-        DynamicColumn.CHOICE: u'0',
+        DynamicColumn.BOOLEAN: '1',
+        DynamicColumn.CHOICE: '0',
         }
     MAX_LENGTH_MAP = {
         DynamicColumn.BOOLEAN: 1,
@@ -103,13 +103,13 @@ class CollectionFormMixin(forms.ModelForm):
             self.Meta.model.__name__)
         self.relations = ColumnCollection.objects.serialize_columns(
             self.coll_name)
-        self.fields[u'column_collection'].required = False
+        self.fields['column_collection'].required = False
 
-        if u'created' in self.fields:
-            self.fields[u'created'].required = False
+        if 'created' in self.fields:
+            self.fields['created'].required = False
 
-        if u'updated' in self.fields:
-            self.fields[u'updated'].required = False
+        if 'updated' in self.fields:
+            self.fields['updated'].required = False
 
         log.debug("args: %s, kwargs: %s", args, kwargs)
         log.debug("fields: %s, data: %s", self.fields, self.data)
@@ -121,8 +121,8 @@ class CollectionFormMixin(forms.ModelForm):
                 relation = self.relations.setdefault(pk, {})
                 # We only want to add new data not overwrite data that is
                 # already there.
-                if u'value' not in relation:
-                    relation[u'value'] = value
+                if 'value' not in relation:
+                    relation['value'] = value
 
         return self.relations
 
@@ -140,10 +140,10 @@ class CollectionFormMixin(forms.ModelForm):
             log.debug("relation: %s", relation)
 
             for key, value in self.data.items():
-                if key == relation.get(u'slug'):
+                if key == relation.get('slug'):
                     value = self.validate_store_relation(relation, value)
                     value = self.validate_date_types(relation, key, value)
-                    relation[u'value'] = value
+                    relation['value'] = value
                     self.validate_required(relation, key, value)
                     self.validate_value_type(relation, key, value)
                     self.validate_value_length(relation, key, value)
@@ -156,10 +156,10 @@ class CollectionFormMixin(forms.ModelForm):
         PK. If 'store_relation' is True then lookup in the choices using the
         PK and return the actual value.
         """
-        if relation.get(u'store_relation', False):
+        if relation.get('store_relation', False):
             log.debug("value: %s, relation: %s", value, relation)
             data = dcolumn_manager.get_relation_model_field(
-                relation.get('relation', u''))
+                relation.get('relation', ''))
 
             if len(data) == 2:
                 model, field = data
@@ -175,13 +175,13 @@ class CollectionFormMixin(forms.ModelForm):
         return value
 
     # SHORT TERM FIX will only work with one data format type.
-    _MONTHS = {u'january': 1, u'february': 2, u'march': 3, u'april': 4,
-               u'may': 5, u'june': 6, u'july': 7, u'august': 8,
-               u'september': 9, u'october': 10, u'november': 11,
-               u'december': 12}
+    _MONTHS = {'january': 1, 'february': 2, 'march': 3, 'april': 4,
+               'may': 5, 'june': 6, 'july': 7, 'august': 8,
+               'september': 9, 'october': 10, 'november': 11,
+               'december': 12}
 
     def validate_date_types(self, relation, key, value):
-        if relation.get(u'value_type') == DynamicColumn.DATE:
+        if relation.get('value_type') == DynamicColumn.DATE:
             if value:
                 year = month = day = 0
                 day_month, delim, year = value.partition(', ')
@@ -190,7 +190,7 @@ class CollectionFormMixin(forms.ModelForm):
                     day, delim, month = day_month.partition(' ')
                     month = self._MONTHS.get(month.lower(), 0)
                 else:
-                    tmp = value.split(u'-')
+                    tmp = value.split('-')
 
                     if len(tmp) == 3:
                         year, month, day = tmp
@@ -199,45 +199,45 @@ class CollectionFormMixin(forms.ModelForm):
 
                 if not year.isdigit() or not month or not day.isdigit():
                     self._errors[key] = self.error_class(
-                        [u"Invalid year, month, or day, found: {}".format(
+                        ["Invalid year, month, or day, found: {}".format(
                             value)])
                 else:
                     value = datetime.date(int(year), int(month),
-                                          int(day)).strftime(u'%Y-%m-%d')
+                                          int(day)).strftime('%Y-%m-%d')
 
         return value
 
     def validate_required(self, relation, key, value):
-        if relation.get(u'required', False):
-            value_type = relation.get(u'value_type')
+        if relation.get('required', False):
+            value_type = relation.get('value_type')
 
             if (not value or value_type in self.SPECIAL_CASE_MAP and
                 self.SPECIAL_CASE_MAP.get(value_type) == value):
 
                 self._errors[key] = self.error_class(
-                    [u"{} field is required.".format(relation.get(u'name'))])
+                    ["{} field is required.".format(relation.get('name'))])
 
     def validate_value_type(self, relation, key, value):
-        value_type = relation.get(u'value_type')
+        value_type = relation.get('value_type')
 
         if value_type == DynamicColumn.NUMBER:
             if value and not value.isdigit():
                 self._errors[key] = self.error_class(
-                    [u"{} field is not a number.".format(
-                        relation.get(u'name'))])
+                    ["{} field is not a number.".format(
+                        relation.get('name'))])
 
     def validate_value_length(self, relation, key, value):
-        value_type = relation.get(u'value_type')
+        value_type = relation.get('value_type')
 
         # If store_relation is True then the storage type is DynamicColumn.TEXT.
-        if relation.get(u'store_relation', False):
+        if relation.get('store_relation', False):
             value_type = DynamicColumn.TEXT
 
         log.debug("key: %s, value: %s", key, value)
 
         if len(value) > self.MAX_LENGTH_MAP.get(value_type):
                 self._errors[key] = self.error_class(
-                    [u"{} field is too long.".format(relation.get(u'name'))])
+                    ["{} field is too long.".format(relation.get('name'))])
 
     def save(self, commit=True):
         inst = super(CollectionFormMixin, self).save(commit=False)
@@ -248,7 +248,7 @@ class CollectionFormMixin(forms.ModelForm):
         if request:
             inst.updater = request.user
 
-            if not hasattr(inst, u'creator') or not inst.creator:
+            if not hasattr(inst, 'creator') or not inst.creator:
                 inst.creator = request.user
                 inst.active = True
 
@@ -261,15 +261,15 @@ class CollectionFormMixin(forms.ModelForm):
 
     def _save_keyvalue_pairs(self):
         for pk, relation in self.get_display_data().items():
-            required = relation.get(u'required', False)
-            value = relation.get(u'value', u'')
+            required = relation.get('required', False)
+            value = relation.get('value', '')
             log.debug("pk: %s, slug: %s, value: %s",
-                      pk, relation.get(u'slug'), relation.get(u'value'))
+                      pk, relation.get('slug'), relation.get('value'))
 
             try:
                 obj, created = self.instance.keyvalue_pairs.get_or_create(
                     collection=self.instance, dynamic_column_id=int(pk),
-                    defaults={u'value': value})
+                    defaults={'value': value})
             except self.instance.MultipleObjectsReturned, e:
                 log.error("Multiple records found for parent: %s, "
                           "dynamic_column_id: %s", self.instance,
@@ -288,15 +288,15 @@ class KeyValueForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(KeyValueForm, self).__init__(*args, **kwargs)
-        self.fields[u'value'].widget = forms.TextInput(
-            attrs={u'size': 50, u'maxlength': 2000})
+        self.fields['value'].widget = forms.TextInput(
+            attrs={'size': 50, 'maxlength': 2000})
         log.debug("args: %s, kwargs: %s", args, kwargs)
         #log.debug("dir(self): %s", dir(self))
 
         if hasattr(self.instance, 'collection'):
             coll_name = self.instance.collection.column_collection.name
             columns = ColumnCollection.objects.get_column_collection(coll_name)
-            self.fields[u'dynamic_column'].queryset = columns
+            self.fields['dynamic_column'].queryset = columns
 
     class Meta:
         model = KeyValue
