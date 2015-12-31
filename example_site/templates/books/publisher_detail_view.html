@@ -35,14 +35,14 @@
           <div>The record has been updated and is displayed below.</div>
 {% endif %}
         </div>
-        <div class="dynamic-container {{ css.top }}">
+        <div class="dynamic-container {{ css.publisher_top }}">
           <ul>
             <li>
               <label>Name</label>
               <span>{{ object.name }}</span>
             </li>
 {% for relation in relations.values %}
-{% if relation.location == css.top %}
+{% if relation.location == css.publisher_top %}
             <li>
               <label>{{ relation.name }}</label>
               {% auto_display relation options=dynamicColumns display=True %}
@@ -51,10 +51,10 @@
 {% endfor %}
           </ul>
         </div>
-        <div class="dynamic-container {{ css.center }}">
+        <div class="dynamic-container {{ css.publisher_center }}">
           <ul>
 {% for relation in relations.values %}
-{% if relation.location == css.center %}
+{% if relation.location == css.publisher_center %}
             <li>
               <label>{{ relation.name }}</label>
               {% auto_display relation options=dynamicColumns display=True %}

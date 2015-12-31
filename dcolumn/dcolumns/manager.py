@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # dcolumn/dcolumns/manager.py
 #
@@ -147,10 +148,11 @@ class DynamicColumnManager(object):
 
             if isinstance(container_list[0], (list, tuple)):
                 self._css_container_map.update(dict(container_list))
-                self._css_containers[:] = [
-                    (key, css) for key, css in enumerate(
-                        [css for name, css in container_list])]
-            else:
+                self._css_containers[:] = container_list
+            else: # This method will be deprecated by version 1.0
+                log.error("Deprecation Warning: The enumeration method of "
+                          "generating the display location will be deprecated "
+                          "with the release of version 1.0.")
                 self._css_container_map.update(
                     {name: css for name, css in enumerate(container_list)})
                 self._css_containers[:] = [
@@ -172,7 +174,7 @@ class DynamicColumnManager(object):
         """
         A property that returns a dict where the key is the CSS container
         number and the value is the CSS class or id. This property should be
-        used in templates to desgnate location in the HTML.
+        used in templates to designate location in the HTML.
 
         :Returns:
           A dict of the CSS containers.

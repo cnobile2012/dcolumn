@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # dcolumn/common/admin_mixins.py
 #

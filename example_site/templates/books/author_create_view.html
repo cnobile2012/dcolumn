@@ -33,7 +33,7 @@
           </ul>
 {% endif %}
         </div>
-        <div class="dynamic-container {{ css.top }}">
+        <div class="dynamic-container {{ css.author_top }}">
           <ul>
             <li>
               {{ form.name.label_tag }}
@@ -41,7 +41,7 @@
               {{ form.name.errors }}
             </li>
 {% for relation in relations.values %}
-{% if relation.location == css.top %}
+{% if relation.location == css.author_top %}
             <li>
               <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
               {% auto_display relation options=dynamicColumns %}

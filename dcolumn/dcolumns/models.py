@@ -1,9 +1,10 @@
+# -*- coding: utf-8 -*-
 #
 # dcolumn/dcolumns/models.py
 #
 
 """
-Dynamic Column depended models
+Dynamic Column dependent models
 
 by: Carl J. Nobile
 
@@ -112,8 +113,8 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
         help_text=_("Store the literal value not the primary key of the "
                     "relation (used when choices change often). The most "
                     "common usage is the default 'No', to not store."))
-    location = models.IntegerField(
-        verbose_name=_("Display Location"),
+    location = models.CharField(
+        verbose_name=_("Display Location"), max_length=50,
         choices=dcolumn_manager.css_containers,
         help_text=_("Choose a display location."))
     order = models.PositiveSmallIntegerField(verbose_name='Display Order')
@@ -133,8 +134,14 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         super(DynamicColumn, self).save()
 
-    def __unicode__(self):
-        return self.name
+    def __str__(self):
+        if self.location.isdigit():
+            location = int(self.location)
+        else:
+            location = self.location
+
+        return "{} ({})".format(
+            self.name, dict(dcolumn_manager.css_containers).get(location, ''))
 
     def _relation_producer(self):
         result = ''
@@ -215,8 +222,13 @@ class ColumnCollectionManager(StatusModelManagerMixin):
             rec['required'] = record.required
             # We convert the list to a dict because css_container_map may
             # not be keyed with integers.
+            if record.location.isdigit():
+                location = int(record.location)
+            else:
+                location = record.location
+
             rec['location'] = dict(dcolumn_manager.css_containers).get(
-                record.location, '')
+                location, '')
             rec['order'] = record.order
             if obj: rec['value'] = key_value_map.get(record.pk, '')
 
@@ -249,10 +261,11 @@ class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin):
     objects = ColumnCollectionManager()
 
     class Meta:
+        ordering = ('name',)
         verbose_name = _("Column Collection")
         verbose_name_plural = _("Column Collections")
 
-    def __unicode__(self):
+    def __str__(self):
         return "{}-{}".format(self.name, self.updated.isoformat())
 
     def save(self, *args, **kwargs):
@@ -293,7 +306,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         result = {}
 
         for kv in self.keyvalue_pairs.all():
-            result[kv.dynamic_column_id] = kv.value
+            result[kv.dynamic_column_id] = kv.value.encode('utf-8')
 
         return result
 
@@ -390,5 +403,5 @@ class KeyValue(models.Model):
         verbose_name = _("Key Value")
         verbose_name_plural = _("Key Values")
 
-    def __unicode__(self):
+    def __str__(self):
         return self.value

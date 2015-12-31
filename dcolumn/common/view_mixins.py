@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # dcolumn/common/view_mixins.py
 #

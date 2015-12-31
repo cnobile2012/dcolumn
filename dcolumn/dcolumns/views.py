@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # dcolumn/dcolumns/views.py
 #
@@ -20,6 +21,9 @@ log = logging.getLogger('dcolumns.dcolumns.views')
 class ContextDataMixin(object):
 
     def get_dynamic_column_context_data(self, class_name='', **kwargs):
+        """
+        
+        """
         context = {}
         fk_slugs = DynamicColumn.objects.get_fk_slugs()
         name = dcolumn_manager.get_collection_name(class_name)

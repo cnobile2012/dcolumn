@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # dcolumn/common/model_mixins.py
 #
@@ -18,7 +19,6 @@ from dateutil.tz import tzutc
 
 from django.db import models
 from django.db.models import Q
-#from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 
@@ -35,7 +35,6 @@ class UserModelMixin(models.Model):
     Abstract model mixin used in the model classes to provide user and
     creator fields.
     """
-
     updater = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name=_("Updater"), editable=False,
         related_name="%(app_label)s_%(class)s_updater_related",
@@ -43,7 +42,7 @@ class UserModelMixin(models.Model):
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name=_("Creator"), editable=False,
         related_name="%(app_label)s_%(class)s_creator_related",
-        help_text=_("The user  who created this record."))
+        help_text=_("The user who created this record."))
 
     class Meta:
         abstract = True

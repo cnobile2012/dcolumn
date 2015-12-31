@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Django settings for example_site project.
 
@@ -34,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admindocs',
+    'django.contrib.sites',
     'dcolumn.dcolumns',
     'example_site.books',
     ]
@@ -127,12 +129,21 @@ DYNAMIC_COLUMNS = {
     # To allow anybody to access the API set to True.
     'INACTIVATE_API_AUTH': False,
     }
-#dcolumn_manager.register_css_containers(
-#    ('top-container', 'center-container', 'bottom-container'))
+
 dcolumn_manager.register_css_containers(
-    (('top', 'top-container'),
-     ('center', 'center-container'),
-     ('bottom', 'bottom-container')))
+    (('author_top', 'author-top'),
+     ('author_center', 'author-center'),
+     ('author_bottom', 'author-botton'),
+     ('book_top', 'book-top'),
+     ('book_center', 'book-center'),
+     ('book_bottom', 'book-bottom'),
+     ('promotion_top', 'promotion-top'),
+     ('promotion_center', 'promotion-center'),
+     ('promotion_bottom', 'promotion-bottom'),
+     ('publisher_top', 'publisher-top'),
+     ('publisher_center', 'publisher-center'),
+     ('publisher_bottom', 'publisher-bottom'),
+     ))
 
 # Change the URL below to your login path.
 LOGIN_URL = "/admin/"

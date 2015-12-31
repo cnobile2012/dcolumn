@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # dcolumn/dcolumns/templatetags/autodisplay.py
 #
@@ -113,7 +114,7 @@ def auto_display(parser, token):
         kwargs.update({k: v for k,d,v in [v.partition('=')
                                           for v in (value1, value2, value3)]})
     else:
-        msg = ("Invalue number of arguments should be 1 - 4, "
+        msg = ("Invalid number of arguments should be 1 - 4, "
                "found: {}").format(size-1)
         raise template.TemplateSyntaxError(msg)
 
@@ -214,7 +215,8 @@ class AutoDisplayNode(template.Node):
                 else:
                     elem = self._add_options(elem, attr, self.YES_NO, relation)
             elif self.display:
-                elem = elem.format("id-" + attr, relation.get('value', ''))
+                elem = elem.format("id-" + attr,
+                                   relation.get('value', ''))
             else:
                 elem = elem.format("id-" + attr, attr,
                                    relation.get('value', ''))
@@ -240,6 +242,8 @@ class AutoDisplayNode(template.Node):
         :Returns:
           The list of options.
         """
+        log.debug("relation: %s, fk_options: %s", relation, fk_options)
+
         if isinstance(fk_options, (list, tuple,)):
             options = fk_options
         else:
@@ -274,12 +278,14 @@ class AutoDisplayNode(template.Node):
         :Returns:
           The populated HTML element.
         """
+        log.debug("elem: %s, attr: %s, options: %s, relation: %s",
+                  elem, attr, options, relation)
         elem = elem.format("id-" + attr, attr)
         buff = StringIO(elem)
         buff.seek(0, os.SEEK_END)
         value = relation.get('value', '')
 
-        # Get the ID if the value is stored and not a pk.
+        # Get the ID if the value is stored not the pk.
         if relation.get('store_relation', False):
             value = [k for k, v in options if v == value]
             value = len(value) >= 1 and value[0] or 0

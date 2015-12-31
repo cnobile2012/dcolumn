@@ -90,7 +90,7 @@ class BookForm(CollectionFormMixin):
         super(BookForm, self).__init__(*args, **kwargs)
         log.debug("args: %s, kwargs: %s", args, kwargs)
         self.fields['title'].widget = forms.TextInput(
-            attrs={'size': 50, 'maxlength': 250})
+            attrs={'size': 80, 'maxlength': 250})
         # Gets rid of the annoying colon afer every label, but only works on
         # Django 1.6 and above.
         self.label_suffix = ''
