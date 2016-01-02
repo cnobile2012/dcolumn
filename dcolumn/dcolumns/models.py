@@ -20,7 +20,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 
 from dcolumn.common.model_mixins import (
-    UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin)
+    UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin,
+    ValidateOnSaveMixin)
 
 from .manager import dcolumn_manager
 
@@ -52,7 +53,8 @@ class DynamicColumnManager(StatusModelManagerMixin):
         return result
 
 
-class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
+class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
+                    ValidateOnSaveMixin):
     """
     This model defines all the fields used in models that implement dynamic
     columns.
@@ -121,28 +123,6 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
     objects = DynamicColumnManager()
 
-    class Meta:
-        ordering = ('location', 'order', 'name',)
-        verbose_name = _("Dynamic Column")
-        verbose_name_plural = _("Dynamic Columns")
-
-    def save(self):
-        if self.preferred_slug:
-            self.slug = self.preferred_slug
-        else:
-            self.slug = slugify(self.name)
-
-        super(DynamicColumn, self).save()
-
-    def __str__(self):
-        if self.location.isdigit():
-            location = int(self.location)
-        else:
-            location = self.location
-
-        return "{} ({})".format(
-            self.name, dict(dcolumn_manager.css_containers).get(location, ''))
-
     def _relation_producer(self):
         result = ''
 
@@ -161,6 +141,31 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin):
         return ", ".join(result)
     _collection_producer.short_description = _("Collections")
     _collection_producer.allow_tags = True
+
+    def clean(self):
+        if self.preferred_slug:
+            self.preferred_slug = slugify(self.preferred_slug)
+            self.slug = self.preferred_slug
+        else:
+            self.slug = slugify(self.name)
+
+    def save(self):
+        super(DynamicColumn, self).save()
+
+    def __str__(self):
+        if self.location.isdigit():
+            location = int(self.location)
+        else:
+            location = self.location
+
+        return "{} ({})".format(
+            self.name, dict(dcolumn_manager.css_containers).get(location, '')
+            ).encode('utf-8')
+
+    class Meta:
+        ordering = ('location', 'order', 'name',)
+        verbose_name = _("Dynamic Column")
+        verbose_name_plural = _("Dynamic Columns")
 
     def get_choice_relation_object_and_field(self):
         return dcolumn_manager.get_relation_model_field(self.relation)
@@ -197,6 +202,20 @@ class ColumnCollectionManager(StatusModelManagerMixin):
         return queryset
 
     def serialize_columns(self, name, obj=None, by_slug=False):
+        """
+        Serialize the dynamic column for this named collection in an
+        OrderedDict. If a model that uses dcolumns is in `obj` it's key/value
+        pairs are also returned. OrderedDict items can be either `pk` or `slug`.
+
+        :Parameters:
+            name : `str`
+              Name of the collection.
+            obj : `object`
+              Model object that uses dcolumns.
+            by_slug : `bool`
+              If False the OrderedDict items are keyed by the dynamic column's
+              `pk`, if True the dynamic column's `slug` is used.
+        """
         records = self.get_column_collection(name)
         result = OrderedDict()
 
@@ -250,27 +269,45 @@ class ColumnCollectionManager(StatusModelManagerMixin):
         return choices
 
 
-class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin):
+class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin,
+                       ValidateOnSaveMixin):
     name = models.CharField(
         verbose_name=_("Name"), unique=True, max_length=50,
         help_text=_("Enter a unique name for this record."))
     dynamic_column = models.ManyToManyField(
-        DynamicColumn, verbose_name=_("Dynamic Column"),
+        DynamicColumn, verbose_name=_("Dynamic Columns"),
         related_name='column_collection')
 
     objects = ColumnCollectionManager()
+
+    def save(self, *args, **kwargs):
+        log.debug("kwargs: %s", kwargs)
+        super(ColumnCollection, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return "{}-{}".format(
+            self.name, self.updated.isoformat()).encode('utf-8')
 
     class Meta:
         ordering = ('name',)
         verbose_name = _("Column Collection")
         verbose_name_plural = _("Column Collections")
 
-    def __str__(self):
-        return "{}-{}".format(self.name, self.updated.isoformat())
-
-    def save(self, *args, **kwargs):
-        log.debug("kwargs: %s", kwargs)
-        super(ColumnCollection, self).save(*args, **kwargs)
+    def process_dynamic_columns(self, dcs):
+        """
+        This method adds or removes dynamic columns to the collection.
+        """
+        if dcs:
+            new_pks = [inst.pk for inst in dcs]
+            old_pks = [inst.pk for inst in self.dynamic_column.all()]
+            rem_pks = list(set(old_pks) - set(new_pks))
+            # Remove unwanted dynamic_columns.
+            self.dynamic_column.remove(
+                *self.dynamic_column.filter(pk__in=rem_pks))
+            # Add new dynamic_columns.
+            add_pks = list(set(new_pks) - set(old_pks))
+            new_dcs = DynamicColumn.objects.filter(pk__in=add_pks)
+            self.dynamic_column.add(*new_dcs)
 
 
 #
@@ -315,7 +352,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
             dc = self.column_collection.dynamic_column.get(slug=slug)
         except DynamicColumn.DoesNotExist as e:
             log.error("DynamicColumn with slug '%s' does not exist.", slug)
-            # Cannot get a dynamic column if not in the collection already.
+            # Cannot get a dynamic column if not in a collection.
             dc = None
 
         return dc
@@ -337,7 +374,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
             log.error("Could not find value for slug '%s'.", slug)
             value = ''
 
-        return value
+        return value.encode('utf-8')
 
     def set_key_value_pair(self, slug, value, field=None, force=False):
         """
@@ -376,7 +413,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                     elif 'decrement' == value and kv.value.isdigit():
                         value = int(kv.value) - 1
 
-                    kv.value = value
+                    kv.value = value.encode('utf-8')
                     kv.save()
 
 
@@ -387,7 +424,7 @@ class KeyValueManager(models.Manager):
     pass
 
 
-class KeyValue(models.Model):
+class KeyValue(ValidateOnSaveMixin):
     collection = models.ForeignKey(
         CollectionBase, verbose_name=_("Collection Type"),
         related_name='keyvalue_pairs')
@@ -398,10 +435,13 @@ class KeyValue(models.Model):
 
     objects = KeyValueManager()
 
+    def save(self, *args, **kwargs):
+        super(KeyValue, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.value.encode('utf-8')
+
     class Meta:
         ordering = ('dynamic_column__location', 'dynamic_column__order',)
         verbose_name = _("Key Value")
         verbose_name_plural = _("Key Values")
-
-    def __str__(self):
-        return self.value

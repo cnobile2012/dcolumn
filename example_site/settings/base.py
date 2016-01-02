@@ -15,6 +15,8 @@ from dcolumn.dcolumns.manager import dcolumn_manager
 # Where is the 'website' directory with settings dir, apps, urls.py, etc. are.
 SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
+SITE_ID = 1
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
@@ -51,9 +53,9 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.template.context_processors.static',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'django.core.context_processors.static',
                 ],
             'debug': DEBUG,
             'loaders': [

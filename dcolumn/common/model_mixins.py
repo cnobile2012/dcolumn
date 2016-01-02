@@ -24,7 +24,7 @@ from django.conf import settings
 
 from dcolumn.common import ChoiceManagerImplementation
 
-log = logging.getLogger('dcolumns.common.models')
+log = logging.getLogger('dcolumns.common.model_mixins')
 
 
 #
@@ -171,3 +171,16 @@ class BaseChoiceModelManager(models.Manager, ChoiceManagerImplementation):
                 0, (0, _("Please choose a {}".format(self.model.__name__))))
 
         return choices
+
+
+#
+# ValidateOnSaveMixin
+#
+class ValidateOnSaveMixin(models.Model):
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(ValidateOnSaveMixin, self).save(*args, **kwargs)

@@ -123,7 +123,7 @@ class CollectionFormMixin(forms.ModelForm):
                 # We only want to add new data not overwrite data that is
                 # already there.
                 if 'value' not in relation:
-                    relation['value'] = value
+                    relation['value'] = value.encode('utf-8')
 
         return self.relations
 
@@ -142,6 +142,7 @@ class CollectionFormMixin(forms.ModelForm):
 
             for key, value in self.data.items():
                 if key == relation.get('slug'):
+                    value = value.encode('utf-8')
                     value = self.validate_store_relation(relation, value)
                     value = self.validate_date_types(relation, key, value)
                     relation['value'] = value

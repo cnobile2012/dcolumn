@@ -1,5 +1,0 @@
-SITE=example_site
-DJANGO_HOME=$(pwd)
-export PYTHONPATH=${DJANGO_HOME}
-export DJANGO_SETTINGS_MODULE=${SITE}.settings
-unset DJANGO_HOME

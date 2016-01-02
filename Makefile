@@ -1,10 +1,6 @@
 #
 # Development by Carl J. Nobile
 #
-# $Author: $
-# $Date: $
-# $Revision: $
-#
 
 PREFIX		= $(shell pwd)
 PACKAGE_DIR	= $(shell echo $${PWD\#\#*/})

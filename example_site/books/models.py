@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 
 from dcolumn.common.model_mixins import (
     UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin,
-    BaseChoiceModelManager)
+    BaseChoiceModelManager, ValidateOnSaveMixin)
 from dcolumn.dcolumns.models import CollectionBase, CollectionBaseManagerBase
 
 from .choices import Language
@@ -37,7 +37,7 @@ class PromotionManager(CollectionBaseManagerBase, StatusModelManagerMixin,
                      for obj in self.dynamic_column(active=active)])
 
 
-class Promotion(CollectionBase):
+class Promotion(CollectionBase, ValidateOnSaveMixin):
     name = models.CharField(
         verbose_name=_("Promotion's Name"), max_length=250,
         help_text=_("Enter the name of the promotion."))
@@ -78,7 +78,7 @@ class AuthorManager(CollectionBaseManagerBase, StatusModelManagerMixin,
                      for obj in self.dynamic_column(active=active)])
 
 
-class Author(CollectionBase):
+class Author(CollectionBase, ValidateOnSaveMixin):
     name = models.CharField(
         verbose_name=_("Author's Name"), max_length=250,
         help_text=_("Enter the name of the author."))
@@ -119,7 +119,7 @@ class PublisherManager(CollectionBaseManagerBase, StatusModelManagerMixin,
                      for obj in self.dynamic_column(active=active)])
 
 
-class Publisher(CollectionBase):
+class Publisher(CollectionBase, ValidateOnSaveMixin):
     name = models.CharField(
         verbose_name=_("Publisher's Name"), max_length=250,
         help_text=_("Enter the name of the publisher."))
@@ -159,7 +159,7 @@ class BookManager(CollectionBaseManagerBase, StatusModelManagerMixin,
                      for obj in self.dynamic_column(active=active)])
 
 
-class Book(CollectionBase):
+class Book(CollectionBase, ValidateOnSaveMixin):
     title = models.CharField(
         verbose_name=_("Title"), max_length=250,
         help_text=_("Enter a book title."))
