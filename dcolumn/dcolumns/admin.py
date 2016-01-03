@@ -24,8 +24,7 @@ class KeyValueInline(admin.TabularInline):
     form = KeyValueForm
 
     class Media:
-        js = ('dcolumn/js/jquery-1.11.1.min.js',
-              'dcolumn/js/js.cookie-2.0.4.min.js',
+        js = ('dcolumn/js/js.cookie-2.0.4.min.js',
               'dcolumn/js/inheritance.js',
               'dcolumn/js/dynamic-column.js',)
 
@@ -46,8 +45,7 @@ class ColumnCollectionAdmin(UserAdminMixin):
     form = ColumnCollectionForm
 
     class Media:
-        js = ('dcolumn/js/jquery-1.11.1.min.js',
-              'dcolumn/js/inheritance.js',
+        js = ('dcolumn/js/inheritance.js',
               'dcolumn/js/column-collection.js',)
         css = {'all': ('dcolumn/css/column-collection.css',)}
 
