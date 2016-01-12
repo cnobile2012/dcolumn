@@ -43,6 +43,9 @@ class ContextDataMixin(object):
         return context
 
     def get_relation_context_data(self, class_name='', obj=None, **kwargs):
+        """
+        
+        """
         form = kwargs.get('form')
 
         if form:

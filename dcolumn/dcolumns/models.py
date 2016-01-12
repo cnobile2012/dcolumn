@@ -254,6 +254,10 @@ class ColumnCollectionManager(StatusModelManagerMixin):
         return result
 
     def get_active_relation_items(self, name):
+        """
+        Get a list of all active relation type choice items. The list is
+        made up of the names of each item.
+        """
         records = self.get_column_collection(name)
         return [dcolumn_manager.choice_relation_map.get(record.relation)
                 for record in records if record.relation]
@@ -316,14 +320,24 @@ class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin,
 class CollectionBaseManagerBase(models.Manager):
 
     def get_all_slugs(self):
+        """
+        Returns all slug names in a list.
+        """
         return [r.slug for r in DynamicColumn.objects.all().order_by('slug')]
 
     def get_all_fields(self):
-        return [unicode(field)
-                for field in self.model._meta.get_all_field_names()
-                if 'collection' not in field and field != 'keyvalue_pairs']
+        """
+        Returns all field names in a list.
+        """
+        return [unicode(field.name)
+                for field in self.model._meta.get_fields()
+                if 'collection' not in field.name and
+                field.name != 'keyvalue_pairs']
 
     def get_all_fields_and_slugs(self):
+        """
+        Returns all field names and the dynamic column slugs is a sorted list.
+        """
         result = self.get_all_slugs() + self.get_all_fields()
         result.sort()
         return result
@@ -340,6 +354,9 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         super(CollectionBase, self).save(*args, **kwargs)
 
     def serialize_key_value_pairs(self):
+        """
+        Returns a dict of the dynamic column PK and value.
+        """
         result = {}
 
         for kv in self.keyvalue_pairs.all():

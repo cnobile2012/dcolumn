@@ -15,9 +15,12 @@ class DynamicColumnManager(object):
     """
     This class manages the dynamic columns.
     """
+    __slots__ = ('__shared_state', '_relations', '_relation_map',
+                 '_relation_numbers', '_choice_map', '_css_containers',
+                 '_css_container_map', '__dict__',)
     __shared_state = {}
-    _relations = [(0, "---------")]
-    _relation_map = None
+    _relations = []
+    _relation_map = {}
     _relation_numbers = set()
     _choice_map = {}
     _css_containers = []
@@ -97,6 +100,11 @@ class DynamicColumnManager(object):
         :Returns:
           A list of the choices.
         """
+        if len(self._relations) and self._relations[0][0] != 0:
+            self._relations.sort(cmp=lambda x,y: cmp(x[1].lower(),
+                                                     y[1].lower()))
+            self._relations.insert(0, (0, _("Choose a Relation")))
+
         return self._relations
 
     @property
@@ -105,10 +113,12 @@ class DynamicColumnManager(object):
         A property that returns a dict (map) of the choices.
 
         :Returns:
-          A dict of the choices.
+          A dict of the choices. {num, <object name>, ...} The key is the
+          number given when added with the register_choice method. The value
+          is the string representation of the choice object.
         """
-        if not self._relation_map:
-            self._relation_map = dict(self._relations)
+        if not len(self._relation_map):
+            self._relation_map.update(dict(self._relations))
 
         return self._relation_map
 
@@ -161,11 +171,11 @@ class DynamicColumnManager(object):
     @property
     def css_containers(self):
         """
-        A property that returns the CSS container classes or ids and is used
-        internally as a choice to location in the DynamicColumn model.
+        A property that returns a list of tuples where the key is the
+        template variable name and the CSS container class.
 
         :Returns:
-          A list of tuples where the tuple is (num, text)
+          A list of tuples where the tuple is (template var, css class)
         """
         return self._css_containers
 
@@ -183,25 +193,36 @@ class DynamicColumnManager(object):
 
     def get_collection_name(self, model_name):
         """
-        Gets the `ColumnCollection` instance name.
+        Gets the `ColumnCollection` name from the class name.
 
         :Parameters:
           model_name : str
-            The key name used in the `settings.DYNAMIC_COLUMNS.COLLECTIONS`.
+            The dynamic column model name.
 
         :Returns:
-          The `ColumnCollection` instance name.
+          The `ColumnCollection` name.
         """
-        model_name = model_name.lower()
-        item_names = dict([
-            (k.lower(), v)
-            for k, v in settings.DYNAMIC_COLUMNS.get('COLLECTIONS').items()])
+        result = ''
+        paths = [app for app in settings.INSTALLED_APPS
+                 if 'django.contrib' not in app]
+        paths = ['{}.models'.format(p) for p in paths]
 
-        if model_name not in item_names:
+        for path in paths:
+            module = __import__(path, globals(), locals(), -1)
+
+            try:
+                obj = getattr(module, model_name).objects.all()[0]
+                break
+            except Exception as e:
+                obj = None
+
+        if obj:
+            result = obj.column_collection.name
+        else:
             msg = _("Invalid model name: {}".format(model_name))
-            raise KeyError(msg)
+            raise ValueError(msg)
 
-        return item_names.get(model_name, '')
+        return result
 
     def get_api_auth_state(self):
         """

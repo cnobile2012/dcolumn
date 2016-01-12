@@ -119,15 +119,6 @@ STATICFILES_DIRS = (
 
 # DCOLUMN config
 DYNAMIC_COLUMNS = {
-    # The default key/value pairs for the ColumnCollection object to use for
-    # all tables that use dcolumn. The key is the table name and the value is
-    # the name used in the ColumnCollection record.
-    'COLLECTIONS': {
-        'Book': 'Book Current',
-        'Author': 'Author Current',
-        'Publisher': 'Publisher Current',
-        'Promotion': 'Promotion Current',
-        },
     # To allow anybody to access the API set to True.
     'INACTIVATE_API_AUTH': False,
     }
@@ -212,12 +203,12 @@ LOGGING = {
             'propagate': True,
             },
         'examples': {
-            'handlers': ('examples_file', 'console', 'mail_admins',),
+            'handlers': ('examples_file', 'mail_admins',),
             'level': 'ERROR',
             'propagate': True,
             },
         'dcolumns': {
-            'handlers': ('dcolumns_file', 'console', 'mail_admins',),
+            'handlers': ('dcolumns_file', 'mail_admins',),
             'level': 'ERROR',
             'propagate': True,
             },
