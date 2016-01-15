@@ -193,7 +193,8 @@ class DynamicColumnManager(object):
 
     def get_collection_name(self, model_name):
         """
-        Gets the `ColumnCollection` name from the class name.
+        Gets the `ColumnCollection` name of the model name. The model name can
+        be all lowercase without underscores or the camel case class name.
 
         :Parameters:
           model_name : str
@@ -206,15 +207,21 @@ class DynamicColumnManager(object):
         paths = [app for app in settings.INSTALLED_APPS
                  if 'django.contrib' not in app]
         paths = ['{}.models'.format(p) for p in paths]
+        obj = None
 
         for path in paths:
             module = __import__(path, globals(), locals(), -1)
+            model_names = [n for n in dir(module)]
 
-            try:
-                obj = getattr(module, model_name).objects.all()[0]
-                break
-            except Exception as e:
-                obj = None
+            for name in model_names:
+                if model_name == name or model_name == name.lower():
+                    try:
+                        obj = getattr(module, name).objects.all()[0]
+                        break
+                    except Exception as e:
+                        pass
+
+                    break
 
         if obj:
             result = obj.column_collection.name

@@ -91,16 +91,15 @@ String.prototype.trim = function(charlist) {
 
     /* Get the dynamic columns */
     _sendDynamicColumnRequest: function() {
-      var className = $('div.breadcrumbs').children().last().attr('href')
+      var modelName = $('div.breadcrumbs').children().last().attr('href')
           .trim('/').split(/[\/]/);
-      className = className[className.length-1];
+      modelName = modelName[modelName.length-1];
       this._setHeader();
       var options = {
-        url: this._assembleURI(this.uri + className + "/"),
+        url: this._assembleURI(this.uri + modelName + "/"),
         cache: false,
         type: 'GET',
         contentType: 'json',
-        //processData: false,
         timeout: 20000, // 20 seconds
         //error: this._errorCB.bind(this),
         success: this._dynamicColumnCB.bind(this),
