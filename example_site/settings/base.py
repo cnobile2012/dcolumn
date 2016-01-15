@@ -3,10 +3,10 @@
 Django settings for example_site project.
 
 For more information on this file, see
-https://docs.djangoproject.com/en/1.6/topics/settings/
+https://docs.djangoproject.com/en/<version>/topics/settings/
 
 For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.6/ref/settings/
+https://docs.djangoproject.com/en/<version>/ref/settings/
 """
 
 import os
@@ -18,7 +18,7 @@ SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 SITE_ID = 1
 
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
+# See https://docs.djangoproject.com/en/<version>/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'gsx-ua^+oo7aqw=jn2ln2jiy3w4sl+5q$lxb2k-5tqasw+sxl*'
@@ -81,7 +81,7 @@ ROOT_URLCONF = 'example_site.urls'
 WSGI_APPLICATION = 'example_site.wsgi.application'
 
 # Internationalization
-# https://docs.djangoproject.com/en/1.6/topics/i18n/
+# https://docs.djangoproject.com/en/<version>/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -94,7 +94,7 @@ USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.6/howto/static-files/
+# https://docs.djangoproject.com/en/<version>/howto/static-files/
 
 # Where is the root of the site? This can be a root-relative URL.
 SITE_URL = '/'
