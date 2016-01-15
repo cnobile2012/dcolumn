@@ -211,9 +211,8 @@ class DynamicColumnManager(object):
 
         for path in paths:
             module = __import__(path, globals(), locals(), -1)
-            model_names = [n for n in dir(module)]
 
-            for name in model_names:
+            for name in dir(module):
                 if model_name == name or model_name == name.lower():
                     try:
                         obj = getattr(module, name).objects.all()[0]
