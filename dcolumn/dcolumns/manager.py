@@ -216,11 +216,11 @@ class DynamicColumnManager(object):
                 if model_name == name or model_name == name.lower():
                     try:
                         obj = getattr(module, name).objects.all()[0]
-                        break
                     except Exception as e:
                         pass
-
-                    break
+                    else:
+                        if hasattr(obj, 'column_collection'):
+                            break
 
         if obj:
             result = obj.column_collection.name
