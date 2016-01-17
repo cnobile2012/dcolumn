@@ -7,6 +7,7 @@ import logging
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from django.db.models.query import QuerySet
 
 log = logging.getLogger('dcolumns.dcolumns.manager')
 
@@ -203,11 +204,10 @@ class DynamicColumnManager(object):
         :Returns:
           The `ColumnCollection` name.
         """
-        result = ''
         paths = [app for app in settings.INSTALLED_APPS
                  if 'django.contrib' not in app]
         paths = ['{}.models'.format(p) for p in paths]
-        obj = None
+        result = obj = None
 
         for path in paths:
             module = __import__(path, globals(), locals(), -1)
@@ -215,22 +215,30 @@ class DynamicColumnManager(object):
             for name in dir(module):
                 if model_name == name or model_name == name.lower():
                     try:
-                        obj = getattr(module, name).objects.all()[0]
-                    except Exception as e:
+                        obj = getattr(module, name).objects.all()
+                    except AttributeError:
                         pass
-                    else:
-                        if hasattr(obj, 'column_collection'):
-                            break
 
-        if obj:
-            result = obj.column_collection.name
-        else:
+                    if isinstance(obj, QuerySet) and obj.count() > 0:
+                        obj = obj[0]
+
+                        if hasattr(obj, 'column_collection'):
+                            result = obj.column_collection.name
+                            break
+                    elif obj is None:
+                        break
+                    else:
+                        log.error("No records in model %s.", name)
+
+        if obj is None:
             msg = _("Invalid model name: {}".format(model_name))
+            log.error(msg)
             raise ValueError(msg)
 
         return result
 
-    def get_api_auth_state(self):
+    @property
+    def api_auth_state(self):
         """
         Gets the value of settings.DYNAMIC_COLUMNS.INACTIVATE_API_AUTH.
         """
