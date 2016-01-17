@@ -16,7 +16,7 @@ def dcolumn_login_required(function=None,
     Decorator for views that checks that the user is logged in, redirecting
     to the log-in page if necessary.
     """
-    if dcolumn_manager.get_api_auth_state():
+    if dcolumn_manager.api_auth_state:
         return function
 
     return login_required(function, redirect_field_name=redirect_field_name,
