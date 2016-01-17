@@ -149,8 +149,8 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
         else:
             self.slug = slugify(self.name)
 
-    def save(self):
-        super(DynamicColumn, self).save()
+    def save(self, *args, **kwargs):
+        super(DynamicColumn, self).save(*args, **kwargs)
 
     def __str__(self):
         if self.location.isdigit():
