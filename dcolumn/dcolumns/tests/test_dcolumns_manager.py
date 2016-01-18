@@ -152,7 +152,7 @@ class TestManager(BaseDcolumns):
         # Test for correct models, both model class names and names all
         # lowercase.
         dc0 = self._create_dynamic_column_record(
-            'New Field', 'new_field', DynamicColumn.TEXT, 'author_top', 1)
+            'New Field', DynamicColumn.TEXT, 'author_top', 1)
         cc0 = self._create_column_collection_record('Author Current', [dc0])
         dcr0 = self._create_dcolumn_record(Author, cc0,
                                            **{'name': 'Carl Nobile'})
