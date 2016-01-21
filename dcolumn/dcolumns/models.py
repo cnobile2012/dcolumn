@@ -365,6 +365,9 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         return result
 
     def get_dynamic_column(self, slug):
+        """
+        Gets the dynamic column given the column's slug.
+        """
         try:
             dc = self.column_collection.dynamic_column.get(slug=slug)
         except DynamicColumn.DoesNotExist as e:
@@ -375,11 +378,17 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         return dc
 
     def get_key_value_pair(self, slug, field='value'):
+        """
+        Return the KeyValue object value for the slug.
+        """
         dc = self.get_dynamic_column(slug)
 
         try:
             obj = self.keyvalue_pairs.get(dynamic_column=dc)
-
+        except self.keyvalue_pairs.model.DoesNotExist:
+            log.error("Could not find value for slug '%s'.", slug)
+            value = ''
+        else:
             model_meta = dc.get_choice_relation_object_and_field()
 
             if model_meta and not dc.store_relation:
@@ -387,9 +396,6 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                 value = model.objects.get_value_by_pk(obj.value, field=field)
             else:
                 value = obj.value
-        except self.keyvalue_pairs.model.DoesNotExist as e:
-            log.error("Could not find value for slug '%s'.", slug)
-            value = ''
 
         return value.encode('utf-8')
 

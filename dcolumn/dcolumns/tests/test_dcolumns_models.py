@@ -391,32 +391,128 @@ class TestCollectionBase(BaseDcolumns):
         Test that the key valie pairs get serialized in a dict.
         """
         #self.skipTest("Temporarily skipped")
-        # Create a few dynamic columns.
-        dc0 = self._create_dynamic_column_record(
-            "Author", DynamicColumn.CHOICE, 'book_top', 1, relation=3)
-        dc1 = self._create_dynamic_column_record(
-            "Publisher", DynamicColumn.CHOICE, 'book_top', 2, relation=4)
-        dc2 = self._create_dynamic_column_record(
-            "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
-        # Add to a collection.
-        cc0 = self._create_column_collection_record(
-            "Books", dynamic_columns=[dc0, dc1, dc2])
-        # Create a book entry.
-        kwargs = {'title': 'Test Book'}
-        book = self._create_dcolumn_record(Book, cc0, title='Test Book')
-        value = "Very very short abstract"
-        kv0 = self._create_key_value_record(book, dc2, value)
-        # Test serialize_key_value_pairs.
+        author, values = self._create_author_objects()
+        publisher, values = self._create_publisher_objects()
+        book, values = self._create_book_objects(
+            author_pk=author.pk, publisher_pk=publisher.pk)
         result = book.serialize_key_value_pairs()
         msg = "result: {}".format(result)
 
         for key, value in result.items():
-            self.assertTrue(isinstance(key, (int, long)), msg)
-            self.assertEqual(value, value, msg)
+            self.assertEqual(value, values.get(key), msg)
 
-        self.assertEqual(len(result), 3, msg)
+        self.assertEqual(len(result), len(values), msg)
 
-# Add three methods that generate valid records for models that use dc.
+    def test_get_dynamic_column(self):
+        """
+        Test that the dynamic column is returned when it's slug is passed.
+        """
+        #self.skipTest("Temporarily skipped")
+        book, values = self._create_book_objects()
+        obj = book.get_dynamic_column('abstract')
+        msg = "obj.name: {}, obj.value_type: {}".format(
+            obj.name, obj.value_type)
+        self.assertEqual(obj.name, 'Abstract', msg)
+        self.assertEqual(obj.value_type, DynamicColumn.TEXT_BLOCK, msg)
+
+    def test_get_key_value_pair(self):
+        """
+        Check that the value of the KeyValue object is returned.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Test proper operation.
+        book, values = self._create_book_objects()
+        value = book.get_key_value_pair('abstract')
+        msg = "value: {}, values: {}".format(value, values)
+        self.assertEqual(value, values.values()[0], msg)
+        # Test that an empty string is returned for a bad slug.
+        value = book.get_key_value_pair('not-a-slug')
+        msg = "value: {}, values: {}".format(value, values)
+        self.assertEqual(value, '', msg)
+
+    def test_set_key_value_pair(self):
+        """
+        """
+        #self.skipTest("Temporarily skipped")
+        pass
 
 
 
+
+
+
+
+
+    def _create_author_objects(self):
+        """
+        Create  a set of Author objects.
+        """
+        dcs = []
+        dc0 = self._create_dynamic_column_record(
+            "Web Site", DynamicColumn.TEXT, 'author_top', 1)
+        dcs.append(dc0)
+        # Add to a collection.
+        cc = self._create_column_collection_record(
+            "Authors", dynamic_columns=dcs)
+        # Create a book entry.
+        author = self._create_dcolumn_record(
+            Author, cc, name='Pickup Andropoff')
+        value = "example.org"
+        kv0 = self._create_key_value_record(author, dc0, value)
+        return author, {dc0.pk: kv0.value}
+
+    def _create_publisher_objects(self):
+        """
+        Create  a set of Publisher objects.
+        """
+        dcs = []
+        dc0 = self._create_dynamic_column_record(
+            "Web Site", DynamicColumn.TEXT, 'publisher_top', 1)
+        dcs.append(dc0)
+        # Add to a collection.
+        cc = self._create_column_collection_record(
+            "Publishers", dynamic_columns=dcs)
+        # Create a book entry.
+        publisher = self._create_dcolumn_record(
+            Publisher, cc, name='Some big Publisher')
+        value = "example.org"
+        kv0 = self._create_key_value_record(publisher, dc0, value)
+        return publisher, {dc0.pk: kv0.value}
+
+    def _create_book_objects(self, author_pk=0, publisher_pk=0):
+        """
+        Create  a set of Book objects.
+        """
+        dcs = []
+        dc0 = self._create_dynamic_column_record(
+            "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
+        dcs.append(dc0)
+
+        if author_pk:
+            dc1 = self._create_dynamic_column_record(
+                "Author", DynamicColumn.CHOICE, 'book_top', 1, relation=3)
+            dcs.append(dc1)
+
+        if publisher_pk:
+            dc2 = self._create_dynamic_column_record(
+                "Publisher", DynamicColumn.CHOICE, 'book_top', 2, relation=4)
+            dcs.append(dc2)
+
+        # Add to a collection.
+        cc = self._create_column_collection_record(
+            "Books", dynamic_columns=dcs)
+        # Create a book entry.
+        book = self._create_dcolumn_record(Book, cc, title='Test Book')
+        value = "Very very short abstract"
+        kv0 = self._create_key_value_record(book, dc0, value)
+        values = {dc0.pk: value}
+
+        if author_pk:
+            kv1 = self._create_key_value_record(book, dc1, author_pk)
+            values[dc1.pk] = kv1.value
+
+        if publisher_pk:
+            kv2 = self._create_key_value_record(book, dc2, publisher_pk)
+            values[dc2.pk] = kv2.value
+
+        return book, values
