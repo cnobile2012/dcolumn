@@ -4,10 +4,13 @@
 #
 
 import logging
+import warnings
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.query import QuerySet
+
+from common.deprication import RemovedInDColumns100Warning
 
 log = logging.getLogger('dcolumns.dcolumns.manager')
 
@@ -161,9 +164,11 @@ class DynamicColumnManager(object):
                 self._css_container_map.update(dict(container_list))
                 self._css_containers[:] = container_list
             else: # This method will be deprecated by version 1.0
-                log.error("Deprecation Warning: The enumeration method of "
-                          "generating the display location will be deprecated "
-                          "with the release of version 1.0.")
+                warnings.warn(
+                    "Deprecation Warning: The enumeration method of "
+                    "generating the display location will be deprecated "
+                    "with the release of version 1.0.0.",
+                    RemovedInDColumns100Warning)
                 self._css_container_map.update(
                     {name: css for name, css in enumerate(container_list)})
                 self._css_containers[:] = [
