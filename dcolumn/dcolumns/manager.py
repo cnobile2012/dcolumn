@@ -10,7 +10,7 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.query import QuerySet
 
-from common.deprication import RemovedInDColumns100Warning
+from dcolumn.common.deprication import RemovedInDColumns100Warning
 
 log = logging.getLogger('dcolumns.dcolumns.manager')
 
