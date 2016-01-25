@@ -434,11 +434,45 @@ class TestCollectionBase(BaseDcolumns):
         """
         """
         #self.skipTest("Temporarily skipped")
-        pass
+        # Add a numeric column to books.
+        dc0 = self._create_dynamic_column_record(
+            "Edition", DynamicColumn.NUMBER, 'book_top', 4)
+        book, values = self._create_book_objects(extra_dcs=[dc0])
+        value = 0
+        kv0 = self._create_key_value_record(book, dc0, value)
+        values[dc0.pk] = value
+        # Update the edition (normal numeric case).
+        new_value = 1
+        book.set_key_value_pair('edition', new_value)
+        found_value = book.get_key_value_pair('edition')
+        msg = "Initial value: {}, found_value: {}, new_found: {}".format(
+            value, found_value, new_value)
+        self.assertEqual(found_value, new_value, msg)
+        # Update the edition by `increment` on a number.
+        book.set_key_value_pair('edition', 'increment')
+        found_value = book.get_key_value_pair('edition')
+        msg = "Initial value: {}, found_value: {}, new_found: {}".format(
+            value, found_value, 2)
+        self.assertEqual(found_value, 2, msg)
+        # Update the edition by `decrement` on a number.
+        book.set_key_value_pair('edition', 'decrement')
+        found_value = book.get_key_value_pair('edition')
+        msg = "Initial value: {}, found_value: {}, new_found: {}".format(
+            value, found_value, 1)
+        self.assertEqual(found_value, 1, msg)
+        # Update the abstract (normal text case).
+        new_value = "A new abstract"
+        book.set_key_value_pair('abstract', new_value)
+        found_value = book.get_key_value_pair('abstract')
+        msg = "Initial value: {}, found_value: {}, new_found: {}".format(
+            value, found_value, new_value)
+        self.assertEqual(found_value, new_value, msg)
+        # 
 
 
 
 
+    # Go back and put the methods below into previous tests.
 
 
 
@@ -479,11 +513,15 @@ class TestCollectionBase(BaseDcolumns):
         kv0 = self._create_key_value_record(publisher, dc0, value)
         return publisher, {dc0.pk: kv0.value}
 
-    def _create_book_objects(self, author_pk=0, publisher_pk=0):
+    def _create_book_objects(self, author_pk=0, publisher_pk=0, extra_dcs=[]):
         """
         Create  a set of Book objects.
         """
-        dcs = []
+        if extra_dcs:
+            dcs = extra_dcs
+        else:
+            dcs = []
+
         dc0 = self._create_dynamic_column_record(
             "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
         dcs.append(dc0)
