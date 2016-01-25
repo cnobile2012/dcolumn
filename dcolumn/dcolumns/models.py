@@ -13,6 +13,9 @@ email: carl.nobile@gmail.com
 __docformat__ = "restructuredtext en"
 
 import logging
+import datetime
+import dateutil
+import types
 from collections import OrderedDict
 
 from django.db import models
@@ -377,7 +380,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return dc
 
-    def get_key_value_pair(self, slug, field='value'):
+    def get_key_value_pair(self, slug, field=None):
         """
         Return the KeyValue object value for the slug.
         """
@@ -391,21 +394,59 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         else:
             model_meta = dc.get_choice_relation_object_and_field()
 
-            if model_meta and not dc.store_relation:
-                model, notused = model_meta
-                value = model.objects.get_value_by_pk(obj.value, field=field)
+            if dc.value_type == dc.CHOICE:
+                if model_meta:
+                    model, m_field = model_meta
+
+                    if not field:
+                        field = m_field
+
+                    if dc.store_relation:
+                        value = obj.value.encode('utf-8')
+                    else:
+                        value = model.objects.get_value_by_pk(
+                            obj.value, field=field)
+            elif dc.value_type == dc.TIME:
+                dt = dateutil.parser.parse(obj.value)
+                value = datetime.time(
+                    hour=dt.hour, minute=dt.minute, second=dt.second,
+                    microsecond=dt.microsecond, tzinfo=dt.tzinfo)
+            elif dc.value_type == dc.DATE:
+                dt = dateutil.parser.parse(obj.value)
+                value = datetime.date(year=dt.year, month=dt.month, day=dt.dat)
+            elif dc.value_type == dc.DATETIME:
+                value = dateutil.parser.parse(obj.value)
+            elif dc.value_type == dc.BOOLEAN:
+                if obj.value.isdigit() and obj.value == '0':
+                    value = False
+                elif obj.value.isdigit() and obj.value != '0':
+                    value = True
+                elif obj.value.lower() == 'false':
+                    value = False
+                elif obj.value.lower() == 'true':
+                    value = True
+            elif dc.value_type == dc.NUMBER and obj.value.isdigit():
+                value = int(obj.value)
+            elif (dc.value_type == dc.FLOAT and
+                  obj.value.replace('.', '').isdigit()):
+                value = float(obj.value)
+            elif dc.value_type in (dc.TEXT, dc.TEXT_BLOCK):
+                value = obj.value.encode('utf-8')
             else:
-                value = obj.value
+                msg = "Invalid value {}, should be type {}".format(
+                        value, VALUE_TYPES_MAP.get(dc.value_type))
+                log.error(msg)
+                raise TypeError(msg)
 
-        return value.encode('utf-8')
+        return value
 
-    def set_key_value_pair(self, slug, value, field=None, force=False):
+    def set_key_value_pair(self, slug, value, field='', force=False):
         """
         This method sets an arbitrary key/value pair, it will log an error
         if the key/value pair could not be found.
 
-        If value contains the value 'increment' or 'decrement' the value
-        associated with the slug will be incremented or decremented.
+        If the argument value contains the value 'increment' or 'decrement'
+        the value associated with the slug will be incremented or decremented.
 
         Arguments:
           slug  -- The slug associated with the key value pair.
@@ -418,15 +459,32 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
             dc = self.get_dynamic_column(slug)
 
             if dc:
-                if dc.store_relation and field:
+                if dc.value_type == dc.CHOICE and dc.store_relation and field:
                     value = getattr(value, field)
-                elif hasattr(value, field):
+                elif dc.value_type == dc.CHOICE and hasattr(value, field):
                     value = getattr(value, field)
-                elif hasattr(value, 'pk'):
+                elif dc.value_type == dc.CHOICE and hasattr(value, 'pk'):
                     value = value.pk
-                elif isinstance(value, (datetime.datetime, datetime.date)):
-                    value = value.strftime("%Y-%m-%d")
+                elif (dc.value_type in (dc.TIME, dc.DATE, dc.DATETIME) and
+                      isinstance(value, (datetime.time, datetime.date,
+                                         datetime.datetime))):
+                    value = value.isoformat()
+                elif (dc.value_type in (dc.BOOLEAN, dc.FLOAT, dc.NUMBER) and
+                      isinstance(value, (int, long, bool, float))):
+                    value = str(value)
+                elif (dc.value_type == dc.NUMBER and
+                      value in ('increment', 'decrement')):
+                    pass
+                elif (dc.value_type in (dc.TEXT, dc.TEXT_BLOCK) and
+                      isinstance(value, types.StringTypes)):
+                    pass
+                else:
+                    msg = "Invalid value {}, should be type {}".format(
+                        value, VALUE_TYPES_MAP.get(dc.value_type))
+                    log.error(msg)
+                    raise TypeError(msg)
 
+                value = value.encode('utf-8')
                 kv, created = self.keyvalue_pairs.get_or_create(
                     dynamic_column=dc, defaults={'value': value})
 
@@ -436,7 +494,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                     elif 'decrement' == value and kv.value.isdigit():
                         value = int(kv.value) - 1
 
-                    kv.value = value.encode('utf-8')
+                    kv.value = value
                     kv.save()
 
 
