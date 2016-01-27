@@ -151,15 +151,19 @@ class StatusModelMixin(models.Model):
 #
 class BaseChoiceModelManager(models.Manager, ChoiceManagerImplementation):
 
-    def get_value_by_pk(self, pk, field=None):
+    def get_value_by_pk(self, pk, field):
         value = ''
 
         if int(pk) != 0:
             try:
                 obj = self.get(pk=pk)
-                value = getattr(obj, field)
             except self.model.DoesNotExist as e:
                 log.error("Access to PK %s failed, %s", pk, e)
+            else:
+                if hasattr(obj, field):
+                    value = getattr(obj, field)
+                else:
+                    log.error("The field value '%s' in not on object '%s'", field, obj)
 
         return value
 

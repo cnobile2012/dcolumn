@@ -124,7 +124,7 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
 
         return self.containers
 
-    def get_value_by_pk(self, pk, field=None):
+    def get_value_by_pk(self, pk, field):
         self.dynamic_column()
         value = ''
         pk = int(pk)
@@ -132,9 +132,13 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
         if pk != 0:
             try:
                 obj = self.container_map.get(pk)
-                value = getattr(obj, field)
             except AttributeError as e:
                 log.error("Access to PK %s failed, %s", pk, e)
+            else:
+                if hasattr(obj, field):
+                    value = getattr(obj, field)
+                else:
+                    log.error("The field value '%s' in not on object '%s'", field, obj)
 
         return value
 

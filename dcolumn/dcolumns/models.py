@@ -356,14 +356,19 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         log.debug("kwargs: %s", kwargs)
         super(CollectionBase, self).save(*args, **kwargs)
 
-    def serialize_key_value_pairs(self):
+    def serialize_key_value_pairs(self, by_slug=False):
         """
         Returns a dict of the dynamic column PK and value.
         """
         result = {}
 
+        if by_slug:
+            field = 'slug'
+        else:
+            field = 'pk'
+
         for kv in self.keyvalue_pairs.all():
-            result[kv.dynamic_column_id] = kv.value.encode('utf-8')
+            result[getattr(kv.dynamic_column, field)] = kv.value.encode('utf-8')
 
         return result
 
@@ -404,8 +409,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                     if dc.store_relation:
                         value = obj.value.encode('utf-8')
                     else:
-                        value = model.objects.get_value_by_pk(
-                            obj.value, field=field)
+                        value = model.objects.get_value_by_pk(obj.value, field)
             elif dc.value_type == dc.TIME:
                 dt = dateutil.parser.parse(obj.value)
                 value = datetime.time(
