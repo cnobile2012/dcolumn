@@ -7,6 +7,8 @@
 #
 
 import datetime
+import dateutil
+import pytz
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -421,16 +423,47 @@ class TestCollectionBase(BaseDcolumns):
 
     def test_get_key_value_pair(self):
         """
-        Check that the value of the KeyValue object is returned.
+        Check that the correct value and vale type of the KeyValue object is
+        returned.
         """
         #self.skipTest("Temporarily skipped")
-        # Create a book object.
+        # Create a book object and lots of dynamic columns.
         author, a_values = self._create_author_objects()
         promotion, p_values = self._create_promotion_objects()
         language = Language()
+        dc0 = self._create_dynamic_column_record(
+            "Date & Time", DynamicColumn.DATETIME, 'book_top', 6)
+        dc1 = self._create_dynamic_column_record(
+            "Ignore", DynamicColumn.BOOLEAN, 'book_top', 7)
+        dc2 = self._create_dynamic_column_record(
+            "Edition", DynamicColumn.NUMBER, 'book_top', 8)
+        dc3 = self._create_dynamic_column_record(
+            "Percentage", DynamicColumn.FLOAT, 'book_top', 9)
+        dc4 = self._create_dynamic_column_record(
+            "Bad Bool", DynamicColumn.BOOLEAN, 'book_top', 10)
+        dc5 = self._create_dynamic_column_record(
+            "Bad Date", DynamicColumn.DATE, 'book_top', 11)
         book, b_values = self._create_book_objects(
             author_pk=author.pk, promotion_pk=promotion.pk,
-            language_pk=language.pk)
+            language_pk=language.pk, extra_dcs=[dc0, dc1, dc2, dc3, dc4, dc5])
+        value = datetime.datetime.now(pytz.utc).isoformat()
+        kv0 = self._create_key_value_record(book, dc0, value)
+        b_values[dc0.slug] = kv0.value
+        value = 'FALSE'
+        kv1 = self._create_key_value_record(book, dc1, value)
+        b_values[dc1.slug] = kv1.value
+        value = 2
+        kv2 = self._create_key_value_record(book, dc2, value)
+        b_values[dc2.slug] = kv2.value
+        value = 20.5
+        kv3 = self._create_key_value_record(book, dc3, value)
+        b_values[dc3.slug] = kv3.value
+        value = 'junk'
+        kv4 = self._create_key_value_record(book, dc4, value)
+        b_values[dc4.slug] = kv4.value
+        value = 'junk'
+        kv5 = self._create_key_value_record(book, dc5, value)
+        b_values[dc5.slug] = kv5.value
         # Test Choice ForeignKey mode with store_relation set to False.
         slug = 'author'
         value = book.get_key_value_pair(slug)
@@ -444,19 +477,55 @@ class TestCollectionBase(BaseDcolumns):
             value, b_values, p_values)
         self.assertEqual(value, b_values.get(slug), msg)
         # Test TIME
-        
+        slug = 'start-time'
+        value = promotion.get_key_value_pair(slug)
+        msg = "value: {}, b_values: {}, p_values: {}".format(
+            value, b_values, p_values)
+        dt = dateutil.parser.parse(p_values.get(slug))
+        t = datetime.time(hour=dt.hour, minute=dt.minute, second=dt.second,
+                          microsecond=dt.microsecond, tzinfo=dt.tzinfo)
+        self.assertEqual(value, t, msg)
         # Test DATE
-
+        slug = 'start-date'
+        value = promotion.get_key_value_pair(slug)
+        msg = "value: {}, b_values: {}, p_values: {}".format(
+            value, b_values, p_values)
+        dt = dateutil.parser.parse(p_values.get(slug))
+        d = datetime.date(year=dt.year, month=dt.month, day=dt.day)
+        self.assertEqual(value, d, msg)
         # Test DATETIME
-
+        slug = 'date-time'
+        value = book.get_key_value_pair(slug)
+        msg = "value: {}, b_values: {}".format(value, b_values)
+        dt = dateutil.parser.parse(b_values.get(slug))
+        self.assertEqual(value, dt, msg)
         # Test BOOLEAN
+        slug = 'ignore'
+        value = book.get_key_value_pair(slug)
+        msg = "value: {}, b_values: {}".format(value, b_values)
+        bool_value = True if b_values.get(slug).lower() == 'true' else False
+        self.assertEqual(value, bool_value, msg)
+        # Test BAD BOOLEAN
+        slug = 'bad-bool'
 
+        with self.assertRaises(ValueError) as cm:
+            value = book.get_key_value_pair(slug)
         # Test NUMBER
-
+        slug = 'edition'
+        value = book.get_key_value_pair(slug)
+        msg = "value: {}, b_values: {}".format(value, b_values)
+        self.assertEqual(value, int(b_values.get(slug)), msg)
         # Test FLOAT
-
+        slug = 'percentage'
+        value = book.get_key_value_pair(slug)
+        msg = "value: {}, b_values: {}".format(value, b_values)
+        self.assertEqual(value, float(b_values.get(slug)), msg)
         # Test TEXT
-
+        slug = 'description'
+        value = promotion.get_key_value_pair(slug)
+        msg = "value: {}, b_values: {}, p_values: {}".format(
+            value, b_values, p_values)
+        self.assertEqual(value, p_values.get(slug), msg)
         # Test TEXT_BLOCK
         slug = 'abstract'
         value = book.get_key_value_pair(slug)
@@ -466,15 +535,11 @@ class TestCollectionBase(BaseDcolumns):
         value = book.get_key_value_pair('not-a-slug')
         msg = "value: {}, b_values: {}".format(value, b_values)
         self.assertEqual(value, '', msg)
+        # Test invalid value other that a bad bolean.
+        slug = 'bad-date'
 
-
-
-
-
-
-
-
-
+        with self.assertRaises(ValueError) as cm:
+            value = book.get_key_value_pair(slug)
 
     def test_set_key_value_pair(self):
         """
@@ -570,7 +635,7 @@ class TestCollectionBase(BaseDcolumns):
         dcs.append(dc0)
         # Create promotion start date.
         dc1 = self._create_dynamic_column_record(
-            "Start Date", DynamicColumn.TIME, 'publisher_top', 2)
+            "Start Date", DynamicColumn.DATE, 'publisher_top', 2)
         dcs.append(dc1)
         # Create promotion start time.
         dc2 = self._create_dynamic_column_record(
@@ -602,28 +667,28 @@ class TestCollectionBase(BaseDcolumns):
             dcs = []
 
         dc0 = self._create_dynamic_column_record(
-            "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
+            "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 1)
         dcs.append(dc0)
 
         if author_pk: # Database table
             dc1 = self._create_dynamic_column_record(
-                "Author", DynamicColumn.CHOICE, 'book_top', 1, relation=3)
+                "Author", DynamicColumn.CHOICE, 'book_top', 2, relation=3)
             dcs.append(dc1)
 
         if publisher_pk: # Database table
             dc2 = self._create_dynamic_column_record(
-                "Publisher", DynamicColumn.CHOICE, 'book_top', 2, relation=4)
+                "Publisher", DynamicColumn.CHOICE, 'book_top', 3, relation=4)
             dcs.append(dc2)
 
         if promotion_pk: # Database table
             dc3 = self._create_dynamic_column_record(
-                "Promotion", DynamicColumn.CHOICE, 'book_top', 3, relation=5,
+                "Promotion", DynamicColumn.CHOICE, 'book_top', 4, relation=5,
                 store_relation=DynamicColumn.YES)
             dcs.append(dc3)
 
         if language_pk: # Choice object
             dc4 =self._create_dynamic_column_record(
-                "Language", DynamicColumn.CHOICE, 'book_top', 4, relation=6)
+                "Language", DynamicColumn.CHOICE, 'book_top', 5, relation=6)
             dcs.append(dc4)
 
         # Add to a collection.

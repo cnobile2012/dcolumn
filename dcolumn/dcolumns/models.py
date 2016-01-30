@@ -397,52 +397,87 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
             log.error("Could not find value for slug '%s'.", slug)
             value = ''
         else:
-            model_meta = dc.get_choice_relation_object_and_field()
-
-            if dc.value_type == dc.CHOICE:
-                if model_meta:
-                    model, m_field = model_meta
-
-                    if not field:
-                        field = m_field
-
-                    if dc.store_relation:
-                        value = obj.value.encode('utf-8')
-                    else:
-                        value = model.objects.get_value_by_pk(obj.value, field)
-            elif dc.value_type == dc.TIME:
-                dt = dateutil.parser.parse(obj.value)
-                value = datetime.time(
-                    hour=dt.hour, minute=dt.minute, second=dt.second,
-                    microsecond=dt.microsecond, tzinfo=dt.tzinfo)
-            elif dc.value_type == dc.DATE:
-                dt = dateutil.parser.parse(obj.value)
-                value = datetime.date(year=dt.year, month=dt.month, day=dt.dat)
-            elif dc.value_type == dc.DATETIME:
-                value = dateutil.parser.parse(obj.value)
-            elif dc.value_type == dc.BOOLEAN:
-                if obj.value.isdigit() and obj.value == '0':
-                    value = False
-                elif obj.value.isdigit() and obj.value != '0':
-                    value = True
-                elif obj.value.lower() == 'false':
-                    value = False
-                elif obj.value.lower() == 'true':
-                    value = True
-            elif dc.value_type == dc.NUMBER and obj.value.isdigit():
-                value = int(obj.value)
-            elif (dc.value_type == dc.FLOAT and
-                  obj.value.replace('.', '').isdigit()):
-                value = float(obj.value)
-            elif dc.value_type in (dc.TEXT, dc.TEXT_BLOCK):
+            if dc.value_type == dc.CHOICE and obj.value:
+                value = self._is_choice(dc, obj.value, field)
+            elif dc.value_type == dc.TIME and obj.value:
+                value = self._is_time(dc, obj.value)
+            elif dc.value_type == dc.DATE and obj.value:
+                value = self._is_date(dc, obj.value)
+            elif dc.value_type == dc.DATETIME and obj.value:
+                value = self._is_datetime(dc, obj.value)
+            elif dc.value_type == dc.BOOLEAN and obj.value:
+                value = self._is_boolean(dc, obj.value)
+            elif dc.value_type == dc.NUMBER and obj.value:
+                value = self._is_number(dc, obj.value)
+            elif dc.value_type == dc.FLOAT and obj.value:
+                value = self._is_float(dc, obj.value)
+            elif dc.value_type in (dc.TEXT, dc.TEXT_BLOCK) and obj.value:
                 value = obj.value.encode('utf-8')
             else:
-                msg = "Invalid value {}, should be type {}".format(
-                        value, VALUE_TYPES_MAP.get(dc.value_type))
-                log.error(msg)
-                raise TypeError(msg)
+                value = obj.value
 
         return value
+
+    def _is_choice(self, dc, value, field):
+        model, m_field = dc.get_choice_relation_object_and_field()
+
+        if not field:
+            field = m_field
+
+        if dc.store_relation:
+            result = value.encode('utf-8')
+        else:
+            result = model.objects.get_value_by_pk(value, field)
+
+        return result
+
+    def _is_time(self, dc, value):
+        dt = self._is_datetime(dc, value)
+        return datetime.time(
+            hour=dt.hour, minute=dt.minute, second=dt.second,
+            microsecond=dt.microsecond, tzinfo=dt.tzinfo)
+
+    def _is_date(self, dc, value):
+        dt = self._is_datetime(dc, value)
+        return datetime.date(year=dt.year, month=dt.month, day=dt.day)
+
+    def _is_datetime(self, dc, value):
+        try:
+            return dateutil.parser.parse(value)
+        except ValueError:
+            self._raise_exception(dc, value)
+
+    def _is_boolean(self, dc, value):
+        if value.isdigit():
+            result = int(value) == 0
+        elif value.lower() in ('false', 'true'):
+            result = value.lower() == 'true'
+        else:
+            self._raise_exception(dc, value)
+
+        return result
+
+    def _is_number(self, dc, value):
+        if value.isdigit():
+            result = int(value)
+        else:
+            self._raise_exception(dc, value)
+
+        return result
+
+    def _is_float(self, dc, value):
+        if value.replace('.', '').isdigit():
+            result = float(value)
+        else:
+            self._raise_exception(dc, value)
+
+        return result
+
+    def _raise_exception(self, dc, value):
+        msg = "Invalid value {}, should be type {}".format(
+            value, DynamicColumn.VALUE_TYPES_MAP.get(dc.value_type))
+        log.error(msg)
+        raise ValueError(msg)
 
     def set_key_value_pair(self, slug, value, field='', force=False):
         """
