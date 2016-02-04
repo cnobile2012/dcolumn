@@ -11,8 +11,6 @@ from django.test import TestCase
 from example_site.books.choices import Language
 from example_site.books.models import Author, Book, Promotion, Publisher
 
-from dcolumn.dcolumns.manager import DynamicColumnManager
-
 from ..models import DynamicColumn, ColumnCollection, KeyValue
 
 from .test_dcolumns_models import BaseDcolumns
@@ -25,7 +23,6 @@ class TestManager(BaseDcolumns):
 
     def setUp(self):
         super(TestManager, self).setUp()
-        self.manager = DynamicColumnManager()
 
     def test_manager_object_methods(self):
         """
@@ -81,7 +78,8 @@ class TestManager(BaseDcolumns):
 
         # Test that the max value in keys is also the size of the set.
         keys = set(result.keys())
-        count = len(keys)
+        count = len(keys) - 1 # Subtract the "Choose a Relation" option.
+        msg = "keys: {}, result: {}".format(keys, result)
         self.assertEqual(count, max(keys), msg)
 
     def test_choice_map(self):
@@ -183,6 +181,7 @@ class TestManager(BaseDcolumns):
         #self.skipTest("Temporarily skipped")
         # Test get_relation_model_field
         for key in self.manager.choice_relation_map:
+            if key == 0: continue # Skip the "Choose a Relation" option.
             model, field = self.manager.get_relation_model_field(key)
             msg = "model: {}, field: {}".format(str(model), field)
 
@@ -190,7 +189,13 @@ class TestManager(BaseDcolumns):
                 # These are DB model objects.
                 obj = model._meta.get_field(field)
             except AttributeError as e:
-                #These are choice objects.
+                # These are choice objects.
                 self.assertTrue(hasattr(model, field), msg)
             else:
                 self.assertTrue(obj, msg)
+
+        # Test that (None, None) are returned when an invalid key is passed.
+        model, field = self.manager.get_relation_model_field(100)
+        msg = "model: {}, field: {}".format(model, field)
+        self.assertEqual(model, None, msg)
+        self.assertEqual(field, None, msg)

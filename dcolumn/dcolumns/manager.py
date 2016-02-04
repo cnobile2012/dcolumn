@@ -261,6 +261,7 @@ class DynamicColumnManager(object):
         :Returns:
           The model object and field used in the HTML select option text value.
         """
-        return self.choice_map.get(self.choice_relation_map.get(relation))
+        return self.choice_map.get(self.choice_relation_map.get(relation),
+                                   (None, None))
 
 dcolumn_manager = DynamicColumnManager()

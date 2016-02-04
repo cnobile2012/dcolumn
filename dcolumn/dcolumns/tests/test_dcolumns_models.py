@@ -15,6 +15,7 @@ from django.test import TestCase
 
 from example_site.books.choices import Language
 from example_site.books.models import Author, Book, Publisher, Promotion
+from dcolumn.dcolumns.manager import DynamicColumnManager
 
 from ..models import DynamicColumn, ColumnCollection, KeyValue
 
@@ -28,6 +29,9 @@ class BaseDcolumns(TestCase):
     def __init__(self, name):
         super(BaseDcolumns, self).__init__(name)
         self.user = None
+        self.manager = DynamicColumnManager()
+        self.choice2index = dict(
+            [(v, k) for k, v in self.manager.choice_relations])
 
     def setUp(self):
         self.user = self._create_user()
@@ -97,7 +101,8 @@ class TestDynamicColumn(BaseDcolumns):
         #self.skipTest("Temporarily skipped")
         # Create a choice type object.
         dc0 = self._create_dynamic_column_record(
-            "Language", DynamicColumn.CHOICE, 'book_center', 6, relation=1)
+            "Language", DynamicColumn.CHOICE, 'book_center', 6,
+            relation=self.choice2index.get("Language"))
         obj, field = dc0.get_choice_relation_object_and_field()
         msg = "obj: %s, field: {}".format(obj, field)
         self.assertTrue(obj == Language, msg)
@@ -116,7 +121,8 @@ class TestDynamicColumn(BaseDcolumns):
         self.assertEqual(len(slugs), 0, msg)
         # Test with a choice type object.
         dc1 = self._create_dynamic_column_record(
-            "Language", DynamicColumn.CHOICE, 'book_center', 6, relation=1)
+            "Language", DynamicColumn.CHOICE, 'book_center', 6,
+            relation=self.choice2index.get("Language"))
         slugs = DynamicColumn.objects.get_fk_slugs()
         msg = "slugs: {}".format(slugs)
         self.assertEqual(len(slugs), 1, msg)
@@ -134,9 +140,11 @@ class TestColumnCollection(BaseDcolumns):
         """
         #self.skipTest("Temporarily skipped")
         dc0 = self._create_dynamic_column_record(
-            "Author", DynamicColumn.CHOICE, 'book_top', 1, relation=3)
+            "Author", DynamicColumn.CHOICE, 'book_top', 1,
+            relation=self.choice2index.get("Author"))
         dc1 = self._create_dynamic_column_record(
-            "Publisher", DynamicColumn.CHOICE, 'book_top', 2, relation=4)
+            "Publisher", DynamicColumn.CHOICE, 'book_top', 2,
+            relation=self.choice2index.get("Publisher"))
         dc2 = self._create_dynamic_column_record(
             "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
         # Test that there are no dynamic columns.
@@ -166,7 +174,8 @@ class TestColumnCollection(BaseDcolumns):
         dc0 = self._create_dynamic_column_record(
             "Postal Code", DynamicColumn.TEXT, 'publisher_top', 6)
         dc1 = self._create_dynamic_column_record(
-            "Language", DynamicColumn.CHOICE, 'book_center', 6, relation=1)
+            "Language", DynamicColumn.CHOICE, 'book_center', 6,
+            relation=self.choice2index.get("Language"))
         dc2 = self._create_dynamic_column_record(
             "Web Site", DynamicColumn.TEXT, 'author_top', 1)
         # Add two dynamic columns to the collections.
@@ -196,9 +205,11 @@ class TestColumnCollection(BaseDcolumns):
         #self.skipTest("Temporarily skipped")
         # Create a few dynamic columns.
         dc0 = self._create_dynamic_column_record(
-            "Author", DynamicColumn.CHOICE, 'book_top', 1, relation=3)
+            "Author", DynamicColumn.CHOICE, 'book_top', 1,
+            relation=self.choice2index.get("Author"))
         dc1 = self._create_dynamic_column_record(
-            "Publisher", DynamicColumn.CHOICE, 'book_top', 2, relation=4)
+            "Publisher", DynamicColumn.CHOICE, 'book_top', 2,
+            relation=self.choice2index.get("Publisher"))
         dc2 = self._create_dynamic_column_record(
             "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
         # Test that the serialized object is correct using pks and has no value.
@@ -230,9 +241,11 @@ class TestColumnCollection(BaseDcolumns):
         #self.skipTest("Temporarily skipped")
         # Create two choice items.
         dc0 = self._create_dynamic_column_record(
-            "Author", DynamicColumn.CHOICE, 'book_top', 1, relation=3)
+            "Author", DynamicColumn.CHOICE, 'book_top', 1,
+            relation=self.choice2index.get("Author"))
         dc1 = self._create_dynamic_column_record(
-            "Publisher", DynamicColumn.CHOICE, 'book_top', 2, relation=4)
+            "Publisher", DynamicColumn.CHOICE, 'book_top', 2,
+            relation=self.choice2index.get("Publisher"))
         # Add to a collection.
         cc0 = self._create_column_collection_record(
             "Books", dynamic_columns=[dc0, dc1])
@@ -249,9 +262,11 @@ class TestColumnCollection(BaseDcolumns):
         #self.skipTest("Temporarily skipped")
         # Create a few dynamic columns.
         dc0 = self._create_dynamic_column_record(
-            "Author", DynamicColumn.CHOICE, 'book_top', 1, relation=3)
+            "Author", DynamicColumn.CHOICE, 'book_top', 1,
+            relation=self.choice2index.get("Author"))
         dc1 = self._create_dynamic_column_record(
-            "Publisher", DynamicColumn.CHOICE, 'book_top', 2, relation=4)
+            "Publisher", DynamicColumn.CHOICE, 'book_top', 2,
+            relation=self.choice2index.get("Publisher"))
         dc2 = self._create_dynamic_column_record(
             "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
         # Add to a collection.
@@ -295,9 +310,11 @@ class TestCollectionBase(BaseDcolumns):
         field1 = "Publisher"
         field2 = "Abstract"
         dc0 = self._create_dynamic_column_record(
-            field0, DynamicColumn.CHOICE, 'book_top', 1, relation=3)
+            field0, DynamicColumn.CHOICE, 'book_top', 1,
+            relation=self.choice2index.get("Author"))
         dc1 = self._create_dynamic_column_record(
-            field1, DynamicColumn.CHOICE, 'book_top', 2, relation=4)
+            field1, DynamicColumn.CHOICE, 'book_top', 2,
+            relation=self.choice2index.get("Publisher"))
         dc2 = self._create_dynamic_column_record(
             field2, DynamicColumn.TEXT_BLOCK, 'book_top', 3)
         # Put the dynamic columns in a collection.
@@ -336,9 +353,11 @@ class TestCollectionBase(BaseDcolumns):
         #self.skipTest("Temporarily skipped")
         # Create a few dynamic columns.
         dc0 = self._create_dynamic_column_record(
-            "Author", DynamicColumn.CHOICE, 'book_top', 1, relation=3)
+            "Author", DynamicColumn.CHOICE, 'book_top', 1,
+            relation=self.choice2index.get("Author"))
         dc1 = self._create_dynamic_column_record(
-            "Publisher", DynamicColumn.CHOICE, 'book_top', 2, relation=4)
+            "Publisher", DynamicColumn.CHOICE, 'book_top', 2,
+            relation=self.choice2index.get("Publisher"))
         dc2 = self._create_dynamic_column_record(
             "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
         # Add to a collection.
@@ -356,9 +375,11 @@ class TestCollectionBase(BaseDcolumns):
         #self.skipTest("Temporarily skipped")
         # Create a few dynamic columns.
         dc0 = self._create_dynamic_column_record(
-            "Author", DynamicColumn.CHOICE, 'book_top', 1, relation=3)
+            "Author", DynamicColumn.CHOICE, 'book_top', 1,
+            relation=self.choice2index.get("Author"))
         dc1 = self._create_dynamic_column_record(
-            "Publisher", DynamicColumn.CHOICE, 'book_top', 2, relation=4)
+            "Publisher", DynamicColumn.CHOICE, 'book_top', 2,
+            relation=self.choice2index.get("Publisher"))
         dc2 = self._create_dynamic_column_record(
             "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
         # Add to a collection.
@@ -377,9 +398,11 @@ class TestCollectionBase(BaseDcolumns):
         #self.skipTest("Temporarily skipped")
         # Create a few dynamic columns.
         dc0 = self._create_dynamic_column_record(
-            "Author", DynamicColumn.CHOICE, 'book_top', 1, relation=3)
+            "Author", DynamicColumn.CHOICE, 'book_top', 1,
+            relation=self.choice2index.get("Author"))
         dc1 = self._create_dynamic_column_record(
-            "Publisher", DynamicColumn.CHOICE, 'book_top', 2, relation=4)
+            "Publisher", DynamicColumn.CHOICE, 'book_top', 2,
+            relation=self.choice2index.get("Publisher"))
         dc2 = self._create_dynamic_column_record(
             "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
         # Add to a collection.
@@ -395,9 +418,9 @@ class TestCollectionBase(BaseDcolumns):
         Test that the key valie pairs get serialized in a dict.
         """
         #self.skipTest("Temporarily skipped")
-        author, a_values = self._create_author_objects()
-        publisher, p_values = self._create_publisher_objects()
-        book, b_values = self._create_book_objects(
+        author, a_cc, a_values = self._create_author_objects()
+        publisher, p_cc, p_values = self._create_publisher_objects()
+        book, b_cc, b_values = self._create_book_objects(
             author_pk=author.pk, publisher_pk=publisher.pk)
         result = book.serialize_key_value_pairs(by_slug=True)
         msg = "result: {}".format(result)
@@ -414,7 +437,7 @@ class TestCollectionBase(BaseDcolumns):
         Test that the dynamic column is returned when it's slug is passed.
         """
         #self.skipTest("Temporarily skipped")
-        book, b_values = self._create_book_objects()
+        book, b_cc, b_values = self._create_book_objects()
         obj = book.get_dynamic_column('abstract')
         msg = "obj.name: {}, obj.value_type: {}".format(
             obj.name, obj.value_type)
@@ -423,13 +446,13 @@ class TestCollectionBase(BaseDcolumns):
 
     def test_get_key_value_pair(self):
         """
-        Check that the correct value and vale type of the KeyValue object is
+        Check that the correct value and value type of the KeyValue object is
         returned.
         """
         #self.skipTest("Temporarily skipped")
         # Create a book object and lots of dynamic columns.
-        author, a_values = self._create_author_objects()
-        promotion, p_values = self._create_promotion_objects()
+        author, a_cc, a_values = self._create_author_objects()
+        promotion, p_cc, p_values = self._create_promotion_objects()
         language = Language()
         dc0 = self._create_dynamic_column_record(
             "Date & Time", DynamicColumn.DATETIME, 'book_top', 6)
@@ -443,7 +466,7 @@ class TestCollectionBase(BaseDcolumns):
             "Bad Bool", DynamicColumn.BOOLEAN, 'book_top', 10)
         dc5 = self._create_dynamic_column_record(
             "Bad Date", DynamicColumn.DATE, 'book_top', 11)
-        book, b_values = self._create_book_objects(
+        book, b_cc, b_values = self._create_book_objects(
             author_pk=author.pk, promotion_pk=promotion.pk,
             language_pk=language.pk, extra_dcs=[dc0, dc1, dc2, dc3, dc4, dc5])
         value = datetime.datetime.now(pytz.utc).isoformat()
@@ -545,13 +568,39 @@ class TestCollectionBase(BaseDcolumns):
         """
         """
         #self.skipTest("Temporarily skipped")
-        # Add a numeric column to books.
+        # Add a multiple columns to books.
+        author, a_cc, a_values = self._create_author_objects()
+        new_author = self._create_dcolumn_record(
+            Author, a_cc, name="Sr. Walter Raleigh")
+        promotion, p_cc, p_values = self._create_promotion_objects()
+        new_promotion = self._create_dcolumn_record(
+            Promotion, p_cc, name="100% off nothing.")
         dc0 = self._create_dynamic_column_record(
             "Edition", DynamicColumn.NUMBER, 'book_top', 4)
-        book, b_values = self._create_book_objects(extra_dcs=[dc0])
+        book, b_cc, b_values = self._create_book_objects(
+            author_pk=author.pk, promotion_pk=promotion.pk, extra_dcs=[dc0])
         value = 0
         kv0 = self._create_key_value_record(book, dc0, value)
-        b_values[dc0.slug] = value
+        b_values[dc0.slug] = kv0.value
+        # Update Choice ForeignKey mode with store_relation set to False.
+        slug = 'author'
+        book.set_key_value_pair(slug, new_author, field='pk')
+        found_value = book.get_key_value_pair(slug)
+        msg = "Initial value: {}, found_value: {}, new_found: {}".format(
+            author.pk, found_value, new_author.pk)
+        self.assertEqual(found_value, new_author.name, msg)
+        # Test Choice mode with store_relation set to True.
+        slug = 'promotion'
+        book.set_key_value_pair(slug, new_promotion)
+        found_value = book.get_key_value_pair(slug)
+        msg = "Initial value: {}, found_value: {}, new_found: {}".format(
+            promotion.name, found_value, new_promotion.name)
+        self.assertEqual(found_value, new_promotion.name, msg)
+        # 
+
+
+
+
         # Update the edition (normal numeric case).
         new_value = 1
         book.set_key_value_pair('edition', new_value)
@@ -588,11 +637,15 @@ class TestCollectionBase(BaseDcolumns):
 
 
 
-    def _create_author_objects(self):
+    def _create_author_objects(self, extra_dcs=[]):
         """
         Create  a set of Author objects.
         """
-        dcs = []
+        if extra_dcs:
+            dcs = extra_dcs
+        else:
+            dcs = []
+
         dc0 = self._create_dynamic_column_record(
             "Web Site", DynamicColumn.TEXT, 'author_top', 1)
         dcs.append(dc0)
@@ -604,13 +657,17 @@ class TestCollectionBase(BaseDcolumns):
             Author, cc, name='Pickup Andropoff')
         value = "example.org"
         kv0 = self._create_key_value_record(author, dc0, value)
-        return author, {dc0.slug: kv0.value}
+        return author, cc, {dc0.slug: kv0.value}
 
-    def _create_publisher_objects(self):
+    def _create_publisher_objects(self, extra_dcs=[]):
         """
         Create  a set of Publisher objects.
         """
-        dcs = []
+        if extra_dcs:
+            dcs = extra_dcs
+        else:
+            dcs = []
+
         dc0 = self._create_dynamic_column_record(
             "Web Site", DynamicColumn.TEXT, 'publisher_top', 1)
         dcs.append(dc0)
@@ -622,13 +679,17 @@ class TestCollectionBase(BaseDcolumns):
             Publisher, cc, name='Some big Publisher')
         value = "example.org"
         kv0 = self._create_key_value_record(publisher, dc0, value)
-        return publisher, {dc0.slug: kv0.value}
+        return publisher, cc, {dc0.slug: kv0.value}
 
-    def _create_promotion_objects(self):
+    def _create_promotion_objects(self, extra_dcs=[]):
         """
         Create  a set of Promotion objects.
         """
-        dcs = []
+        if extra_dcs:
+            dcs = extra_dcs
+        else:
+            dcs = []
+
         # Create promotion description
         dc0 = self._create_dynamic_column_record(
             "Description", DynamicColumn.TEXT, 'publisher_top', 1)
@@ -653,8 +714,8 @@ class TestCollectionBase(BaseDcolumns):
         kv1 = self._create_key_value_record(promotion, dc1, value)
         value = datetime.time(hour=12, minute=0, second=0).isoformat()
         kv2 = self._create_key_value_record(promotion, dc2, value)
-        return promotion, {dc0.slug: kv0.value, dc1.slug: kv1.value,
-                           dc2.slug: kv2.value}
+        return promotion, cc, {dc0.slug: kv0.value, dc1.slug: kv1.value,
+                               dc2.slug: kv2.value}
 
     def _create_book_objects(self, author_pk=0, publisher_pk=0, promotion_pk=0,
                              language_pk=0, extra_dcs=[]):
@@ -672,23 +733,27 @@ class TestCollectionBase(BaseDcolumns):
 
         if author_pk: # Database table
             dc1 = self._create_dynamic_column_record(
-                "Author", DynamicColumn.CHOICE, 'book_top', 2, relation=3)
+                "Author", DynamicColumn.CHOICE, 'book_top', 2,
+                relation=self.choice2index.get("Author"))
             dcs.append(dc1)
 
         if publisher_pk: # Database table
             dc2 = self._create_dynamic_column_record(
-                "Publisher", DynamicColumn.CHOICE, 'book_top', 3, relation=4)
+                "Publisher", DynamicColumn.CHOICE, 'book_top', 3,
+                relation=self.choice2index.get("Publisher"))
             dcs.append(dc2)
 
         if promotion_pk: # Database table
             dc3 = self._create_dynamic_column_record(
-                "Promotion", DynamicColumn.CHOICE, 'book_top', 4, relation=5,
+                "Promotion", DynamicColumn.CHOICE, 'book_top', 4,
+                relation=self.choice2index.get("Promotion"),
                 store_relation=DynamicColumn.YES)
             dcs.append(dc3)
 
         if language_pk: # Choice object
             dc4 =self._create_dynamic_column_record(
-                "Language", DynamicColumn.CHOICE, 'book_top', 5, relation=6)
+                "Language", DynamicColumn.CHOICE, 'book_top', 5,
+                relation=self.choice2index.get("Language"))
             dcs.append(dc4)
 
         # Add to a collection.
@@ -698,7 +763,7 @@ class TestCollectionBase(BaseDcolumns):
         book = self._create_dcolumn_record(Book, cc, title='Test Book')
         value = "Very very short abstract"
         kv0 = self._create_key_value_record(book, dc0, value)
-        values = {dc0.slug: value}
+        values = {dc0.slug: kv0.value}
 
         if author_pk:
             kv1 = self._create_key_value_record(book, dc1, author_pk)
@@ -716,4 +781,4 @@ class TestCollectionBase(BaseDcolumns):
             kv4 = self._create_key_value_record(book, dc4, language_pk)
             values[dc4.slug] = kv4.value
 
-        return book, values
+        return book, cc, values

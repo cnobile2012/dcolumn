@@ -398,19 +398,19 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
             value = ''
         else:
             if dc.value_type == dc.CHOICE and obj.value:
-                value = self._is_choice(dc, obj.value, field)
+                value = self._is_get_choice(dc, obj.value, field)
             elif dc.value_type == dc.TIME and obj.value:
-                value = self._is_time(dc, obj.value)
+                value = self._is_get_time(dc, obj.value)
             elif dc.value_type == dc.DATE and obj.value:
-                value = self._is_date(dc, obj.value)
+                value = self._is_get_date(dc, obj.value)
             elif dc.value_type == dc.DATETIME and obj.value:
-                value = self._is_datetime(dc, obj.value)
+                value = self._is_get_datetime(dc, obj.value)
             elif dc.value_type == dc.BOOLEAN and obj.value:
-                value = self._is_boolean(dc, obj.value)
+                value = self._is_get_boolean(dc, obj.value)
             elif dc.value_type == dc.NUMBER and obj.value:
-                value = self._is_number(dc, obj.value)
+                value = self._is_get_number(dc, obj.value)
             elif dc.value_type == dc.FLOAT and obj.value:
-                value = self._is_float(dc, obj.value)
+                value = self._is_get_float(dc, obj.value)
             elif dc.value_type in (dc.TEXT, dc.TEXT_BLOCK) and obj.value:
                 value = obj.value.encode('utf-8')
             else:
@@ -418,36 +418,39 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return value
 
-    def _is_choice(self, dc, value, field):
-        model, m_field = dc.get_choice_relation_object_and_field()
-
-        if not field:
-            field = m_field
-
+    def _is_get_choice(self, dc, value, field):
         if dc.store_relation:
             result = value.encode('utf-8')
         else:
-            result = model.objects.get_value_by_pk(value, field)
+            model, m_field = dc.get_choice_relation_object_and_field()
+
+            if not field:
+                field = m_field
+
+            if model and field:
+                result = model.objects.get_value_by_pk(value, field)
+            else:
+                self._raise_exception(dc, value, field=field)
 
         return result
 
-    def _is_time(self, dc, value):
-        dt = self._is_datetime(dc, value)
+    def _is_get_time(self, dc, value):
+        dt = self._is_get_datetime(dc, value)
         return datetime.time(
             hour=dt.hour, minute=dt.minute, second=dt.second,
             microsecond=dt.microsecond, tzinfo=dt.tzinfo)
 
-    def _is_date(self, dc, value):
-        dt = self._is_datetime(dc, value)
+    def _is_get_date(self, dc, value):
+        dt = self._is_get_datetime(dc, value)
         return datetime.date(year=dt.year, month=dt.month, day=dt.day)
 
-    def _is_datetime(self, dc, value):
+    def _is_get_datetime(self, dc, value):
         try:
             return dateutil.parser.parse(value)
         except ValueError:
             self._raise_exception(dc, value)
 
-    def _is_boolean(self, dc, value):
+    def _is_get_boolean(self, dc, value):
         if value.isdigit():
             result = int(value) == 0
         elif value.lower() in ('false', 'true'):
@@ -457,7 +460,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return result
 
-    def _is_number(self, dc, value):
+    def _is_get_number(self, dc, value):
         if value.isdigit():
             result = int(value)
         else:
@@ -465,7 +468,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return result
 
-    def _is_float(self, dc, value):
+    def _is_get_float(self, dc, value):
         if value.replace('.', '').isdigit():
             result = float(value)
         else:
@@ -473,13 +476,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return result
 
-    def _raise_exception(self, dc, value):
-        msg = "Invalid value {}, should be type {}".format(
-            value, DynamicColumn.VALUE_TYPES_MAP.get(dc.value_type))
-        log.error(msg)
-        raise ValueError(msg)
-
-    def set_key_value_pair(self, slug, value, field='', force=False):
+    def set_key_value_pair(self, slug, value, field=None, force=False):
         """
         This method sets an arbitrary key/value pair, it will log an error
         if the key/value pair could not be found.
@@ -490,7 +487,9 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         Arguments:
           slug  -- The slug associated with the key value pair.
           value -- The value can be text or an object to get the value from.
-          field -- The field used to get the value on the object.
+          field -- The field used to get the value on the object. If this
+                   keyword argument is not set the default field will be used
+                   when the dcolumn_manager.register_choice() was set.
           force -- Default is False, do not save empty strings or None objects
                    else True save empty strings only.
         """
@@ -498,30 +497,20 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
             dc = self.get_dynamic_column(slug)
 
             if dc:
-                if dc.value_type == dc.CHOICE and dc.store_relation and field:
-                    value = getattr(value, field)
-                elif dc.value_type == dc.CHOICE and hasattr(value, field):
-                    value = getattr(value, field)
-                elif dc.value_type == dc.CHOICE and hasattr(value, 'pk'):
-                    value = value.pk
-                elif (dc.value_type in (dc.TIME, dc.DATE, dc.DATETIME) and
-                      isinstance(value, (datetime.time, datetime.date,
-                                         datetime.datetime))):
-                    value = value.isoformat()
-                elif (dc.value_type in (dc.BOOLEAN, dc.FLOAT, dc.NUMBER) and
-                      isinstance(value, (int, long, bool, float))):
-                    value = str(value)
+                if dc.value_type == dc.CHOICE:
+                    value = self._is_set_choice(dc, value, field)
+                elif dc.value_type in (dc.TIME, dc.DATE, dc.DATETIME):
+                    value = self._is_set_datetime(dc, value)
                 elif (dc.value_type == dc.NUMBER and
                       value in ('increment', 'decrement')):
                     pass
+                elif dc.value_type in (dc.BOOLEAN, dc.FLOAT, dc.NUMBER):
+                    value = self._is_set_bool_or_numerical(dc, value)
                 elif (dc.value_type in (dc.TEXT, dc.TEXT_BLOCK) and
                       isinstance(value, types.StringTypes)):
                     pass
                 else:
-                    msg = "Invalid value {}, should be type {}".format(
-                        value, VALUE_TYPES_MAP.get(dc.value_type))
-                    log.error(msg)
-                    raise TypeError(msg)
+                    self._raise_exception(dc, value)
 
                 value = value.encode('utf-8')
                 kv, created = self.keyvalue_pairs.get_or_create(
@@ -535,6 +524,50 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
                     kv.value = value
                     kv.save()
+            else:
+                msg = "Could not DynamicColumn for slug '{}'.".format(slug)
+                log.error(msg)
+                raise ValueError(msg)
+
+    def _is_set_choice(self, dc, value, field):
+        model, m_field = dc.get_choice_relation_object_and_field()
+
+        if not field:
+            field = m_field
+
+        if dc.store_relation and field:
+            result = str(getattr(value, field))
+        else:
+            if model and field and hasattr(value, field):
+                result = str(getattr(value, field))
+            else:
+                self._raise_exception(dc, value, field=field)
+
+        return result
+
+    def _is_set_datetime(self, dc, value):
+        if isinstance(
+            value, (datetime.time, datetime.date, datetime.datetime)):
+            result = value.isoformat()
+        else:
+            self._raise_exception(dc, value)
+
+        return result
+
+    def _is_set_bool_or_numerical(self, dc, value):
+        if isinstance(value, (int, long, bool, float)):
+            result = str(value)
+        else:
+            self._raise_exception(dc, value)
+
+        return result
+
+    def _raise_exception(self, dc, value,
+                         field='(Does not apply to this type)'):
+        msg = "Invalid value {}, should be of type {}, with field: {}.".format(
+            value, DynamicColumn.VALUE_TYPES_MAP.get(dc.value_type), field)
+        log.error(msg)
+        raise ValueError(msg)
 
 
 #
