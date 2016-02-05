@@ -570,7 +570,7 @@ class TestCollectionBase(BaseDcolumns):
         correctly.
         """
         #self.skipTest("Temporarily skipped")
-        # Add a multiple columns to books.
+        # Add a few columns to author, promotion, and book.
         author, a_cc, a_values = self._create_author_objects()
         new_author = self._create_dcolumn_record(
             Author, a_cc, name="Sr. Walter Raleigh")
@@ -579,70 +579,141 @@ class TestCollectionBase(BaseDcolumns):
             Promotion, p_cc, name="100% off nothing.")
         dc0 = self._create_dynamic_column_record(
             "Edition", DynamicColumn.NUMBER, 'book_top', 4)
+        dc1 = self._create_dynamic_column_record(
+            "Date & Time", DynamicColumn.DATETIME, 'book_top', 5)
+        dc2 = self._create_dynamic_column_record(
+            "Ignore", DynamicColumn.BOOLEAN, 'book_top', 6)
+        dc3 = self._create_dynamic_column_record(
+            "Percentage", DynamicColumn.FLOAT, 'book_top', 7)
+        # Web Site gets created, so no KeyValue is pre-created.
+        dc4 = self._create_dynamic_column_record(
+            "Web Site", DynamicColumn.TEXT, 'book_top', 8)
         book, b_cc, b_values = self._create_book_objects(
-            author_pk=author.pk, promotion_pk=promotion.pk, extra_dcs=[dc0])
+            author_pk=author.pk, promotion_pk=promotion.pk,
+            extra_dcs=[dc0, dc1, dc2, dc3, dc4])
         value = 0
         kv0 = self._create_key_value_record(book, dc0, value)
         b_values[dc0.slug] = kv0.value
-        # Update Choice ForeignKey mode with store_relation set to False.
+        value = datetime.datetime.now(pytz.utc).isoformat()
+        kv1 = self._create_key_value_record(book, dc1, value)
+        b_values[dc1.slug] = kv1.value
+        value = 'FALSE'
+        kv2 = self._create_key_value_record(book, dc2, value)
+        b_values[dc2.slug] = kv2.value
+        value = 20.5
+        kv3 = self._create_key_value_record(book, dc3, value)
+        b_values[dc3.slug] = kv3.value
+        # Test CHOICE ForeignKey mode with store_relation set to False.
         slug = 'author'
         book.set_key_value_pair(slug, new_author)
         found_value = book.get_key_value_pair(slug)
-        msg = "Initial value: {}, found_value: {}, new_found: {}".format(
+        msg = "Initial value: {}, found_value: {}, new_pk: {}".format(
             author.pk, found_value, new_author.pk)
         self.assertEqual(found_value, new_author.name, msg)
-        # Test Choice mode with store_relation set to True.
+        # Test CHOICE mode with store_relation set to True.
         slug = 'promotion'
         book.set_key_value_pair(slug, new_promotion)
         found_value = book.get_key_value_pair(slug)
-        msg = "Initial value: {}, found_value: {}, new_found: {}".format(
+        msg = "Initial value: {}, found_value: {}, new_pk: {}".format(
             promotion.name, found_value, new_promotion.name)
         self.assertEqual(found_value, new_promotion.name, msg)
-        # Test Choice mode returns an exception in the proper situation only.
+        # Test CHOICE mode returns an exception in the proper situation only.
         slug = 'author'
 
         with self.assertRaises(ValueError) as cm:
             value = book.set_key_value_pair(slug, new_author, field='junk')
 
         # Test TIME
-
-
-
-
+        slug = 'start-time'
+        dt = datetime.datetime.now(pytz.utc)
+        time = datetime.time(hour=dt.hour, minute=dt.minute, second=dt.second,
+                             microsecond=dt.microsecond, tzinfo=dt.tzinfo)
+        promotion.set_key_value_pair(slug, time)
+        found_value = promotion.get_key_value_pair(slug)
+        msg = "Initial value: {}, found_value: {}, new_time: {}".format(
+            p_values.get(slug), found_value, time)
+        self.assertEqual(found_value, time, msg)
         # Test DATE
-
+        slug = 'start-date'
+        date = datetime.date.today() + datetime.timedelta(days=1)
+        promotion.set_key_value_pair(slug, date)
+        found_value = promotion.get_key_value_pair(slug)
+        msg = "Initial value: {}, found_value: {}, new_date: {}".format(
+            p_values.get(slug), found_value, date)
+        self.assertEqual(found_value, date, msg)
         # Test DATETIME
-
-
-        # Update the edition (normal numeric case).
-        new_value = 1
-        book.set_key_value_pair('edition', new_value)
-        found_value = book.get_key_value_pair('edition')
-        msg = "Initial value: {}, found_value: {}, new_found: {}".format(
-            value, found_value, new_value)
-        self.assertEqual(found_value, new_value, msg)
-        # Update the edition by `increment` on a number.
-        book.set_key_value_pair('edition', 'increment')
-        found_value = book.get_key_value_pair('edition')
-        msg = "Initial value: {}, found_value: {}, new_found: {}".format(
-            value, found_value, 2)
+        slug = 'date-time'
+        dt = datetime.datetime.now(pytz.utc)
+        book.set_key_value_pair(slug, dt)
+        found_value = book.get_key_value_pair(slug)
+        msg = "Initial value: {}, found_value: {}, new_datetime: {}".format(
+            b_values.get(slug), found_value, dt)
+        self.assertEqual(found_value, dt, msg)
+        # Test BOOLEAN
+        slug = 'ignore'
+        value = 1
+        book.set_key_value_pair(slug, value)
+        found_value = book.get_key_value_pair(slug)
+        msg = "Initial value: {}, found_value: {}, new_bool: {}".format(
+            b_values.get(slug), found_value, value)
+        self.assertEqual(found_value, True, msg)
+        # Test FLOAT
+        slug = 'percentage'
+        value = 30.0
+        book.set_key_value_pair(slug, value)
+        found_value = book.get_key_value_pair(slug)
+        msg = "Initial value: {}, found_value: {}, new_float: {}".format(
+            b_values.get(slug), found_value, value)
+        self.assertEqual(found_value, value, msg)
+        # Test NUMBER (normal numeric case).
+        slug = 'edition'
+        value = 1
+        book.set_key_value_pair(slug, value)
+        found_value = book.get_key_value_pair(slug)
+        msg = "Initial value: {}, found_value: {}, new_int: {}".format(
+            b_values.get(slug), found_value, value)
+        self.assertEqual(found_value, value, msg)
+        # Test NUMBER by `increment` on a number.
+        slug = 'edition'
+        book.set_key_value_pair(slug, 'increment')
+        found_value = book.get_key_value_pair(slug)
+        msg = "Initial value: {}, found_value: {}, new_int: {}".format(
+            b_values.get(slug), found_value, 2)
         self.assertEqual(found_value, 2, msg)
-        # Update the edition by `decrement` on a number.
-        book.set_key_value_pair('edition', 'decrement')
-        found_value = book.get_key_value_pair('edition')
-        msg = "Initial value: {}, found_value: {}, new_found: {}".format(
-            value, found_value, 1)
+        # Test NUMBER by `decrement` on a number.
+        slug = 'edition'
+        book.set_key_value_pair(slug, 'decrement')
+        found_value = book.get_key_value_pair(slug)
+        msg = "Initial value: {}, found_value: {}, new_int: {}".format(
+            b_values.get(slug), found_value, 1)
         self.assertEqual(found_value, 1, msg)
-        # Update the abstract (normal text case).
-        new_value = "A new abstract"
-        book.set_key_value_pair('abstract', new_value)
-        found_value = book.get_key_value_pair('abstract')
-        msg = "Initial value: {}, found_value: {}, new_found: {}".format(
-            value, found_value, new_value)
-        self.assertEqual(found_value, new_value, msg)
+        # Test TEXT (normal text case).
+        slug = 'abstract'
+        value = "A new abstract"
+        book.set_key_value_pair(slug, value)
+        found_value = book.get_key_value_pair(slug)
+        msg = "Initial value: {}, found_value: {}, new_value: {}".format(
+            b_values.get(slug), found_value, value)
+        self.assertEqual(found_value, value, msg)
+        # Test creating a TEXT KeyValue object.
+        slug = 'web-site'
+        value = "www.example.org"
+        book.set_key_value_pair(slug, value)
+        found_value = book.get_key_value_pair(slug)
+        b_values[slug] = value
+        msg = "found_value: {}, new_value: {}".format(found_value, value)
+        self.assertEqual(found_value, value, msg)
+        result = book.serialize_key_value_pairs(by_slug=True)
+        msg = "result: {}, b_values: ()".format(result, b_values)
+        self.assertEqual(len(result), len(b_values), msg)
+        # Test general error condition.
+        slug = 'bad-data'
+        value = 'Should never get set.'
 
+        with self.assertRaises(ValueError) as cm:
+            book.set_key_value_pair(slug, value)
 
-
+        # TODO test final exception
 
     # Go back and put the methods below into previous tests.
 
@@ -724,8 +795,10 @@ class TestCollectionBase(BaseDcolumns):
         kv0 = self._create_key_value_record(promotion, dc0, value)
         value = datetime.date.today().isoformat()
         kv1 = self._create_key_value_record(promotion, dc1, value)
-        value = datetime.time(hour=12, minute=0, second=0).isoformat()
-        kv2 = self._create_key_value_record(promotion, dc2, value)
+        dt = datetime.datetime.now(pytz.utc)
+        value = datetime.time(hour=dt.hour, minute=dt.minute, second=dt.second,
+                              microsecond=dt.microsecond, tzinfo=dt.tzinfo)
+        kv2 = self._create_key_value_record(promotion, dc2, value.isoformat())
         return promotion, cc, {dc0.slug: kv0.value, dc1.slug: kv1.value,
                                dc2.slug: kv2.value}
 

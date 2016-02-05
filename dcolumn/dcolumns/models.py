@@ -452,7 +452,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
     def _is_get_boolean(self, dc, value):
         if value.isdigit():
-            result = int(value) == 0
+            result = int(value) != 0
         elif value.lower() in ('false', 'true'):
             result = value.lower() == 'true'
         else:
@@ -486,7 +486,8 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         Arguments:
           slug  -- The slug associated with the key value pair.
-          value -- The value can be text or an object to get the value from.
+          value -- The value can be the value or an object to get the value
+                   from.
           field -- The field used to get the value on the object. If this
                    keyword argument is not set the default field will be used
                    when the dcolumn_manager.register_choice() was set.
@@ -525,9 +526,15 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                     kv.value = value
                     kv.save()
             else:
-                msg = "Could not DynamicColumn for slug '{}'.".format(slug)
+                msg = "Could not find DynamicColumn for slug '{}'.".format(slug)
                 log.error(msg)
                 raise ValueError(msg)
+        else:
+            msg = ("Could not process the data as passed into {}, "
+                   "slug: {}, value: {}, field: {}, force: {}").format(
+                set_key_value_pair.__name__, slug, value, field, force)
+            log.error(msg)
+            raise ValueError(msg)
 
     def _is_set_choice(self, dc, value, field):
         model, m_field = dc.get_choice_relation_object_and_field()
