@@ -446,8 +446,8 @@ class TestCollectionBase(BaseDcolumns):
 
     def test_get_key_value_pair(self):
         """
-        Check that the correct value and value type of the KeyValue object is
-        returned.
+        Check that all the ppossible combinations of this method work
+        correctly.
         """
         #self.skipTest("Temporarily skipped")
         # Create a book object and lots of dynamic columns.
@@ -566,6 +566,8 @@ class TestCollectionBase(BaseDcolumns):
 
     def test_set_key_value_pair(self):
         """
+        Check that all the ppossible combinations of this method work
+        correctly.
         """
         #self.skipTest("Temporarily skipped")
         # Add a multiple columns to books.
@@ -584,7 +586,7 @@ class TestCollectionBase(BaseDcolumns):
         b_values[dc0.slug] = kv0.value
         # Update Choice ForeignKey mode with store_relation set to False.
         slug = 'author'
-        book.set_key_value_pair(slug, new_author, field='pk')
+        book.set_key_value_pair(slug, new_author)
         found_value = book.get_key_value_pair(slug)
         msg = "Initial value: {}, found_value: {}, new_found: {}".format(
             author.pk, found_value, new_author.pk)
@@ -596,9 +598,20 @@ class TestCollectionBase(BaseDcolumns):
         msg = "Initial value: {}, found_value: {}, new_found: {}".format(
             promotion.name, found_value, new_promotion.name)
         self.assertEqual(found_value, new_promotion.name, msg)
-        # 
+        # Test Choice mode returns an exception in the proper situation only.
+        slug = 'author'
+
+        with self.assertRaises(ValueError) as cm:
+            value = book.set_key_value_pair(slug, new_author, field='junk')
+
+        # Test TIME
 
 
+
+
+        # Test DATE
+
+        # Test DATETIME
 
 
         # Update the edition (normal numeric case).
@@ -627,7 +640,6 @@ class TestCollectionBase(BaseDcolumns):
         msg = "Initial value: {}, found_value: {}, new_found: {}".format(
             value, found_value, new_value)
         self.assertEqual(found_value, new_value, msg)
-        # 
 
 
 

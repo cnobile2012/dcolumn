@@ -533,15 +533,18 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         model, m_field = dc.get_choice_relation_object_and_field()
 
         if not field:
-            field = m_field
-
-        if dc.store_relation and field:
-            result = str(getattr(value, field))
+            new_field = m_field
         else:
-            if model and field and hasattr(value, field):
-                result = str(getattr(value, field))
-            else:
-                self._raise_exception(dc, value, field=field)
+            new_field = None
+
+        if dc.store_relation and new_field:
+            result = str(getattr(value, new_field))
+        elif model and not field: # Normal mode
+            result = str(getattr(value, 'pk'))
+        elif model and new_field and hasattr(value, new_field):
+            result = str(getattr(value, new_field))
+        else:
+            self._raise_exception(dc, value, field=new_field)
 
         return result
 
