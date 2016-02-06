@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # dcolumn/common/__init__.py
 #
@@ -25,8 +26,5 @@ class ChoiceManagerImplementation(object):
     def get_choices(self, field, comment=True):
         raise NotImplementedError("Must implement 'get_choices'.")
 
-    def dynamic_column(self, active=True):
-        raise NotImplementedError("Must implement 'dynamic_column'.")
-
-    def get_choice_map(self, field, active=True):
-        raise NotImplementedError("Must implement 'get_choice_map'.")
+    def model_objects(self, active=True):
+        raise NotImplementedError("Must implement 'model_objects'.")

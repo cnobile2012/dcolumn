@@ -105,7 +105,7 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
                               "choices."))
 
     @InspectChoice.set_model
-    def dynamic_column(self):
+    def model_objects(self):
         if not self.containers:
             for pk, values in enumerate(self.VALUES, start=1):
                 obj = self.model()
@@ -125,7 +125,7 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
         return self.containers
 
     def get_value_by_pk(self, pk, field):
-        self.dynamic_column()
+        self.model_objects()
         value = ''
         pk = int(pk)
 
@@ -138,20 +138,17 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
                 if hasattr(obj, field):
                     value = getattr(obj, field)
                 else:
-                    log.error("The field value '%s' in not on object '%s'", field, obj)
+                    log.error("The field value '%s' is not on object '%s'",
+                              field, obj)
 
         return value
 
     def get_choices(self, field, comment=True):
         choices = [(obj.pk, getattr(obj, field))
-                   for obj in self.dynamic_column()]
+                   for obj in self.model_objects()]
 
         if comment:
             choices.insert(
                 0, (0, _("Please choose a {}".format(self.model.__name__))))
 
         return choices
-
-    def get_choice_map(self, field):
-        return dict([(getattr(obj, field), obj.pk)
-                     for obj in self.dynamic_column()])

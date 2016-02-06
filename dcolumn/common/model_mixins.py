@@ -76,7 +76,6 @@ class TimeModelMixin(models.Model):
     Abstract model mixin used in the model classes to supply created and
     updated fields.
     """
-
     created = models.DateTimeField(
         verbose_name=_("Date Created"),
         help_text=_("The date and time of creation."))
@@ -144,37 +143,6 @@ class StatusModelMixin(models.Model):
         Save is here to assure that save is executed throughout the MRO.
         """
         super(StatusModelMixin, self).save(*args, **kwargs)
-
-
-#
-# BaseChoiceModelManager
-#
-class BaseChoiceModelManager(models.Manager, ChoiceManagerImplementation):
-
-    def get_value_by_pk(self, pk, field):
-        value = ''
-
-        if int(pk) != 0:
-            try:
-                obj = self.get(pk=pk)
-            except self.model.DoesNotExist as e:
-                log.error("Access to PK %s failed, %s", pk, e)
-            else:
-                if hasattr(obj, field):
-                    value = getattr(obj, field)
-                else:
-                    log.error("The field value '%s' in not on object '%s'", field, obj)
-
-        return value
-
-    def get_choices(self, field, comment=True):
-        choices = [(obj.pk, getattr(obj, field)) for obj in self.all()]
-
-        if comment:
-            choices.insert(
-                0, (0, _("Please choose a {}".format(self.model.__name__))))
-
-        return choices
 
 
 #

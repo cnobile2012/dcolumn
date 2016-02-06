@@ -168,7 +168,7 @@ class CollectionFormMixin(forms.ModelForm):
                 old_value = value
                 value = value.isdigit() and int(value) or 0
                 value = [getattr(r, field)
-                         for r in model.objects.dynamic_column()
+                         for r in model.objects.model_objects()
                          if value == r.pk]
                 value = len(value) >= 1 and value[0] or old_value
                 log.debug("value: %s, field: %s, model: %s",

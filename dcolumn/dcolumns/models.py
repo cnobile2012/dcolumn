@@ -320,26 +320,83 @@ class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin,
 #
 # CollectionBase
 #
-class CollectionBaseManagerBase(models.Manager):
+class CollectionBaseManager(models.Manager):
+
+    def model_objects(self, active=True):
+        """
+        Returns a list of all objects on this model.
+        """
+        if hasattr(self, 'active'):
+            result = self.active(active=active)
+        else:
+            result = self.all()
+
+        return result
+
+    def get_choices(self, field, active=True, comment=True):
+        choices = [(obj.pk, getattr(obj, field))
+                   for obj in self.model_objects(active=active)]
+
+        if comment:
+            choices.insert(
+                0, (0, _("Please choose a {}".format(self.model.__name__))))
+
+        return choices
+
+    def get_value_by_pk(self, pk, field):
+        """
+        Returns the value from 'field' using the pk as the key.
+        """
+        value = ''
+
+        if int(pk) != 0:
+            try:
+                obj = self.get(pk=pk)
+            except self.model.DoesNotExist as e:
+                log.error("Access to PK %s failed, %s", pk, e)
+            else:
+                if hasattr(obj, field):
+                    value = getattr(obj, field)
+                else:
+                    msg = "The field value '{}' is not on object '{}'".format(
+                        field, obj)
+                    log.error(msg)
+                    raise AttributeError(msg)
+
+        return value
 
     def get_all_slugs(self):
         """
         Returns all slug names in a list.
         """
-        return [r.slug for r in DynamicColumn.objects.all().order_by('slug')]
+        result = []
+        obj = self.select_related('column_collection__name').first()
+
+        if obj:
+            cc_obj = ColumnCollection.objects.filter(
+                name=obj.column_collection.name).prefetch_related(
+                'dynamic_column')
+
+            if cc_obj:
+                cc_obj = cc_obj[0]
+                result[:] = [
+                    r.slug for r in cc_obj.dynamic_column.all().order_by(
+                        'slug')]
+
+        return result
 
     def get_all_fields(self):
         """
         Returns all field names in a list.
         """
-        return [unicode(field.name)
+        return [field.name.encode('utf-8')
                 for field in self.model._meta.get_fields()
                 if 'collection' not in field.name and
                 field.name != 'keyvalue_pairs']
 
     def get_all_fields_and_slugs(self):
         """
-        Returns all field names and the dynamic column slugs is a sorted list.
+        Returns all field names and the dynamic column slugs in a sorted list.
         """
         result = self.get_all_slugs() + self.get_all_fields()
         result.sort()
@@ -388,6 +445,14 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
     def get_key_value_pair(self, slug, field=None):
         """
         Return the KeyValue object value for the slug.
+
+        Arguments:
+          slug  -- The KeyValue slug.
+          field -- Only used with CHOICE objects. Defaults to the field passed
+                   to the dcolumn_manager.register_choice(choice, relation_num,
+                   field) during configuration. The 'field' argument allows
+                   the return of a different field on the CHOICE objects, but
+                   must be a valid member object on the model.
         """
         dc = self.get_dynamic_column(slug)
 
@@ -488,9 +553,11 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
           slug  -- The slug associated with the key value pair.
           value -- The value can be the value or an object to get the value
                    from.
-          field -- The field used to get the value on the object. If this
-                   keyword argument is not set the default field will be used
-                   when the dcolumn_manager.register_choice() was set.
+          field -- Only used with CHOICE objects. The field used to get the
+                   value on the object. If this keyword argument is not set the
+                   default field will be used when the
+                   dcolumn_manager.register_choice(choice, relation_num, field)
+                   was set.
           force -- Default is False, do not save empty strings or None objects
                    else True save empty strings only.
         """
@@ -532,7 +599,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         else:
             msg = ("Could not process the data as passed into {}, "
                    "slug: {}, value: {}, field: {}, force: {}").format(
-                set_key_value_pair.__name__, slug, value, field, force)
+                self.set_key_value_pair.__name__, slug, value, field, force)
             log.error(msg)
             raise ValueError(msg)
 

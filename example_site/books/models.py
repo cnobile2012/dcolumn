@@ -10,8 +10,8 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 
 from dcolumn.common.model_mixins import (
     UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin,
-    BaseChoiceModelManager, ValidateOnSaveMixin)
-from dcolumn.dcolumns.models import CollectionBase, CollectionBaseManagerBase
+    ValidateOnSaveMixin)
+from dcolumn.dcolumns.models import CollectionBase, CollectionBaseManager
 
 from .choices import Language
 
@@ -22,19 +22,8 @@ log = logging.getLogger('examples.books.models')
 #
 # Promotion
 #
-class PromotionManager(CollectionBaseManagerBase, StatusModelManagerMixin,
-                       BaseChoiceModelManager):
-
-    def dynamic_column(self, active=True):
-        """
-        We need to return all choices even if some are inactive, because
-        the store_relation field in DynamicColumn' is active for this model.
-        """
-        return self.active(active=active)
-
-    def get_choice_map(self, field, active=True):
-        return dict([(getattr(obj, field), obj.pk)
-                     for obj in self.dynamic_column(active=active)])
+class PromotionManager(CollectionBaseManager, StatusModelManagerMixin):
+    pass
 
 
 class Promotion(CollectionBase, ValidateOnSaveMixin):
@@ -67,15 +56,8 @@ class Promotion(CollectionBase, ValidateOnSaveMixin):
 #
 # Author
 #
-class AuthorManager(CollectionBaseManagerBase, StatusModelManagerMixin,
-                    BaseChoiceModelManager):
-
-    def dynamic_column(self, active=True):
-        return self.active(active=active)
-
-    def get_choice_map(self, field, active=True):
-        return dict([(getattr(obj, field), obj.pk)
-                     for obj in self.dynamic_column(active=active)])
+class AuthorManager(CollectionBaseManager, StatusModelManagerMixin):
+    pass
 
 
 class Author(CollectionBase, ValidateOnSaveMixin):
@@ -108,15 +90,8 @@ class Author(CollectionBase, ValidateOnSaveMixin):
 #
 # Publisher
 #
-class PublisherManager(CollectionBaseManagerBase, StatusModelManagerMixin,
-                       BaseChoiceModelManager):
-
-    def dynamic_column(self, active=True):
-        return self.active(active=active)
-
-    def get_choice_map(self, field, active=True):
-        return dict([(getattr(obj, field), obj.pk)
-                     for obj in self.dynamic_column(active=active)])
+class PublisherManager(CollectionBaseManager, StatusModelManagerMixin):
+    pass
 
 
 class Publisher(CollectionBase, ValidateOnSaveMixin):
@@ -148,15 +123,8 @@ class Publisher(CollectionBase, ValidateOnSaveMixin):
 #
 # Book
 #
-class BookManager(CollectionBaseManagerBase, StatusModelManagerMixin,
-                  BaseChoiceModelManager):
-
-    def dynamic_column(self, active=True):
-        return self.active(active=active)
-
-    def get_choice_map(self, field, active=True):
-        return dict([(getattr(obj, field), obj.pk)
-                     for obj in self.dynamic_column(active=active)])
+class BookManager(CollectionBaseManager, StatusModelManagerMixin):
+    pass
 
 
 class Book(CollectionBase, ValidateOnSaveMixin):

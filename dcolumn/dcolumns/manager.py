@@ -60,9 +60,9 @@ class DynamicColumnManager(object):
             raise ValueError(msg)
 
         if (not hasattr(choice, 'objects') or
-            not hasattr(choice.objects, 'dynamic_column')):
+            not hasattr(choice.objects, 'model_objects')):
             msg = ("Invalid 'choice' object '{}', must have a "
-                   "'dynamic_column' manager class method.").format(choice)
+                   "'model_objects' manager class method.").format(choice)
             log.critical(msg)
             raise AttributeError(msg)
 

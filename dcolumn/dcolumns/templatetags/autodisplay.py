@@ -398,7 +398,7 @@ class SingleDisplayNode(template.Node):
         obj, field = dcolumn_manager.choice_map[choice_name]
         value = int(value)
 
-        for choice in obj.objects.dynamic_column():
+        for choice in obj.objects.model_objects():
             if getattr(choice, 'pk') == value:
                 value = getattr(choice, field)
                 break

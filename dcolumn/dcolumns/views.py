@@ -33,7 +33,7 @@ class ContextDataMixin(object):
             model, field = dcolumn_manager.choice_map.get(model_name)
             objects = context.setdefault('dynamicColumns', {})
             values = [(r.pk, getattr(r, field))
-                      for r in model.objects.dynamic_column()]
+                      for r in model.objects.model_objects()]
             values.insert(0, (0, "Choose a value"))
             objects[fk_slugs.get(model_name)] = values
             log.debug("model_name: %s, model: %s, field: %s, fk_slugs: %s, "

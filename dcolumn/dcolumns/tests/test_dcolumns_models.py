@@ -305,87 +305,103 @@ class TestCollectionBase(BaseDcolumns):
         columns get serialized properly.
         """
         #self.skipTest("Temporarily skipped")
-        # Create a few dynamic columns.
-        field0 = "Author"
-        field1 = "Publisher"
-        field2 = "Abstract"
-        dc0 = self._create_dynamic_column_record(
-            field0, DynamicColumn.CHOICE, 'book_top', 1,
-            relation=self.choice2index.get("Author"))
-        dc1 = self._create_dynamic_column_record(
-            field1, DynamicColumn.CHOICE, 'book_top', 2,
-            relation=self.choice2index.get("Publisher"))
-        dc2 = self._create_dynamic_column_record(
-            field2, DynamicColumn.TEXT_BLOCK, 'book_top', 3)
-        # Put the dynamic columns in a collection.
-        cc0 = self._create_column_collection_record(
-            "Books", dynamic_columns=[dc0, dc1, dc2])
-        cc1 = self._create_column_collection_record(
-            "Authors", dynamic_columns=[])
-        cc2 = self._create_column_collection_record(
-            "Publishers", dynamic_columns=[])
-
-        # Test that the serialized object has values.
-        # Create three records one each for Book, Author, and Publisher.
-        book = self._create_dcolumn_record(
-            Book, collection=cc0, title="Bogus Book Name")
-        author = self._create_dcolumn_record(
-            Author, collection=cc1, name='Me Myself')
-        publisher = self._create_dcolumn_record(
-            Publisher, collection=cc2, name='My Publisher')
-        # Create three values for Book.
-        kv0 = self._create_key_value_record(book, dc0, author.pk)
-        kv1 = self._create_key_value_record(book, dc1, publisher.pk)
-        kv2 = self._create_key_value_record(book, dc2, "Test for Abstract.")
+        # Create a few book objects.
+        author, a_cc, a_values = self._create_author_objects()
+        promotion, p_cc, p_values = self._create_promotion_objects()
+        book, b_cc, b_values = self._create_book_objects(
+            author_pk=author.pk, promotion_pk=promotion.pk)
         # Get serialized object.
-        result = ColumnCollection.objects.serialize_columns('Books', obj=book)
-        msg = "result: {}".format(result)
-        dc_records = {dc0.pk: field0, dc1.pk: field1, dc2.pk: field2}
+        result = ColumnCollection.objects.serialize_columns(
+            'Books', obj=book, by_slug=True)
+        msg = "result: {}, b_values: {}".format(result, b_values)
 
-        for pk, dc_name in dc_records.items():
-            name = result.get(pk).get('name')
-            self.assertEqual(dc_name, name, msg)
+        for slug, dc_value in b_values.items():
+            value = result.get(slug).get('value')
+            self.assertEqual(value, dc_value, msg)
+
+    def test_model_objects(self):
+        """
+        Test that the correct object types get returned.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create a few book objects.
+        author, a_cc, a_values = self._create_author_objects()
+        promotion, p_cc, p_values = self._create_promotion_objects()
+        book, b_cc, b_values = self._create_book_objects(
+            author_pk=author.pk, promotion_pk=promotion.pk)
+        # Get object list.
+        result = Book.objects.model_objects()
+        msg = "result: {}, book: {}".format(result, book)
+
+        for record in result:
+            self.assertEqual(record.title, book.title, msg)
+
+    def test_get_choice(self):
+        """
+        Test that a valid list of HTML select option choices are returned both
+        with and without a header option.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create a few book objects.
+        author, a_cc, a_values = self._create_author_objects()
+        promotion, p_cc, p_values = self._create_promotion_objects()
+        book, b_cc, b_values = self._create_book_objects(
+            author_pk=author.pk, promotion_pk=promotion.pk)
+        # Test that a book and HTML select option header is returned.
+        result = Book.objects.get_choices('title')
+        msg = "result: {}, book: {}".format(result, book)
+        self.assertTrue(0 in dict(result), msg)
+        self.assertEqual(dict(result).get(book.pk), book.title, msg)
+        # Test that a book and HTML select option header is not returned.
+        result = Book.objects.get_choices('title', comment=False)
+        msg = "result: {}, book: {}".format(result, book)
+        self.assertFalse(0 in dict(result), msg)
+        self.assertEqual(dict(result).get(book.pk), book.title, msg)
+
+    def test_get_value_by_pk(self):
+        """
+        Test that a value is returned based on the objects pk.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create a few book objects.
+        author, a_cc, a_values = self._create_author_objects()
+        promotion, p_cc, p_values = self._create_promotion_objects()
+        book, b_cc, b_values = self._create_book_objects(
+            author_pk=author.pk, promotion_pk=promotion.pk)
+        # Test for normal operation.
+        result = Book.objects.get_value_by_pk(book.pk, 'title')
+        msg = "result: {}".format(result)
+        self.assertEqual(result, book.title, msg)
+        # Test that an exception is raised with an invalif field argument.
+        with self.assertRaises(AttributeError) as cm:
+            Book.objects.get_value_by_pk(book.pk, 'bad_field')
 
     def test_get_all_slugs(self):
         """
         Test that all dynamic column slugs are returned in a list.
         """
         #self.skipTest("Temporarily skipped")
-        # Create a few dynamic columns.
-        dc0 = self._create_dynamic_column_record(
-            "Author", DynamicColumn.CHOICE, 'book_top', 1,
-            relation=self.choice2index.get("Author"))
-        dc1 = self._create_dynamic_column_record(
-            "Publisher", DynamicColumn.CHOICE, 'book_top', 2,
-            relation=self.choice2index.get("Publisher"))
-        dc2 = self._create_dynamic_column_record(
-            "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
-        # Add to a collection.
-        cc0 = self._create_column_collection_record(
-            "Books", dynamic_columns=[dc0, dc1, dc2])
+        # Create a few book objects.
+        author, a_cc, a_values = self._create_author_objects()
+        promotion, p_cc, p_values = self._create_promotion_objects()
+        book, b_cc, b_values = self._create_book_objects(
+            author_pk=author.pk, promotion_pk=promotion.pk)
         # Test get_all_slugs
         result = Book.objects.get_all_slugs()
-        msg = "result: {}".format(result)
-        self.assertEqual(len(result), 3, msg)
+        msg = "result: {}, b_values: {}".format(result, b_values)
+        self.assertEqual(len(result), len(b_values), msg)
 
     def test_get_all_fields(self):
         """
         Test that all field names are returned in a list.
         """
         #self.skipTest("Temporarily skipped")
-        # Create a few dynamic columns.
-        dc0 = self._create_dynamic_column_record(
-            "Author", DynamicColumn.CHOICE, 'book_top', 1,
-            relation=self.choice2index.get("Author"))
-        dc1 = self._create_dynamic_column_record(
-            "Publisher", DynamicColumn.CHOICE, 'book_top', 2,
-            relation=self.choice2index.get("Publisher"))
-        dc2 = self._create_dynamic_column_record(
-            "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
-        # Add to a collection.
-        cc0 = self._create_column_collection_record(
-            "Books", dynamic_columns=[dc0, dc1, dc2])
-        # Test get_all_slugs
+        # Create a few book objects.
+        author, a_cc, a_values = self._create_author_objects()
+        promotion, p_cc, p_values = self._create_promotion_objects()
+        book, b_cc, b_values = self._create_book_objects(
+            author_pk=author.pk, promotion_pk=promotion.pk)
+        # Test get_all_fields.
         result = Book.objects.get_all_fields()
         msg = "result: {}".format(result)
         self.assertEqual(len(result), 7, msg)
@@ -393,22 +409,15 @@ class TestCollectionBase(BaseDcolumns):
     def test_get_all_fields_and_slugs(self):
         """
         Test that all field names and dynamic column slugs are returned in a
-        sorted list.
+        sorted list for the requested model.
         """
         #self.skipTest("Temporarily skipped")
-        # Create a few dynamic columns.
-        dc0 = self._create_dynamic_column_record(
-            "Author", DynamicColumn.CHOICE, 'book_top', 1,
-            relation=self.choice2index.get("Author"))
-        dc1 = self._create_dynamic_column_record(
-            "Publisher", DynamicColumn.CHOICE, 'book_top', 2,
-            relation=self.choice2index.get("Publisher"))
-        dc2 = self._create_dynamic_column_record(
-            "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
-        # Add to a collection.
-        cc0 = self._create_column_collection_record(
-            "Books", dynamic_columns=[dc0, dc1, dc2])
-        # Test get_all_slugs
+        # Create a few book objects.
+        author, a_cc, a_values = self._create_author_objects()
+        promotion, p_cc, p_values = self._create_promotion_objects()
+        book, b_cc, b_values = self._create_book_objects(
+            author_pk=author.pk, promotion_pk=promotion.pk)
+        # Test get_all_fields_and_slugs.
         result = Book.objects.get_all_fields_and_slugs()
         msg = "result: {}".format(result)
         self.assertEqual(len(result), 10, msg)
@@ -707,18 +716,18 @@ class TestCollectionBase(BaseDcolumns):
         msg = "result: {}, b_values: ()".format(result, b_values)
         self.assertEqual(len(result), len(b_values), msg)
         # Test general error condition.
-        slug = 'bad-data'
+        slug = 'bad-slug'
         value = 'Should never get set.'
 
         with self.assertRaises(ValueError) as cm:
             book.set_key_value_pair(slug, value)
 
-        # TODO test final exception
+        # Test for exception when invalid arguments are passed.
+        value = None
+        force = True
 
-    # Go back and put the methods below into previous tests.
-
-
-
+        with self.assertRaises(ValueError) as cm:
+            book.set_key_value_pair(slug, value, force=force)
 
     def _create_author_objects(self, extra_dcs=[]):
         """
