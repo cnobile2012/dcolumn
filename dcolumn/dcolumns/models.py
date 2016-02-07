@@ -242,13 +242,14 @@ class ColumnCollectionManager(StatusModelManagerMixin):
                 rec['store_relation'] = record.store_relation
 
             rec['required'] = record.required
-            # We convert the list to a dict because css_container_map may
-            # not be keyed with integers.
+
             if record.location.isdigit():
                 location = int(record.location)
             else:
                 location = record.location
 
+            # We convert the list to a dict because css_container_map may
+            # not be keyed with integers.
             rec['location'] = dict(dcolumn_manager.css_containers).get(
                 location, '')
             rec['order'] = record.order
@@ -424,7 +425,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         else:
             field = 'pk'
 
-        for kv in self.keyvalue_pairs.all():
+        for kv in self.keyvalue_pairs.select_related('dynamic_column').all():
             result[getattr(kv.dynamic_column, field)] = kv.value.encode('utf-8')
 
         return result

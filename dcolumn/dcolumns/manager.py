@@ -220,7 +220,8 @@ class DynamicColumnManager(object):
             for name in dir(module):
                 if model_name == name or model_name == name.lower():
                     try:
-                        obj = getattr(module, name).objects.all()
+                        obj = getattr(module, name).objects.select_related(
+                            'column_collection__name').all()
                     except AttributeError:
                         pass
 

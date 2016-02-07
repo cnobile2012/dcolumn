@@ -242,8 +242,6 @@ class AutoDisplayNode(template.Node):
         :Returns:
           The list of options.
         """
-        log.debug("relation: %s, fk_options: %s", relation, fk_options)
-
         if isinstance(fk_options, (list, tuple,)):
             options = fk_options
         else:
@@ -256,6 +254,8 @@ class AutoDisplayNode(template.Node):
                 log.error(msg)
                 raise template.TemplateSyntaxError(msg)
 
+        log.debug("relation: %s, fk_options: %s, options: %s",
+                  relation, fk_options, options)
         return options
 
     def _add_options(self, elem, attr, options, relation):
@@ -278,8 +278,6 @@ class AutoDisplayNode(template.Node):
         :Returns:
           The populated HTML element.
         """
-        log.debug("elem: %s, attr: %s, options: %s, relation: %s",
-                  elem, attr, options, relation)
         elem = elem.format("id-" + attr, attr)
         buff = StringIO(elem)
         buff.seek(0, os.SEEK_END)
@@ -303,6 +301,8 @@ class AutoDisplayNode(template.Node):
         buff.write('</select>\n')
         elem = buff.getvalue()
         buff.close()
+        log.debug("elem: %s, attr: %s, options: %s, relation: %s, value: %s",
+                  elem, attr, options, relation, value)
         return elem
 
     def _find_value(self, elem, attr, options, relation):
@@ -453,7 +453,8 @@ class SingleDisplayNode(template.Node):
         value = ''
 
         try:
-            key_value = obj.keyvalue_pairs.get(dynamic_column__slug=self.slug)
+            key_value = obj.keyvalue_pairs.select_related(
+                'dynamic_column__slug').get(dynamic_column__slug=self.slug)
             dc = key_value.dynamic_column
             value_type = dc.value_type
 

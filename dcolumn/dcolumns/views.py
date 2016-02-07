@@ -108,7 +108,8 @@ class CollectionCreateUpdateViewMixin(ContextDataMixin):
         context = super(CollectionCreateUpdateViewMixin,
                         self).get_context_data(**kwargs)
         context.update(self.get_dynamic_column_context_data(**kwargs))
-        context.update(self.get_relation_context_data(**kwargs))
+        context.update(self.get_relation_context_data(
+            obj=self.object, **kwargs))
         context.update({'css': dcolumn_manager.css_container_map})
         return context
 
