@@ -11,9 +11,36 @@ from django.test import TestCase
 from example_site.books.choices import Language
 from example_site.books.models import Author, Book, Promotion, Publisher
 
+from dcolumn.common.choice_mixins import BaseChoiceManager
+
 from ..models import DynamicColumn, ColumnCollection, KeyValue
 
 from .test_dcolumns_models import BaseDcolumns
+
+
+#
+# Country
+#
+class CountryManager(BaseChoiceManager):
+    VALUES = [
+        ('China', 'Mandarin'),
+        ('USA', 'English'),
+        ('Brazil', 'Portuguese'),
+        ('USSR', 'Russian'),
+        ('Janan', 'Japanese'),
+        ]
+    FIELD_LIST = ['pk', 'name', 'language',]
+
+    def __init__(self):
+        super(CountryManager, self).__init__()
+
+
+class Country(object):
+    pk = 0
+    name = ''
+    language = ''
+
+    objects = CountryManager()
 
 
 class TestManager(BaseDcolumns):
@@ -44,9 +71,44 @@ class TestManager(BaseDcolumns):
     def test_register_choice(self):
         """
         There's no easy way to test this since the manager is a borg pattern
-        and always has data loaded from the actual application.
+        and always has data loaded from the actual application. I've added an
+        _unregister_choice method to get around these issues, but this method
+        should never need to be used outside of tests.
         """
-        self.skipTest("Temporarily skipped")
+        #self.skipTest("Temporarily skipped")
+        self.manager.register_choice(Country, 99, 'name')
+        msg = "class: {}, relation_num: {}, field: {}".format(
+            Country.__name__, 99, 'name')
+        rel_map = dict(self.manager._relations)
+        self.assertTrue(99 in rel_map, msg)
+        self.assertTrue(rel_map.get(99) == Country.__name__, msg)
+        self.assertTrue(99 in self.manager._relation_numbers, msg)
+        self.assertTrue(Country.__name__ in self.manager._choice_map, msg)
+        self.assertTrue(
+            self.manager._choice_map.get(Country.__name__)[0] is Country, msg)
+        self.assertTrue(
+            self.manager._choice_map.get(Country.__name__)[1] == 'name', msg)
+        # Cleanup
+        self.manager._unregister_choice(Country)
+
+    def test__unregister_choice(self):
+        """
+        Test that the _unregister_choice method works.
+        """
+        #self.skipTest("Temporarily skipped")
+        self.manager.register_choice(Country, 99, 'name')
+        self.manager._unregister_choice(Country)
+        msg = "class: {}, relation_num: {}, field: {}".format(
+            Country.__name__, 99, 'name')
+        rel_map = dict(self.manager._relations)
+        self.assertTrue(99 not in rel_map, msg)
+        self.assertTrue(rel_map.get(99) != Country.__name__, msg)
+        self.assertTrue(99 not in self.manager._relation_numbers, msg)
+        self.assertTrue(Country.__name__ not in self.manager._choice_map, msg)
+        self.assertTrue(
+            self.manager._choice_map.get(Country.__name__) is None, msg)
+        self.assertTrue(
+            self.manager._choice_map.get(Country.__name__) is None, msg)
 
     def test_choice_relations(self):
         """
@@ -105,9 +167,53 @@ class TestManager(BaseDcolumns):
     def test_register_css_containers(self):
         """
         There's no easy way to test this since the manager is a borg pattern
-        and always has data loaded from the actual application.
+        and always has data loaded from the actual application. I've added an
+        _unregister_css_containers method to get around these issues, but this
+        method should never need to be used outside of tests.
         """
-        self.skipTest("Temporarily skipped")
+        #self.skipTest("Temporarily skipped")
+        css_cont = (('andromeda_strain', 'andromeda-strain'),)
+        self.manager.register_css_containers(css_cont)
+        msg = "New css_cont: {}, Original css_containers: {}".format(
+            css_cont, self.manager._css_containers)
+
+        for item in css_cont:
+            self.assertTrue(item in self.manager._css_containers, msg)
+
+        css_cont_map = dict(css_cont)
+        msg = "New css_cont_map: {}, Original css_container_map: {}".format(
+            css_cont_map, self.manager._css_container_map)
+
+        for key in css_cont_map:
+            self.assertTrue(key in self.manager._css_container_map, msg)
+            self.assertTrue(
+                self.manager._css_container_map.get(key) == css_cont_map.get(
+                    key), msg)
+        # Cleanup
+        self.manager._unregester_css_containers(css_cont)
+
+    def test__unregister_css_containers(self):
+        """
+        Test that the _unregister_css_containers method works.
+        """
+        #self.skipTest("Temporarily skipped")
+        css_cont = (('andromeda_strain', 'andromeda-strain'),)
+        self.manager.register_css_containers(css_cont)
+        self.manager._unregester_css_containers(css_cont)
+        msg = "New css_cont: {}, Original css_containers: {}".format(
+            css_cont, self.manager._css_containers)
+
+        for item in css_cont:
+            self.assertTrue(item not in self.manager._css_containers, msg)
+
+        css_cont_map = dict(css_cont)
+        msg = "New css_cont_map: {}, Original css_container_map: {}".format(
+            css_cont_map, self.manager._css_container_map)
+
+        for key in css_cont_map:
+            self.assertTrue(key not in self.manager._css_container_map, msg)
+            self.assertTrue(self.manager._css_container_map.get(key) is None,
+                            msg)
 
     def test_css_containers(self):
         """

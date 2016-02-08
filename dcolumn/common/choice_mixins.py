@@ -97,10 +97,14 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
         self.container_map = {}
 
         if not self.VALUES:
-            raise TypeError(_("Must set the '_VALUES' object to valid "
+            raise TypeError(_("Must set the 'VALUES' object to valid "
                               "choices for the container object."))
 
-        if not self.FIELD_LIST and len(self.FIELD_LIST) > 1:
+        if 'pk' in self.FIELD_LIST:
+            self.FIELD_LIST = list(self.FIELD_LIST)
+            self.FIELD_LIST.remove('pk')
+
+        if not self.FIELD_LIST or not len(self.FIELD_LIST) >= 1:
             raise TypeError(_("Must provide fields to populate for your "
                               "choices."))
 
@@ -109,11 +113,11 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
         if not self.containers:
             for pk, values in enumerate(self.VALUES, start=1):
                 obj = self.model()
-                setattr(obj, self.FIELD_LIST[0], pk)
+                setattr(obj, 'pk', pk)
 
                 if isinstance(values, (tuple, list)):
-                    for idx in xrange(len(values)):
-                        setattr(obj, self.FIELD_LIST[idx+1], values[idx])
+                    for idx in range(len(values)):
+                        setattr(obj, self.FIELD_LIST[idx], values[idx])
                 else:
                     setattr(obj, self.FIELD_LIST[1], values)
 

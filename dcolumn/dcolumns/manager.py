@@ -24,7 +24,6 @@ class DynamicColumnManager(object):
                  '_css_container_map', '__dict__',)
     __shared_state = {}
     _relations = []
-    _relation_map = {}
     _relation_numbers = set()
     _choice_map = {}
     _css_containers = []
@@ -41,9 +40,9 @@ class DynamicColumnManager(object):
 
         :Parameters:
           choice : ClassType
-            This can be either a Django model or choice object. A choice object
-            mimics a model class so that this manager can work with them
-            as if they were Django models.
+            This can be either a Django model class or choice class. A choice
+            class mimics a model class so that this manager can work with them
+            as if they were Django model classes.
 
           relation_num : int
             A numeric identifier for the `choice` used as the HTML select
@@ -66,7 +65,7 @@ class DynamicColumnManager(object):
             log.critical(msg)
             raise AttributeError(msg)
 
-        self._test_field(choice, field)
+        self._check_field(choice, field)
         self._relation_numbers.add(relation_num)
         self._relations.append((relation_num, choice.__name__))
         self._choice_map[choice.__name__] = (choice, field)
@@ -74,7 +73,25 @@ class DynamicColumnManager(object):
                   "choice_map: %s", choice, relation_num, field,
                   self._relations, self._choice_map)
 
-    def _test_field(self, choice, field):
+    def _unregister_choice(self, choice):
+        """
+        Unregister choice from the manager (Used for testing only, should not
+        be used in code).
+        """
+        _choice, field = self._choice_map.get(choice.__name__, (None, None))
+        relation_num = dict([(v, k) for k, v in self._relations]).get(
+            choice.__name__)
+
+        if _choice and field and relation_num:
+            self._choice_map.pop(_choice.__name__)
+            self._relations.remove((relation_num, _choice.__name__))
+            self._relation_numbers.remove(relation_num)
+        else:
+            msg = "Tried to remove an invalid choice object {}.".format(choice)
+            log.error(msg)
+            raise ValueError(msg)
+
+    def _check_field(self, choice, field):
         """
         Test that the specified field is a member object on the instantiated
         class object.
@@ -99,7 +116,7 @@ class DynamicColumnManager(object):
     @property
     def choice_relations(self):
         """
-        A property that returns the HTML select tag choices.
+        A property that returns the HTML select option choices.
 
         :Returns:
           A list of the choices.
@@ -121,10 +138,7 @@ class DynamicColumnManager(object):
           number given when added with the register_choice method. The value
           is the string representation of the choice object.
         """
-        if not len(self._relation_map):
-            self._relation_map.update(dict(self._relations))
-
-        return self._relation_map
+        return dict(self._relations)
 
     @property
     def choice_map(self):
@@ -154,25 +168,40 @@ class DynamicColumnManager(object):
                        "can be in either of these formats: "
                        "('container_top', 'container_bottom',) or "
                        "(('top', 'container_top'), "
-                       "('bottom', 'container_bottom'))")
+                       "('bottom', 'container_bottom'))") # Deprication
                 log.critical(msg)
                 raise TypeError(msg)
 
             self._css_container_map.clear()
 
             if isinstance(container_list[0], (list, tuple)):
-                self._css_container_map.update(dict(container_list))
-                self._css_containers[:] = container_list
-            else: # This method will be deprecated by version 1.0
+                self._css_containers += list(container_list)
+                self._css_container_map.update(dict(self._css_containers))
+            else: # This method will be deprecated in version 1.0
                 warnings.warn(
                     "Deprecation Warning: The enumeration method of "
                     "generating the display location will be deprecated "
                     "with the release of version 1.0.0.",
                     RemovedInDColumns100Warning)
-                self._css_container_map.update(
-                    {name: css for name, css in enumerate(container_list)})
-                self._css_containers[:] = [
+                self._css_containers += [
                     (key, css) for key, css in enumerate(container_list)]
+                self._css_container_map.update(dict(self._css_containers))
+        else:
+            msg = ("Invalid container_list type '{}', should be either a list "
+                   "of tuple.").format(type(container_list))
+            log.critical(msg)
+            raise TypeError(msg)
+
+    def _unregester_css_containers(self, container_list):
+        """
+        Unregister css containers from the manager (Used for testing only,
+        should not be used in code).
+        """
+        for item in container_list:
+            self._css_containers.remove(item)
+
+        self._css_container_map.clear()
+        self._css_container_map.update(dict(self._css_containers))
 
     @property
     def css_containers(self):
