@@ -27,7 +27,7 @@ class CountryManager(BaseChoiceManager):
         ('USA', 'English'),
         ('Brazil', 'Portuguese'),
         ('USSR', 'Russian'),
-        ('Janan', 'Japanese'),
+        ('Japan', 'Japanese'),
         ]
     FIELD_LIST = ['pk', 'name', 'language',]
 
@@ -41,6 +41,9 @@ class Country(object):
     language = ''
 
     objects = CountryManager()
+
+    def __str__(self):
+        return "{}--{}".format(self.name, self.language).encode('utf-8')
 
 
 class TestManager(BaseDcolumns):

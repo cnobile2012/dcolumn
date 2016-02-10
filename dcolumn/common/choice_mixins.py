@@ -110,6 +110,10 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
 
     @InspectChoice.set_model
     def model_objects(self):
+        """
+        This method creates and returns the choice objects the first time it
+        is run, on subsequent runs it just returns the objects.
+        """
         if not self.containers:
             for pk, values in enumerate(self.VALUES, start=1):
                 obj = self.model()
@@ -119,7 +123,7 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
                     for idx in range(len(values)):
                         setattr(obj, self.FIELD_LIST[idx], values[idx])
                 else:
-                    setattr(obj, self.FIELD_LIST[1], values)
+                    setattr(obj, self.FIELD_LIST[0], values)
 
                 self.containers.append(obj)
 
@@ -129,6 +133,10 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
         return self.containers
 
     def get_value_by_pk(self, pk, field):
+        """
+        Calls model_objects() to be sure the choice objects are created, then
+        returns the value from the `field` argument based on the 'pk' argument.
+        """
         self.model_objects()
         value = ''
         pk = int(pk)
@@ -148,8 +156,14 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
         return value
 
     def get_choices(self, field, comment=True):
+        """
+        Calls model_objects() to be sure the choice objects are created, then
+        returns a list appropriate for HTML select option values. If the
+        'comment' argument is True a choice header is prepended to the list.
+        """
         choices = [(obj.pk, getattr(obj, field))
                    for obj in self.model_objects()]
+        choices.sort(key=lambda x: x[1])
 
         if comment:
             choices.insert(

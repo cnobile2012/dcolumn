@@ -74,9 +74,10 @@ class BookAdmin(UserAdminMixin):
                        'fields': ('column_collection', 'active', 'creator',
                                   'created', 'updater', 'updated',)}),
         )
+    list_editable = ('active',)
     readonly_fields = ('creator', 'created', 'updater', 'updated',)
-    list_display = ('title', 'column_collection', 'updater', 'updated',
-                    '_detail_producer',)
+    list_display = ('title', 'column_collection', 'active', 'updater',
+                    'updated', '_detail_producer',)
     inlines = (KeyValueInline,)
     form = BookForm
 
