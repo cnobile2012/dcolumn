@@ -30,6 +30,9 @@ class DynamicColumnManager(object):
     _css_container_map = {}
 
     def __init__(self):
+        """
+        Constructor creates the Borg pattern.
+        """
         self.__dict__ = self.__shared_state
 
     def register_choice(self, choice, relation_num, field):

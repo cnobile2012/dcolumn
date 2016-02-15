@@ -41,10 +41,10 @@ class DynamicColumnManager(StatusModelManagerMixin):
 
     def get_fk_slugs(self):
         """
-        This method returns a dict of the relation class name and slug.
+        This method returns a dict of the relation model foreign key name and
+        slug.
 
-        :Returns:
-          A dict of {<relation class name>: <slug>, ...}
+        :rtype: A dict of ``{<relation class name>: <slug>, ...}``.
         """
         result = {}
 
@@ -127,6 +127,11 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
     objects = DynamicColumnManager()
 
     def _relation_producer(self):
+        """
+        Produces a ``CHOICE`` relation that is used in the Django admin.
+
+        :rtype: The ``CHOICE`` relation or empty string.
+        """
         result = ''
 
         if self.relation is not None:
@@ -136,6 +141,11 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
     _relation_producer.short_description = _("Relation")
 
     def _collection_producer(self):
+        """
+        Produces a ``Collection`` name that is used in the Django admin.
+
+        :rtype: A comma seperated list of ``Collection`` names.
+        """
         result = []
 
         for collection in self.column_collection.all():
@@ -447,13 +457,17 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         """
         Return the KeyValue object value for the slug.
 
-        Arguments:
-          slug  -- The KeyValue slug.
-          field -- Only used with CHOICE objects. Defaults to the field passed
-                   to the dcolumn_manager.register_choice(choice, relation_num,
-                   field) during configuration. The 'field' argument allows
-                   the return of a different field on the CHOICE objects, but
-                   must be a valid member object on the model.
+        :param slug: The KeyValue slug.
+        :type slug: str
+        :param field: Only used with CHOICE objects. Defaults to the field
+                      passed to the dcolumn_manager.register_choice(choice,
+                      relation_num, field) during configuration. The 'field'
+                      argument allows the return of a different field on the
+                      CHOICE objects, but must be a valid member object on the
+                      model.
+        :type field: str or None
+        :rtype: String value from a KeyValue object.
+        :raises ValueError: Invalid combination of parameters.
         """
         dc = self.get_dynamic_column(slug)
 
@@ -550,17 +564,21 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         If the argument value contains the value 'increment' or 'decrement'
         the value associated with the slug will be incremented or decremented.
 
-        Arguments:
-          slug  -- The slug associated with the key value pair.
-          value -- The value can be the value or an object to get the value
-                   from.
-          field -- Only used with CHOICE objects. The field used to get the
-                   value on the object. If this keyword argument is not set the
-                   default field will be used when the
-                   dcolumn_manager.register_choice(choice, relation_num, field)
-                   was set.
-          force -- Default is False, do not save empty strings or None objects
-                   else True save empty strings only.
+        :param slug: The slug associated with a ``KeyValue`` object.
+        :type slug: str
+        :param value: Can be a ``KeyValue`` value or a ``KeyValue`` object to
+                      get the value from.
+        :type value: string or CollectionBase object
+        :param field: Only used with ``CHOICE`` objects. Used to get the value
+                      on the ``KeyValue`` object. If this keyword argument is
+                      not set the default field will be used when the
+                      ``dcolumn_manager.register_choice(choice, relation_num,
+                      field)`` was set.
+        :type field: str or None
+        :param force: Default is ``False``, do not save empty strings or
+                      ``None`` objects else ``True`` save empty strings only.
+        :type force: bool
+        :raises ValueError: Invalid combination of parameters.
         """
         if (force and value == '') or value not in (None, ''):
             dc = self.get_dynamic_column(slug)

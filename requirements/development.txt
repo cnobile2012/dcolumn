@@ -9,3 +9,6 @@ slimit
 
 # Extensions
 django-extensions
+
+# Documentation
+Sphinx

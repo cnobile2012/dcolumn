@@ -9,12 +9,12 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-dcolumns',
-    version='0.5.2',
+    version='0.6.0',
     packages=['dcolumn', 'dcolumn.dcolumns', 'dcolumn.common',],
     include_package_data=True,
     license='MIT',
     description=('An app to give any Django database model the ability to '
-                 'dynamically add fields.'),
+                 'dynamically add fields to a model.'),
     long_description=README,
     url='https://github.com/cnobile2012/dcolumn',
     author='Carl J. Nobile',
