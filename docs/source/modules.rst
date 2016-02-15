@@ -1,7 +1,8 @@
-Dcolumn
-=======
+API Documentation
+*****************
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
 
-   dcolumn
+   dcolumns
+   common
