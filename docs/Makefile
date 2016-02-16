@@ -52,10 +52,10 @@ help:
 clean:
 	rm -rf $(BUILDDIR)/*
 
-.PHONY	: sphinx-apidoc
-sphinx-apidoc:
-	sphinx-apidoc -o source/ -H Dcolumn -A 'Carl J. Nobile' -V 0.6 \
-         -R 0.6.0 ../dcolumn/
+#.PHONY	: sphinx-apidoc
+#sphinx-apidoc:
+#	sphinx-apidoc -o source/ -H Dcolumn -A 'Carl J. Nobile' -V 0.6 \
+#         -R 0.6.0 ../dcolumn/
 
 .PHONY: html
 html:
