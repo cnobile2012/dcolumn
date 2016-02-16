@@ -19,8 +19,8 @@ from django.contrib import admin
 
 class UserAdminMixin(admin.ModelAdmin):
     """
-    Admin mixin that should be used in any model implimented with dynamic
-    columns.
+    Admin mixin that must be used in any model implimented with CollectionBase
+    as it's base class.
     """
     def save_model(self, request, obj, form, change):
         """
@@ -28,15 +28,15 @@ class UserAdminMixin(admin.ModelAdmin):
         with the request user object if `change` is `False`. The `updater` is
         always updated withthe request user object.
 
-        :Parameters:
-          request : HttpRequest
-            Django request object.
-          obj : Model
-            Django model object
-          form : Form
-            Django form object.
-          change : bool
-            If `True` the record was updated, if `False` the record was created.
+        :param request: Django request object.
+        :type request: HttpRequest
+        :param obj: Django model object
+        :type obj: Model object
+        :param form: Django form object.
+        :type form: Form object
+        :param change: If `True` the record was updated, if `False` the record
+                       was created.
+        :type change: bool
         """
         if change is False:
             obj.creator = request.user

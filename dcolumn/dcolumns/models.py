@@ -4,7 +4,7 @@
 #
 
 """
-Dynamic Column dependent models
+Dynamic Column dependent models.
 
 by: Carl J. Nobile
 

@@ -3,6 +3,15 @@
 # dcolumn/common/choice_mixins.py
 #
 
+"""
+Dynamic Column dependent choice mixins.
+
+by: Carl J. Nobile
+
+email: carl.nobile@gmail.com
+"""
+__docformat__ = "restructuredtext en"
+
 import logging
 import inspect
 
@@ -17,6 +26,10 @@ log = logging.getLogger('dcolumns.common.choices')
 # InspectChoice
 #
 class InspectChoice(object):
+    """
+    This class does introspection on a non-model ``CHOICE`` object. It should
+    not be necessary to use this class outside of DColumns itself.
+    """
 
     def __init__(self):
         self._path, self._caller_name = self._caller_info(skip=4)
@@ -25,13 +38,13 @@ class InspectChoice(object):
         """
         Get a name of a caller in the format module.class.method.
 
-        :Parameters:
-          skip : `int`
-            Specifies how many levels of stack to skip while getting caller
-            name. skip=1 means 'who calls me', skip=2 'who calls my caller'
-            etc.
+        :param skip: Specifies how many levels of stack to skip while getting
+                     caller name. skip=1 means 'who calls me', skip=2 'who
+                     calls my caller' etc.
+        :type skip: int
+        :rtype: A list or empty string
 
-        An empty string is returned if skipped levels exceed stack height
+        An empty string is returned if skipped levels exceed stack height.
 
         See: https://gist.github.com/techtonik/2151727
         """
@@ -70,6 +83,10 @@ class InspectChoice(object):
     def set_model(self, method):
         """
         A decorator to set the choice/model object of the calling class.
+
+        :param method: The method name to be decorated.
+        :type method: str
+        :rtype: The enclosed function embedded in this method.
         """
         def wrapper(this):
             modules = __import__(this._path, globals(), locals(),
@@ -88,6 +105,9 @@ class InspectChoice(object):
 # BaseChoiceManager
 #
 class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
+    """
+    This class must be used in any non-django model ``CHOICE`` object.
+    """
     VALUES = None
     FIELD_LIST = None
 
@@ -113,6 +133,8 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
         """
         This method creates and returns the choice objects the first time it
         is run, on subsequent runs it just returns the objects.
+
+        :rtype: A list of non-django model ``CHOICE`` objects.
         """
         if not self.containers:
             for pk, values in enumerate(self.VALUES, start=1):
@@ -136,6 +158,12 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
         """
         Calls model_objects() to be sure the choice objects are created, then
         returns the value from the `field` argument based on the 'pk' argument.
+
+        :param pk: The key of the object.
+        :type pk: int or str
+        :param field: The field of the choice the value is taken from.
+        :type field: str
+        :rtype: Value from the ``field`` on the object.
         """
         self.model_objects()
         value = ''
@@ -158,8 +186,15 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
     def get_choices(self, field, comment=True):
         """
         Calls model_objects() to be sure the choice objects are created, then
-        returns a list appropriate for HTML select option values. If the
-        'comment' argument is True a choice header is prepended to the list.
+        returns a list appropriate for HTML select option tags.
+
+        :param field: The field of the choice that is used to populate the list.
+        :type field: str
+        :param comment: Defaults to ``True`` prepending a choice header to the
+                        list.
+        :type comment: bool
+        :rtype: A list of tuples suitable for use in HTML select option tags.
+
         """
         choices = [(obj.pk, getattr(obj, field))
                    for obj in self.model_objects()]
