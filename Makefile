@@ -9,7 +9,6 @@ DOCS_DIR	= $(PREFIX)/docs
 TODAY		= $(shell date +"%Y-%m-%d_%H%M")
 
 #----------------------------------------------------------------------
-.PHONY	: all
 all	: tar
 
 #----------------------------------------------------------------------
@@ -43,4 +42,4 @@ clean	:
 .PHONY	: clobber
 clobber	: clean
 	@rm -rf dist build *.egg-info
-	@(cd $(DOCS_DIR); make clobber)
+#	@(cd $(DOCS_DIR); make clobber)
