@@ -3,6 +3,11 @@
 # dcolumn/dcolumns/forms.py
 #
 
+"""
+Dynamic Column forms.
+"""
+__docformat__ = "restructuredtext en"
+
 import logging
 import datetime
 
@@ -19,35 +24,38 @@ log = logging.getLogger('dcolumns.dcolumns.views')
 # ColumnCollection
 #
 class ColumnCollectionForm(forms.ModelForm):
+    """
+    Used internally to DColumn in the ``ColumnCollectionAdmin`` class.
+    """
 
     def __init__(self, *args, **kwargs):
+        """
+        The constructor creates the proper queryset for the DynamicColumn
+        HTML choices.
+        """
         super(ColumnCollectionForm, self).__init__(*args, **kwargs)
         log.debug("args: %s, kwargs: %s", args, kwargs)
-        self.columns = ColumnCollection.objects.get_column_collection(
+        columns = ColumnCollection.objects.get_column_collection(
             self.instance.name, unassigned=True)
-        self.fields['dynamic_column'].queryset = self.columns
+        self.fields['dynamic_column'].queryset = columns
 
     class Meta:
         model = ColumnCollection
         exclude = []
-
-    def clean(self):
-        if not self.columns:
-            msg = ("No objects in the database, please create initial objects "
-                   "in the Dynamic Columns model to be used for this "
-                   "collection type.")
-            log.error(msg)
-            raise forms.ValidationError({'dynamic_column': [msg]})
-
-        return self.cleaned_data
 
 
 #
 # DynamicColumn
 #
 class DynamicColumnForm(forms.ModelForm):
+    """
+    Used internally to DColumn in the ``DynamicColumnAdmin`` class.
+    """
 
     def __init__(self, *args, **kwargs):
+        """
+        The constructor sets up the proper ``relation`` field HTML object.
+        """
         super(DynamicColumnForm, self).__init__(*args, **kwargs)
         self.fields['relation'] = forms.ChoiceField(
             widget=forms.Select, choices=dcolumn_manager.choice_relations)
@@ -57,28 +65,15 @@ class DynamicColumnForm(forms.ModelForm):
         model = DynamicColumn
         exclude = []
 
-    def clean(self):
-        cleaned_data = super(DynamicColumnForm, self).clean()
-        value_type = cleaned_data.get('value_type')
-        relation = cleaned_data.get('relation', '0')
-        relation = int(relation)
-        log.debug("value_type: %s, relation: %s", value_type, relation)
-
-        if value_type == DynamicColumn.CHOICE:
-            if not relation:
-                self._errors['relation'] = self.error_class(
-                        [_("If the Value Type is a Choice then a relation "
-                           "must be entered.")])
-        else:
-            cleaned_data['relation'] = None
-
-        return cleaned_data
-
 
 #
 # CollectionFormMixin
 #
 class CollectionFormMixin(forms.ModelForm):
+    """
+    This mixin must be used by all forms who's model inherits from
+    CollectionBase.
+    """
     SPECIAL_CASE_MAP = {
         DynamicColumn.BOOLEAN: '1',
         DynamicColumn.CHOICE: '0',
@@ -99,6 +94,9 @@ class CollectionFormMixin(forms.ModelForm):
         exclude = ['creator', 'updater', 'created', 'updated']
 
     def __init__(self, *args, **kwargs):
+        """
+        The constructor sets up the proper field HTML object.
+        """
         super(CollectionFormMixin, self).__init__(*args, **kwargs)
         self.coll_name = dcolumn_manager.get_collection_name(
             self.Meta.model.__name__)
@@ -154,9 +152,9 @@ class CollectionFormMixin(forms.ModelForm):
 
     def validate_store_relation(self, relation, value):
         """
-        If 'store_relation' is False then return the value as is, should be a
-        PK. If 'store_relation' is True then lookup in the choices using the
-        PK and return the actual value.
+        If 'store_relation' is False then return the value as is from the
+        KeyValue object, should be a PK. If 'store_relation' is True then
+        lookup in the choices using the PK and return the actual value.
         """
         if relation.get('store_relation', False):
             log.debug("value: %s, relation: %s", value, relation)

@@ -5,10 +5,6 @@
 
 """
 Dynamic Column dependent models.
-
-by: Carl J. Nobile
-
-email: carl.nobile@gmail.com
 """
 __docformat__ = "restructuredtext en"
 
@@ -19,8 +15,9 @@ import types
 from collections import OrderedDict
 
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 from django.template.defaultfilters import slugify
+from django.core.exceptions import ValidationError
 
 from dcolumn.common.model_mixins import (
     UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin,
@@ -156,11 +153,21 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
     _collection_producer.allow_tags = True
 
     def clean(self):
+
+        # If we have a preferred_slug set the slug with it.
         if self.preferred_slug:
             self.preferred_slug = slugify(self.preferred_slug)
             self.slug = self.preferred_slug
         else:
             self.slug = slugify(self.name)
+
+        # Test that if the value_type is set to CHOICE that the relation
+        # is also set.
+        if self.value_type == self.CHOICE and not self.relation:
+            msg = _("If CHOICE type is chosed then a relation must aso be "
+                    "chosen.")
+            log.warn(ugettext(msg))
+            raise ValidationError({'relation': [msg]})
 
     def save(self, *args, **kwargs):
         super(DynamicColumn, self).save(*args, **kwargs)
@@ -206,7 +213,7 @@ class ColumnCollectionManager(StatusModelManagerMixin):
         try:
             queryset = self.active().get(name=name).dynamic_column.active()
         except self.model.DoesNotExist:
-            pass # This is caught in the form.
+            pass
 
         if unassigned:
             queryset = queryset | DynamicColumn.objects.active().filter(
@@ -297,6 +304,20 @@ class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin,
         related_name='column_collection')
 
     objects = ColumnCollectionManager()
+
+    def clean(self):
+        """
+        """
+        # Check that DynamicColumn objects exist for this collection type.
+        columns = ColumnCollection.objects.get_column_collection(
+            self.name, unassigned=True)
+
+        if not columns:
+            msg = _("No objects in the database, please create initial "
+                    "objects in the Dynamic Columns model to be used for "
+                    "this collection type.")
+            log.error(ugettext(msg))
+            raise ValidationError({'dynamic_column': [msg]})
 
     def save(self, *args, **kwargs):
         log.debug("kwargs: %s", kwargs)

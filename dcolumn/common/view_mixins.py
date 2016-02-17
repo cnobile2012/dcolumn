@@ -5,10 +5,6 @@
 
 """
 Dynamic Column view mixins.
-
-by: Carl J. Nobile
-
-email: carl.nobile@gmail.com
 """
 __docformat__ = "restructuredtext en"
 

@@ -4,10 +4,6 @@
 
 """
 Dynamic Column model admin.
-
-by: Carl J. Nobile
-
-email: carl.nobile@gmail.com
 """
 __docformat__ = "restructuredtext en"
 
@@ -24,6 +20,10 @@ from .forms import DynamicColumnForm, ColumnCollectionForm, KeyValueForm
 # KeyValue
 #
 class KeyValueInline(admin.TabularInline):
+    """
+    Admin inline used in an admin class who's model inherits from
+    CollectionBase.
+    """
     fieldsets = (
         (None, {'fields': ('dynamic_column', 'value',)}),
         )
@@ -42,6 +42,9 @@ class KeyValueInline(admin.TabularInline):
 # ColumnCollection
 #
 class ColumnCollectionAdmin(UserAdminMixin):
+    """
+    Used internally to DColumn for the ColumnCollection model.
+    """
     fieldsets = (
         (None, {'fields': ('name', 'dynamic_column',)}),
         (_('Status'), {'classes': ('collapse',),
@@ -63,6 +66,9 @@ class ColumnCollectionAdmin(UserAdminMixin):
 # DynamicColumn
 #
 class DynamicColumnAdmin(UserAdminMixin):
+    """
+    Used internally to DColumn for the DynamicColumn model.
+    """
     fieldsets = (
         (None, {'fields': ('name', 'value_type', 'relation',
                            'store_relation',)}),
