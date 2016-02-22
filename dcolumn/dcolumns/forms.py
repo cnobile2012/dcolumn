@@ -10,6 +10,7 @@ __docformat__ = "restructuredtext en"
 
 import logging
 import datetime
+import dateutil
 
 from django import forms
 from django.utils.translation import ugettext_lazy as _
@@ -71,8 +72,7 @@ class DynamicColumnForm(forms.ModelForm):
 #
 class CollectionFormMixin(forms.ModelForm):
     """
-    This mixin must be used by all forms who's model inherits from
-    CollectionBase.
+    This mixin must be used by all forms who's model inherits CollectionBase.
     """
     SPECIAL_CASE_MAP = {
         DynamicColumn.BOOLEAN: '1',
@@ -114,6 +114,17 @@ class CollectionFormMixin(forms.ModelForm):
         log.debug("fields: %s, data: %s", self.fields, self.data)
 
     def get_display_data(self):
+        """
+        Update objects derived from
+        ``ColumnCollection.objects.serialize_columns()`` which are now in
+        ``self.relations``. Populate the ``KeyValue`` values except where the
+        value was set on an update.
+
+        :rtype: A ``dict`` derived from the
+                ``ColumnCollection.objects.serialize_columns()`` dict.
+        """
+        # Be sure we have an instance and it is an update on the instance
+        # not a new instance.
         if self.instance and self.instance.pk is not None:
             for pk, value in self.instance.serialize_key_value_pairs().items():
                 log.debug("pk: %s, value: %s", pk, value)
@@ -126,88 +137,113 @@ class CollectionFormMixin(forms.ModelForm):
         return self.relations
 
     def clean_column_collection(self):
+        """
+        Return the ``ColumnCollection`` object for the current collection name.
+
+        :rtype: Django model ``ColumnCollection`` object.
+        :raises DoesNotExist: If the record does not exist.
+        :raises MultipleObjectsReturned: If multiple objects were returned.
+        """
         return ColumnCollection.objects.active().get(name=self.coll_name)
 
     def clean(self):
+        """
+        Run validation on models that inherit ``CollectionBase``.
+
+        :rtype: The Django ``cleaned_data`` dict.
+        """
         cleaned_data = super(CollectionFormMixin, self).clean()
         self.validate_dynamic_fields()
         log.debug("cleaned_data: %s", cleaned_data)
         return cleaned_data
 
     def validate_dynamic_fields(self):
+        """
+        Validate all validators.
+        """
         for relation in  self.relations.values():
             log.debug("relation: %s", relation)
 
             for key, value in self.data.items():
                 if key == relation.get('slug'):
                     value = value.encode('utf-8')
-                    value = self.validate_store_relation(relation, value)
+                    value = self.validate_choice_relations(relation, key, value)
                     value = self.validate_date_types(relation, key, value)
                     relation['value'] = value
                     self.validate_required(relation, key, value)
-                    self.validate_value_type(relation, key, value)
+                    self.validate_numeric_type(relation, key, value)
                     self.validate_value_length(relation, key, value)
 
         log.warn("form.errors: %s", self._errors)
 
-    def validate_store_relation(self, relation, value):
+    def validate_choice_relations(self, relation, key, value):
         """
-        If 'store_relation' is False then return the value as is from the
-        KeyValue object, should be a PK. If 'store_relation' is True then
-        lookup in the choices using the PK and return the actual value.
+        If ``store_relation`` is False then return the value as is from the
+        ``KeyValue`` object (should be a PK). If ``store_relation`` is True
+        then lookup in the choices using the PK and return the actual value
+        from the ``KeyValue`` object.
+
+        :param relation: A single value set from
+                         ``ColumnCollection.objects.serialize_columns()``.
+        :param key: The tag attribute value from the POST request.
+        :param value: The possibly prepossessed value from the POST request.
+        :rtype: The ``str`` value.
         """
-        if relation.get('store_relation', False):
-            log.debug("value: %s, relation: %s", value, relation)
-            data = dcolumn_manager.get_relation_model_field(
+        if relation.get('value_type') == DynamicColumn.CHOICE:
+            model, field = dcolumn_manager.get_relation_model_field(
                 relation.get('relation', ''))
 
-            if len(data) == 2:
-                model, field = data
-                old_value = value
-                value = value.isdigit() and int(value) or 0
-                value = [getattr(r, field)
-                         for r in model.objects.model_objects()
-                         if value == r.pk]
-                value = len(value) >= 1 and value[0] or old_value
-                log.debug("value: %s, field: %s, model: %s",
-                          value, field, model)
+            if not relation.get('store_relation', False):
+                if value.isdigit():
+                    try:
+                        obj = model.objects.get(pk=value)
+                    except model.DoesNotExist:
+                        self._errors[key] = self.error_class(
+                            [_("Could not find object with '{}'.").format(
+                                value)])
+                    except model.MultipleObjectsReturned:
+                        self._errors[key] = self.error_class(
+                            [_("Found multiple objects with '{}'.").format(
+                                value)])
+                    else:
+                        value = getattr(obj, field)
+                else:
+                    self._errors[key] = self.error_class(
+                        [_("Invalid value '{}', must be a number.").format(
+                            value)])
 
         return value
 
-    # SHORT TERM FIX will only work with one data format type.
-    _MONTHS = {'january': 1, 'february': 2, 'march': 3, 'april': 4,
-               'may': 5, 'june': 6, 'july': 7, 'august': 8,
-               'september': 9, 'october': 10, 'november': 11,
-               'december': 12}
-
     def validate_date_types(self, relation, key, value):
-        if relation.get('value_type') == DynamicColumn.DATE:
-            if value:
-                year = month = day = 0
-                day_month, delim, year = value.partition(', ')
+        """
+        Validate the time, date, or datetime object.
 
-                if delim:
-                    day, delim, month = day_month.partition(' ')
-                    month = self._MONTHS.get(month.lower(), 0)
-                else:
-                    tmp = value.split('-')
-
-                    if len(tmp) == 3:
-                        year, month, day = tmp
-
-                log.debug("year: %s, month: %s, day: %s", year, month, day)
-
-                if not year.isdigit() or not month or not day.isdigit():
-                    self._errors[key] = self.error_class(
-                        ["Invalid year, month, or day, found: {}".format(
-                            value)])
-                else:
-                    value = datetime.date(int(year), int(month),
-                                          int(day)).strftime('%Y-%m-%d')
+        :param relation: A single value set from
+                         ``ColumnCollection.objects.serialize_columns()``.
+        :param key: The tag attribute value from the POST request.
+        :param value: The possibly prepossessed value from the POST request
+        :rtype: The ``str`` value.
+        """
+        if relation.get('value_type') in (DynamicColumn.TIME,
+                                          DynamicColumn.DATE,
+                                          DynamicColumn.DATETIME):
+            try:
+                dt = dateutil.parser.parse(value)
+            except ValueError as e:
+                self._errors[key] = self.error_class(
+                    [_("Invalid calendar object '{}', {}.").format(value, e)])
 
         return value
 
     def validate_required(self, relation, key, value):
+        """
+        Validate if a field is required by the ``DynamicColumn`` setting.
+
+        :param relation: A single value set from
+                         ``ColumnCollection.objects.serialize_columns()``.
+        :param key: The tag attribute value from the POST request.
+        :param value: The possibly prepossessed value from the POST request
+        """
         if relation.get('required', False):
             value_type = relation.get('value_type')
 
@@ -215,18 +251,32 @@ class CollectionFormMixin(forms.ModelForm):
                 self.SPECIAL_CASE_MAP.get(value_type) == value):
 
                 self._errors[key] = self.error_class(
-                    ["{} field is required.".format(relation.get('name'))])
+                    [_("{} field is required.").format(relation.get('name'))])
 
-    def validate_value_type(self, relation, key, value):
-        value_type = relation.get('value_type')
+    def validate_numeric_type(self, relation, key, value):
+        """
+        Validate that if a number that the value is a number.
 
-        if value_type == DynamicColumn.NUMBER:
+        :param relation: A single value set from
+                         ``ColumnCollection.objects.serialize_columns()``.
+        :param key: The tag attribute value from the POST request.
+        :param value: The possibly prepossessed value from the POST request
+        """
+        if relation.get('value_type') == DynamicColumn.NUMBER:
             if value and not value.isdigit():
                 self._errors[key] = self.error_class(
-                    ["{} field is not a number.".format(
+                    [_("{} field is not a number.").format(
                         relation.get('name'))])
 
     def validate_value_length(self, relation, key, value):
+        """
+        Validate the the incoming data does not exceed the maximum lengths.
+
+        :param relation: A single value set from
+                         ``ColumnCollection.objects.serialize_columns()``.
+        :param key: The tag attribute value from the POST request.
+        :param value: The possibly prepossessed value from the POST request
+        """
         value_type = relation.get('value_type')
 
         # If store_relation is True then the storage type is DynamicColumn.TEXT.
@@ -237,9 +287,15 @@ class CollectionFormMixin(forms.ModelForm):
 
         if len(value) > self.MAX_LENGTH_MAP.get(value_type):
                 self._errors[key] = self.error_class(
-                    ["{} field is too long.".format(relation.get('name'))])
+                    [_("{} field is too long.").format(relation.get('name'))])
 
     def save(self, commit=True):
+        """
+        Saves a record that inherits from ``CollectionBase`` and all the
+        ``KeyValue`` objects related to it.
+
+        :param commit: If ``True`` the record is saved else not saved.
+        """
         inst = super(CollectionFormMixin, self).save(commit=False)
         request = self.initial.get('request')
         log.debug("request: %s, inst: %s, instance: %s",
@@ -254,12 +310,14 @@ class CollectionFormMixin(forms.ModelForm):
 
         if commit:
             inst.save()
-            #self.save_m2m() # If we have any.
             self._save_keyvalue_pairs()
 
         return inst
 
     def _save_keyvalue_pairs(self):
+        """
+        Save all the ``KeyValue`` objects.
+        """
         for pk, relation in self.get_display_data().items():
             required = relation.get('required', False)
             value = relation.get('value', '')
@@ -270,7 +328,7 @@ class CollectionFormMixin(forms.ModelForm):
                 obj, created = self.instance.keyvalue_pairs.get_or_create(
                     collection=self.instance, dynamic_column_id=int(pk),
                     defaults={'value': value})
-            except self.instance.MultipleObjectsReturned, e:
+            except self.instance.MultipleObjectsReturned as e:
                 log.error("Multiple records found for parent: %s, "
                           "dynamic_column_id: %s", self.instance,
                           dynamic_column_id=cc_id)
@@ -285,13 +343,18 @@ class CollectionFormMixin(forms.ModelForm):
 # KeyValue
 #
 class KeyValueForm(forms.ModelForm):
+    """
+    Form for validating ``KeyValue`` model objects.
+    """
 
     def __init__(self, *args, **kwargs):
+        """
+        The constructor sets up the proper field HTML object.
+        """
         super(KeyValueForm, self).__init__(*args, **kwargs)
         self.fields['value'].widget = forms.TextInput(
             attrs={'size': 50, 'maxlength': 2000})
         log.debug("args: %s, kwargs: %s", args, kwargs)
-        #log.debug("dir(self): %s", dir(self))
 
         if hasattr(self.instance, 'collection'):
             coll_name = self.instance.collection.column_collection.name
