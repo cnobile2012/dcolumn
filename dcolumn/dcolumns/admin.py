@@ -22,7 +22,7 @@ from .forms import DynamicColumnForm, ColumnCollectionForm, KeyValueForm
 class KeyValueInline(admin.TabularInline):
     """
     Admin inline used in an admin class who's model inherits from
-    CollectionBase.
+    ``CollectionBase``.
     """
     fieldsets = (
         (None, {'fields': ('dynamic_column', 'value',)}),
@@ -43,7 +43,7 @@ class KeyValueInline(admin.TabularInline):
 #
 class ColumnCollectionAdmin(UserAdminMixin):
     """
-    Used internally to DColumn for the ColumnCollection model.
+    Used internally to DColumn for the ``ColumnCollection`` model.
     """
     fieldsets = (
         (None, {'fields': ('name', 'dynamic_column',)}),
@@ -67,7 +67,7 @@ class ColumnCollectionAdmin(UserAdminMixin):
 #
 class DynamicColumnAdmin(UserAdminMixin):
     """
-    Used internally to DColumn for the DynamicColumn model.
+    Used internally to DColumn for the ``DynamicColumn`` model.
     """
     fieldsets = (
         (None, {'fields': ('name', 'value_type', 'relation',
