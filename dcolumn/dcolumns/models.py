@@ -141,7 +141,7 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
         """
         Produces a ``Collection`` name that is used in the Django admin.
 
-        :rtype: A comma seperated list of ``Collection`` names.
+        :rtype: A comma separated list of ``Collection`` names.
         """
         result = []
 
@@ -153,7 +153,10 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
     _collection_producer.allow_tags = True
 
     def clean(self):
-
+        """
+        Validate the proper operation between the slug and preferred_slug
+        fields and the relation and value_type fields.
+        """
         # If we have a preferred_slug set the slug with it.
         if self.preferred_slug:
             self.preferred_slug = slugify(self.preferred_slug)
@@ -163,9 +166,9 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
 
         # Test that if the value_type is set to CHOICE that the relation
         # is also set.
-        if self.value_type == self.CHOICE and not self.relation:
-            msg = _("If CHOICE type is chosed then a relation must aso be "
-                    "chosen.")
+        if ((self.value_type == self.CHOICE and not self.relation) or
+            (self.relation and self.value_type != self.CHOICE)):
+            msg = _("Must choose CHOICE type and relation.")
             log.warn(ugettext(msg))
             raise ValidationError({'relation': [msg]})
 
@@ -304,20 +307,6 @@ class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin,
         related_name='column_collection')
 
     objects = ColumnCollectionManager()
-
-    def clean(self):
-        """
-        """
-        # Check that DynamicColumn objects exist for this collection type.
-        columns = ColumnCollection.objects.get_column_collection(
-            self.name, unassigned=True)
-
-        if not columns:
-            msg = _("No objects in the database, please create initial "
-                    "objects in the Dynamic Columns model to be used for "
-                    "this collection type.")
-            log.error(ugettext(msg))
-            raise ValidationError({'dynamic_column': [msg]})
 
     def save(self, *args, **kwargs):
         log.debug("kwargs: %s", kwargs)
@@ -653,9 +642,11 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         if dc.store_relation and new_field:
             result = str(getattr(value, new_field))
-        elif model and not field: # Normal mode
+        elif model and not field:
+            # Normal mode
             result = str(getattr(value, 'pk'))
         elif model and new_field and hasattr(value, new_field):
+            # Non-default field
             result = str(getattr(value, new_field))
         else:
             self._raise_exception(dc, value, field=new_field)
