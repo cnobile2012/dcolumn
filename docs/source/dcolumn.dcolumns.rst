@@ -44,6 +44,7 @@ dcolumn.dcolumns.models module
     :members:
     :undoc-members:
     :show-inheritance:
+    :exclude-members: author, book, promotion, publisher
 
 dcolumn.dcolumns.urls module
 ----------------------------
