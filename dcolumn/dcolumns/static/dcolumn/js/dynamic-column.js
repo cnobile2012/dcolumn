@@ -104,7 +104,7 @@ String.prototype.trim = function(charlist) {
         //error: this._errorCB.bind(this),
         success: this._dynamicColumnCB.bind(this),
         statusCode: {400: this._dynamicColumnCB.bind(this)}
-      }
+      };
       $.ajax(options);
     },
 
