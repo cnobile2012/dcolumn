@@ -4,10 +4,6 @@
 #
 """
 Implementation class.
-
-by: Carl J. Nobile
-
-email: carl.nobile@gmail.com
 """
 __docformat__ = "restructuredtext en"
 
@@ -17,7 +13,8 @@ __docformat__ = "restructuredtext en"
 #
 class ChoiceManagerImplementation(object):
     """
-    Manditory defined method.
+    Manditory methods that must be defined in both choice models and Django
+    models that are used as or in Dcolumns.
     """
 
     def get_value_by_pk(self, pk, field=None):
