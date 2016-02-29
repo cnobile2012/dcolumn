@@ -1,17 +1,10 @@
 dcolumn.dcolumns package
 ========================
 
-Subpackages
------------
-
 .. toctree::
 
-    dcolumn.dcolumns.migrations
     dcolumn.dcolumns.templatetags
     dcolumn.dcolumns.tests
-
-Submodules
-----------
 
 dcolumn.dcolumns.admin module
 -----------------------------
@@ -58,15 +51,6 @@ dcolumn.dcolumns.views module
 -----------------------------
 
 .. automodule:: dcolumn.dcolumns.views
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: dcolumn.dcolumns
     :members:
     :undoc-members:
     :show-inheritance:

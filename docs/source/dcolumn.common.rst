@@ -1,9 +1,6 @@
 dcolumn.common package
 ======================
 
-Submodules
-----------
-
 dcolumn.common.admin_mixins module
 ----------------------------------
 

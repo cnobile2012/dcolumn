@@ -15,9 +15,6 @@ Contents:
    configuration
    modules
 
-
-
-
 Indices and tables
 ==================
 
