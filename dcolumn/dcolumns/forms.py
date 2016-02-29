@@ -72,13 +72,10 @@ class DynamicColumnForm(forms.ModelForm):
 #
 class CollectionFormMixin(forms.ModelForm):
     """
-    This mixin must be used by all forms who's model inherits CollectionBase.
+    This mixin must be used by all forms who's model inherits
+    ``CollectionBase``.
     """
-    SPECIAL_CASE_MAP = {
-        DynamicColumn.BOOLEAN: '1',
-        DynamicColumn.CHOICE: '0',
-        }
-    MAX_LENGTH_MAP = {
+    MAX_FIELD_LENGTH_MAP = {
         DynamicColumn.BOOLEAN: 1,
         DynamicColumn.CHOICE: 12,
         DynamicColumn.DATE: 20,
@@ -118,7 +115,7 @@ class CollectionFormMixin(forms.ModelForm):
         Update objects derived from
         ``ColumnCollection.objects.serialize_columns()`` which are now in
         ``self.relations``. Populate the ``KeyValue`` values except where the
-        value was set on an update.
+        value was set on an update so as not to overwrite it.
 
         :rtype: A ``dict`` derived from the
                 ``ColumnCollection.objects.serialize_columns()`` dict.
@@ -180,8 +177,8 @@ class CollectionFormMixin(forms.ModelForm):
         """
         If ``store_relation`` is False then return the value as is from the
         ``KeyValue`` object (should be a PK). If ``store_relation`` is True
-        then lookup in the choices using the PK and return the actual value
-        from the ``KeyValue`` object.
+        then lookup in the ``CHOICE`` object using the PK and return the
+        actual value from the ``KeyValue`` object.
 
         :param relation: A single value set from
                          ``ColumnCollection.objects.serialize_columns()``.
@@ -237,21 +234,17 @@ class CollectionFormMixin(forms.ModelForm):
 
     def validate_required(self, relation, key, value):
         """
-        Validate if a field is required by the ``DynamicColumn`` setting.
+        Validate if a field is required by the ``DynamicColumn`` meta data
+        setting.
 
         :param relation: A single value set from
                          ``ColumnCollection.objects.serialize_columns()``.
         :param key: The tag attribute value from the POST request.
         :param value: The possibly prepossessed value from the POST request
         """
-        if relation.get('required', False):
-            value_type = relation.get('value_type')
-
-            if (not value or value_type in self.SPECIAL_CASE_MAP and
-                self.SPECIAL_CASE_MAP.get(value_type) == value):
-
-                self._errors[key] = self.error_class(
-                    [_("{} field is required.").format(relation.get('name'))])
+        if relation.get('required', False) and value == '':
+            self._errors[key] = self.error_class(
+                [_("{} field is required.").format(relation.get('name'))])
 
     def validate_numeric_type(self, relation, key, value):
         """
@@ -285,7 +278,7 @@ class CollectionFormMixin(forms.ModelForm):
 
         log.debug("key: %s, value: %s", key, value)
 
-        if len(value) > self.MAX_LENGTH_MAP.get(value_type):
+        if len(value) > self.MAX_FIELD_LENGTH_MAP.get(value_type):
                 self._errors[key] = self.error_class(
                     [_("{} field is too long.").format(relation.get('name'))])
 
