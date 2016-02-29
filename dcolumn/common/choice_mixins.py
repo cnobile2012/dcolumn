@@ -198,6 +198,6 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
 
         if comment:
             choices.insert(
-                0, (0, _("Please choose a {}".format(self.model.__name__))))
+                0, (0, _("Please choose a {}").format(self.model.__name__)))
 
         return choices
