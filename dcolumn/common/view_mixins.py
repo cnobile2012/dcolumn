@@ -25,9 +25,9 @@ class JSONResponseMixin(object):
         Returns a JSON response, transforming 'context' to make the payload.
 
         :param context: The template rendering context.
-        :type context: See `Django Context <https://docs.djangoproject.com/en/1.9/ref/templates/api/#playing-with-context-objects>`_.
+        :type context: See `Django Context <https://docs.djangoproject.com/en/dev/ref/templates/api/#playing-with-context-objects>`_.
         :param response_kwargs: Response keywords arguments.
-        :rtype: See `Django response_class <https://docs.djangoproject.com/en/1.9/ref/class-based-views/mixins-simple/#django.views.generic.base.TemplateResponseMixin.response_class>`_.
+        :rtype: See `Django response_class <https://docs.djangoproject.com/en/dev/ref/class-based-views/mixins-simple/#django.views.generic.base.TemplateResponseMixin.response_class>`_.
         """
         response_kwargs['content_type'] = 'application/json'
         return self.response_class(self.convert_context_to_json(context),
@@ -55,7 +55,7 @@ class AjaxableResponseMixin(object):
 
         :param context: A dict of context data.
         :type context: dict
-        :rtype: See `Django's HttpResponse <https://docs.djangoproject.com/en/1.9/ref/request-response/#httpresponse-objects>`_
+        :rtype: See `Django's HttpResponse <https://docs.djangoproject.com/en/dev/ref/request-response/#httpresponse-objects>`_
         """
         data = json.dumps(context)
         #log.debug("data: %s", data)
@@ -65,8 +65,8 @@ class AjaxableResponseMixin(object):
     def form_invalid(self, form):
         """
         Renders the invalid form error description. See `Django's form_invalid
-        <https://docs.djangoproject.com/en/1.9/ref/class-based-views/mixins-editing/#django.views.generic.edit.FormMixin.form_invalid>`_. If the request is an
-        AJAX request return this data as a JSON string.
+        <https://docs.djangoproject.com/en/dev/ref/class-based-views/mixins-editing/#django.views.generic.edit.FormMixin.form_invalid>`_.
+        If the request is an AJAX request return this data as a JSON string.
 
         :param form: The Django form object.
         :type form: Django's form object.
@@ -81,8 +81,8 @@ class AjaxableResponseMixin(object):
 
     def form_valid(self, form):
         """
-        Renders the valid data. See `Django's form_valid <https://docs.djangoproject.com/en/1.9/ref/class-based-views/mixins-editing/#django.views.generic.edit.FormMixin.form_valid>`_. If the request is an
-        AJAX request return this data as a JSON string.
+        Renders the valid data. See `Django's form_valid <https://docs.djangoproject.com/en/dev/ref/class-based-views/mixins-editing/#django.views.generic.edit.FormMixin.form_valid>`_.
+        If the request is an AJAX request return this data as a JSON string.
 
         :param form: The Django form object.
         :type form: Django's form object.
