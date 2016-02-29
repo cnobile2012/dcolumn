@@ -12,6 +12,7 @@ import pytz
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.core.exceptions import ValidationError
 
 from example_site.books.choices import Language
 from example_site.books.models import Author, Book, Publisher, Promotion
@@ -94,20 +95,6 @@ class TestDynamicColumn(BaseDcolumns):
     def __init__(self, name):
         super(TestDynamicColumn, self).__init__(name)
 
-    def test_get_choice_relation_object_and_field(self):
-        """
-        Test that the relation object is returned.
-        """
-        #self.skipTest("Temporarily skipped")
-        # Create a choice type object.
-        dc0 = self._create_dynamic_column_record(
-            "Language", DynamicColumn.CHOICE, 'book_center', 6,
-            relation=self.choice2index.get("Language"))
-        obj, field = dc0.get_choice_relation_object_and_field()
-        msg = "obj: %s, field: {}".format(obj, field)
-        self.assertTrue(obj == Language, msg)
-        self.assertEqual(field, 'name', msg)
-
     def test_get_fk_slugs(self):
         """
         Test that a dict of slugs are returned for CHOICE type fields.
@@ -126,6 +113,88 @@ class TestDynamicColumn(BaseDcolumns):
         slugs = DynamicColumn.objects.get_fk_slugs()
         msg = "slugs: {}".format(slugs)
         self.assertEqual(len(slugs), 1, msg)
+
+    def test__relation_producer(self):
+        """
+        Test that this method returns the correct relation type for the
+        database int value. Used in the Django admin.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create two DynamicColumn objects.
+        dc0 = self._create_dynamic_column_record(
+            "Postal Code", DynamicColumn.TEXT, 'publisher_top', 1)
+        dc1 = self._create_dynamic_column_record(
+            "Language", DynamicColumn.CHOICE, 'book_center', 1,
+            relation=self.choice2index.get("Language"))
+        require = {dc0: '', dc1: "Language"}
+
+        for dc, value in require.items():
+            result = dc._relation_producer()
+            msg = "value: {}, result: {}".format(value, result)
+            self.assertEqual(value, result, msg)
+
+    def test__collection_producer(self):
+        """
+        Test that the correct ``Collection`` name is returned for this
+        ``DynamicColumn``.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create a DynamicColumn object.
+        dc0 = self._create_dynamic_column_record(
+            "Postal Code", DynamicColumn.TEXT, 'publisher_top', 1)
+        cc_name = "Publisher"
+        cc = self._create_column_collection_record(
+            cc_name, dynamic_columns=[dc0])
+        result = dc0._collection_producer()
+        value = '<span>{}</span>'.format(cc_name)
+        msg = "value {}, result".format(value, result)
+        self.assertEqual(value, result, msg)
+
+    def test_clean(self):
+        """
+        Test that ``DynamicColumn.preferred_slug`` is populated in
+        ``DynamicColumn.slug``. Also test that if a ``DynamicColumn.value_type``
+        is a ``CHOICE`` that ``DynamicColumn.relation`` is also set.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create a DynamicColumn object.
+        preferred_slug = 'zip-code'
+        dc0 = self._create_dynamic_column_record(
+            "Postal Code", DynamicColumn.TEXT, 'publisher_top', 1,
+            preferred_slug=preferred_slug)
+        dc1 = self._create_dynamic_column_record(
+            "Language", DynamicColumn.CHOICE, 'book_center', 1,
+            relation=self.choice2index.get("Language"))
+        # Test preferred_slug
+        msg = "preferred_slug: {}, result".format(preferred_slug, dc0.slug)
+        self.assertEqual(preferred_slug, dc0.slug)
+        # Test slug
+        slug = 'language'
+        msg = "slug: {}, result".format(slug, dc1.slug)
+        self.assertEqual(slug, dc1.slug)
+        # Test CHOICE and not relation
+        with self.assertRaises(ValidationError) as cm:
+            dc2 = self._create_dynamic_column_record(
+                "Author", DynamicColumn.CHOICE, 'book_top', 1)
+        # Test relation and not CHOICE
+        with self.assertRaises(ValidationError) as cm:
+            dc3 = self._create_dynamic_column_record(
+                "Author", DynamicColumn.TEXT, 'book_top', 1,
+                relation=self.choice2index.get("Author"))
+
+    def test_get_choice_relation_object_and_field(self):
+        """
+        Test that the model class object and the correct field.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create a choice type object.
+        dc0 = self._create_dynamic_column_record(
+            "Language", DynamicColumn.CHOICE, 'book_center', 6,
+            relation=self.choice2index.get("Language"))
+        obj, field = dc0.get_choice_relation_object_and_field()
+        msg = "obj: %s, field: {}".format(obj, field)
+        self.assertTrue(obj == Language, msg)
+        self.assertEqual(field, 'name', msg)
 
 
 class TestColumnCollection(BaseDcolumns):
@@ -496,18 +565,21 @@ class TestCollectionBase(BaseDcolumns):
         value = 'junk'
         kv5 = self._create_key_value_record(book, dc5, value)
         b_values[dc5.slug] = kv5.value
-        # Test Choice ForeignKey mode with store_relation set to False.
-        slug = 'author'
-        value = book.get_key_value_pair(slug)
-        msg = "value: {}, b_values: {}, a_values: {}, author.name: {}".format(
-            value, b_values, a_values, author.name)
-        self.assertEqual(value, author.name, msg)
         # Test Choice mode with store_relation set to True.
         slug = 'promotion'
         value = book.get_key_value_pair(slug)
         msg = "value: {}, b_values: {}, p_values: {}".format(
             value, b_values, p_values)
         self.assertEqual(value, b_values.get(slug), msg)
+        # Test Choice ForeignKey mode with store_relation set to False.
+        slug = 'author'
+        value = book.get_key_value_pair(slug)
+        msg = "value: {}, b_values: {}, a_values: {}, author.name: {}".format(
+            value, b_values, a_values, author.name)
+        self.assertEqual(value, author.name, msg)
+        # Test Choice exception.
+        with self.assertRaises(AttributeError) as cm:
+            value = book.get_key_value_pair(slug, 'bad_field')
         # Test TIME
         slug = 'start-time'
         value = promotion.get_key_value_pair(slug)

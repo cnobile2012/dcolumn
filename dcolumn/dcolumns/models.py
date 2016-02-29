@@ -173,16 +173,20 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
             raise ValidationError({'relation': [msg]})
 
     def save(self, *args, **kwargs):
+        """
+        Be sure the complete MRO has their constructors called.
+        """
         super(DynamicColumn, self).save(*args, **kwargs)
 
     def __str__(self):
+        # int 
         if self.location.isdigit():
             location = int(self.location)
         else:
             location = self.location
 
         return "{} ({})".format(
-            self.name, dict(dcolumn_manager.css_containers).get(location, '')
+            self.name, dcolumn_manager.css_container_map.get(location, '')
             ).encode('utf-8')
 
     class Meta:
@@ -191,6 +195,22 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
         verbose_name_plural = _("Dynamic Columns")
 
     def get_choice_relation_object_and_field(self):
+        """
+        Gets the model class object and the field passed in when
+        ``dcolumn_manager.register_choice`` was configured. If this
+        ``DynamicColumn`` was not used for a choice model then a tuple of
+        two Nones is returned.
+
+        Example of Output::
+
+          (example_site.books.models.Promotion, 'name')
+
+          or
+
+          (None, None)
+
+        :rtype: tuple
+        """
         return dcolumn_manager.get_relation_model_field(self.relation)
 
 
@@ -198,17 +218,21 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
 # ColumnCollection
 #
 class ColumnCollectionManager(StatusModelManagerMixin):
+    """
+    Manager for the ``ColumnCollection`` model.
+    """
 
     def get_column_collection(self, name, unassigned=False):
         """
         Get the query set for the named collection. If unassigned is True add
         the unassigned dynamic columns to the query set.
 
-        :Parameters:
-            name : `str`
-              Name of the column collection.
-            unassigned : `bool`
-              Also get items that are not assigned to a column collection yet.
+        :param name: Name of the column collection.
+        :type name: str
+        :param unassigned: Also get items that are not assigned to a column
+                           collection yet.
+        :type unassigned: bool
+        :rtype: A queryset of objects that inherit ``CollectionBase``.
         """
         log.debug("Collection name: %s, unassigned: %s", name, unassigned)
         queryset = self.none()
@@ -226,18 +250,21 @@ class ColumnCollectionManager(StatusModelManagerMixin):
 
     def serialize_columns(self, name, obj=None, by_slug=False):
         """
-        Serialize the dynamic column for this named collection in an
-        OrderedDict. If a model that uses dcolumns is in `obj` it's key/value
-        pairs are also returned. OrderedDict items can be either `pk` or `slug`.
+        Serialize the ``DynamicColumn`` for the ``name`` of this collection in
+        an OrderedDict. When a model that inherits ``CollectionBase`` is
+        passed in as ``obj`` its set of ``KeyValue`` objects value are also
+        included. OrderedDict items can be keys by either a `pk` or `slug`.
 
-        :Parameters:
-            name : `str`
-              Name of the collection.
-            obj : `object`
-              Model object that uses dcolumns.
-            by_slug : `bool`
-              If False the OrderedDict items are keyed by the dynamic column's
-              `pk`, if True the dynamic column's `slug` is used.
+        :param name: Name of the collection.
+        :type name: str
+        :param obj: Optional model object that inherits from ``CollectionBase``.
+        :type obj: object
+        :param by_slug: If False the OrderedDict items are keyed by the dynamic
+                        column's ``pk``, if True the dynamic column's ``slug``
+                        is used.
+        :type by_slug: bool
+        :rtype: An OrderedDict of serialized ``KeyValue`` values and their
+                ``DynamicColumn`` meta data.
         """
         records = self.get_column_collection(name)
         result = OrderedDict()
@@ -264,6 +291,7 @@ class ColumnCollectionManager(StatusModelManagerMixin):
             rec['required'] = record.required
 
             if record.location.isdigit():
+                # This will become depricated in version 1.3.0.
                 location = int(record.location)
             else:
                 location = record.location
@@ -281,6 +309,11 @@ class ColumnCollectionManager(StatusModelManagerMixin):
         """
         Get a list of all active relation type choice items. The list is
         made up of the names of each item.
+
+        :param name: Name of the ``ColumnCollection``.
+        :type name: str
+        :rtype: A ``list`` of all ``CHOICE`` items including both model and
+                choice items.
         """
         records = self.get_column_collection(name)
         return [dcolumn_manager.choice_relation_map.get(record.relation)
@@ -291,6 +324,13 @@ class ColumnCollectionManager(StatusModelManagerMixin):
         Returns a set of choices for a list of options on an HTML select tag.
         Normally the slug is returned as the option value, however if `use_pk`
         is `True` then the value attribute will get the pk of the record.
+
+        :param name: Name of the ``ColumnCollection``.
+        :type name: str
+        :param use_pk: If ``False`` (default) slugs are used else if ``True``
+                       PKs are used.
+        :type use_pk: bool
+        :rtype: A list of tuples. ``[(<slug or pk>, <KeyValue name>), ...]``
         """
         records = self.get_column_collection(name)
         choices = [(use_pk and r.pk or r.slug, r.name) for r in records]
@@ -299,6 +339,10 @@ class ColumnCollectionManager(StatusModelManagerMixin):
 
 class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin,
                        ValidateOnSaveMixin):
+    """
+    This model defines the collection of ``DynamicColumn`` objects in this set.
+    """
+
     name = models.CharField(
         verbose_name=_("Name"), unique=True, max_length=50,
         help_text=_("Enter a unique name for this record."))
@@ -309,7 +353,9 @@ class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin,
     objects = ColumnCollectionManager()
 
     def save(self, *args, **kwargs):
-        log.debug("kwargs: %s", kwargs)
+        """
+        Be sure the complete MRO has their constructors called.
+        """
         super(ColumnCollection, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -323,7 +369,10 @@ class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin,
 
     def process_dynamic_columns(self, dcs):
         """
-        This method adds or removes dynamic columns to the collection.
+        This method adds or removes ``DynamicColumn`` objects to the
+        collection.
+
+        :param dcs: A list of ``DynamicColumn`` objects.
         """
         if dcs:
             new_pks = [inst.pk for inst in dcs]
@@ -342,10 +391,19 @@ class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin,
 # CollectionBase
 #
 class CollectionBaseManager(models.Manager):
+    """
+    The manager class for any model that inherits ``CollectionBase``.
+    """
 
     def model_objects(self, active=True):
         """
         Returns a list of all objects on this model.
+
+        :param active: If ``True`` (default) only active records will be
+                       returned else if ``False`` all records will be
+                       returned.
+        :type active: bool
+        :rtype: Django queryset.
         """
         if hasattr(self, 'active'):
             result = self.active(active=active)
@@ -355,18 +413,34 @@ class CollectionBaseManager(models.Manager):
         return result
 
     def get_choices(self, field, active=True, comment=True):
+        """
+        Returns choices that can be used in HTML select options.
+
+        :param field: The field of the choice that is used to populate the list.
+        :type field: str
+        :param comment: Defaults to ``True`` prepending a choice header to the
+                        list.
+        :type comment: bool
+        :rtype: A list of tuples suitable for use in HTML select option tags.
+        """
         choices = [(obj.pk, getattr(obj, field))
                    for obj in self.model_objects(active=active)]
 
         if comment:
             choices.insert(
-                0, (0, _("Please choose a {}".format(self.model.__name__))))
+                0, (0, _("Please choose a {}").format(self.model.__name__)))
 
         return choices
 
     def get_value_by_pk(self, pk, field):
         """
         Returns the value from 'field' using the pk as the key.
+
+        :param pk: The key of the object.
+        :type pk: int or str
+        :param field: The field of the choice the value is taken from.
+        :type field: str
+        :rtype: Value from the ``field`` on the object.
         """
         value = ''
 
@@ -388,7 +462,9 @@ class CollectionBaseManager(models.Manager):
 
     def get_all_slugs(self):
         """
-        Returns all slug names in a list.
+        Returns all ``DynamicColumn`` slug names relitive to this model.
+
+        :rtype: List of slugs.
         """
         result = []
         obj = self.select_related('column_collection__name').first()
@@ -401,14 +477,16 @@ class CollectionBaseManager(models.Manager):
             if cc_obj:
                 cc_obj = cc_obj[0]
                 result[:] = [
-                    r.slug for r in cc_obj.dynamic_column.all().order_by(
-                        'slug')]
+                    r.slug.encode('utf-8')
+                    for r in cc_obj.dynamic_column.all().order_by('slug')]
 
         return result
 
     def get_all_fields(self):
         """
-        Returns all field names in a list.
+        Returns all model field names.
+
+        :rtype: List of fields.
         """
         return [field.name.encode('utf-8')
                 for field in self.model._meta.get_fields()
@@ -417,7 +495,10 @@ class CollectionBaseManager(models.Manager):
 
     def get_all_fields_and_slugs(self):
         """
-        Returns all field names and the dynamic column slugs in a sorted list.
+        Returns all field names and the ``DynamicColumn`` slugs in a sorted
+        list.
+
+        :rtype: List of all field and slugs.
         """
         result = self.get_all_slugs() + self.get_all_fields()
         result.sort()
@@ -431,12 +512,20 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                     "for all Collections."))
 
     def save(self, *args, **kwargs):
-        log.debug("kwargs: %s", kwargs)
+        """
+        Be sure the complete MRO has their constructors called.
+        """
         super(CollectionBase, self).save(*args, **kwargs)
 
     def serialize_key_value_pairs(self, by_slug=False):
         """
-        Returns a dict of the dynamic column PK and value.
+        Returns a dict of the ``DynamicColumn`` PK and the ``KeyValue`` value.
+
+        :param by_slug: If False a dict of items are keyed by the dynamic
+                        column's ``pk``, if True the dynamic column's ``slug``
+                        is used.
+        :type by_slug: bool
+        :rtype: Dict
         """
         result = {}
 
@@ -452,7 +541,11 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
     def get_dynamic_column(self, slug):
         """
-        Gets the dynamic column given the column's slug.
+        Gets the ``DynamicColumn`` instance given the slug.
+
+        :param slug: The ``DynamicColumn`` slug value.
+        :type slug: str
+        :rtype: ``DynamicColumn`` model instance.
         """
         try:
             dc = self.column_collection.dynamic_column.get(slug=slug)
@@ -465,9 +558,9 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
     def get_key_value_pair(self, slug, field=None):
         """
-        Return the KeyValue object value for the slug.
+        Return the ``KeyValue`` object value for the ``DynamicColumn`` slug.
 
-        :param slug: The KeyValue slug.
+        :param slug: The ``DynamicColumn`` slug.
         :type slug: str
         :param field: Only used with CHOICE objects. Defaults to the field
                       passed to the dcolumn_manager.register_choice(choice,
@@ -476,8 +569,9 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                       CHOICE objects, but must be a valid member object on the
                       model.
         :type field: str or None
-        :rtype: String value from a KeyValue object.
+        :rtype: String value from a ``KeyValue`` object.
         :raises ValueError: Invalid combination of parameters.
+        :raises AttributeError: If a bad field is passed in.
         """
         dc = self.get_dynamic_column(slug)
 
@@ -697,6 +791,9 @@ class KeyValue(ValidateOnSaveMixin):
     objects = KeyValueManager()
 
     def save(self, *args, **kwargs):
+        """
+        Be sure the complete MRO has their constructors called.
+        """
         super(KeyValue, self).save(*args, **kwargs)
 
     def __str__(self):
