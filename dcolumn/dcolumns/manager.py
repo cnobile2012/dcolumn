@@ -3,6 +3,11 @@
 # dcolumn/dcolumns/manager.py
 #
 
+"""
+The DColumn manager uses the Borg pattern.
+"""
+__docformat__ = "restructuredtext en"
+
 import logging
 import warnings
 
@@ -10,7 +15,7 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.query import QuerySet
 
-from dcolumn.common.deprication import RemovedInDColumns100Warning
+from dcolumn.common.deprication import RemovedInDColumns130Warning
 
 log = logging.getLogger('dcolumns.dcolumns.manager')
 
@@ -41,19 +46,16 @@ class DynamicColumnManager(object):
         multiple-choice non-database columns. ManyToMany is not supported
         at this time.
 
-        :Parameters:
-          choice : ClassType
-            This can be either a Django model class or choice class. A choice
-            class mimics a model class so that this manager can work with them
-            as if they were Django model classes.
-
-          relation_num : int
-            A numeric identifier for the `choice` used as the HTML select
-            option value.
-
-          field : str
-            A field from the model or choice object used as the HTML select
-            option text.
+        :param choice: This can be either a Django model class or choice class.
+                       A choice class mimics a model class so that this manager
+                       can work with them as if they were Django model classes.
+        :type choice: ClassType
+        :param relation_num: A numeric identifier for the `choice` used as the
+                             HTML select option value.
+        :type relation_num: int
+        :param field: A field from the model or choice object used as the HTML
+                      select option text.
+        :type field: str
         """
         if relation_num in self._relation_numbers:
             msg = ("Invalid relation number {} is already used. [choice: {}, "
@@ -78,8 +80,13 @@ class DynamicColumnManager(object):
 
     def _unregister_choice(self, choice):
         """
-        Unregister choice from the manager (Used for testing only, should not
-        be used in code).
+        Unregister choice from the manager.
+
+        .. note::
+            This is an undocumented method and should only be used for testing.
+
+        :param choice: This is a ``CHOICE`` object not a string.
+        :type choice: ``CHOICE`` object
         """
         _choice, field = self._choice_map.get(choice.__name__, (None, None))
         relation_num = dict([(v, k) for k, v in self._relations]).get(
@@ -99,14 +106,13 @@ class DynamicColumnManager(object):
         Test that the specified field is a member object on the instantiated
         class object.
 
-        :Parameters:
-          choice : ClassType
-            This can be either a Django model or choice object. A choice object
-            mimics a model class so that this manager can work with them
-            as if they were Django models.
-          field : str
-            A field from the model or choice object used as the HTML select
-            option text.
+        :param choice: This can be either a Django model or choice object. A
+                       choice object mimics a model class so that this manager
+                       can work with them as if they were Django models.
+        :type choice: ClassType
+        :param field: A field from the model or choice object used as the HTML
+                      select option text.
+        :raises AttributeError: If ``field`` is not an attribute of ``choice``.
         """
         obj = choice()
 
@@ -121,8 +127,7 @@ class DynamicColumnManager(object):
         """
         A property that returns the HTML select option choices.
 
-        :Returns:
-          A list of the choices.
+        :rtype: A ``list`` of the choices.
         """
         if len(self._relations) and self._relations[0][0] != 0:
             self._relations.sort(cmp=lambda x,y: cmp(x[1].lower(),
@@ -136,10 +141,9 @@ class DynamicColumnManager(object):
         """
         A property that returns a dict (map) of the choices.
 
-        :Returns:
-          A dict of the choices. {num, <object name>, ...} The key is the
-          number given when added with the register_choice method. The value
-          is the string representation of the choice object.
+        :rtype: A dict of the choices. ``{num, <object name>, ...}`` The key
+                is the number given when added with the register_choice method.
+                The value is the string representation of the choice object.
         """
         return dict(self._relations)
 
@@ -149,9 +153,9 @@ class DynamicColumnManager(object):
         A property that returns a dict (map). This property is used internally
         by `dcolumn`.
 
-        :Returns:
-          A dict where the key is the choice name (model or choice type) and
-          the value is a tuple of the model/choice object and the field.
+        :rtype: A dict where the key is the choice name (model or choice type)
+                and the value is a tuple of the model/choice object and the
+                field.
         """
         return self._choice_map
 
@@ -160,18 +164,24 @@ class DynamicColumnManager(object):
         Register the CSS container objects. This method is usually called in
         the settings file.
 
-        :Parameters:
-          container_list : list or tuple
-            A list of the CSS classes or ids that will determine the location
-            on the page of the various dynamic columns.
+        .. note::
+            The format that is put in the settings should be something like
+            this: ``((<template var>, <CSS class name>), ...)``
+
+            Example:
+              ``(('top', 'container_top'), ('bottom', 'container_bottom'))``
+
+        :param container_list: A list of the CSS classes that will determine
+                               the location on the page of the various dynamic
+                               columns.
+        :type container_list: list or tuple
+        :raises TypeError: If ``container_list`` is not a ``list`` or ``tuple``.
         """
         if isinstance(container_list, (list, tuple)):
             if len(container_list) <= 0:
                 msg = ("Must supply at least one CSS container. The format "
-                       "can be in either of these formats: "
-                       "('container_top', 'container_bottom',) or "
-                       "(('top', 'container_top'), "
-                       "('bottom', 'container_bottom'))") # Deprication
+                       "should be in this formats: (('top', 'container_top'), "
+                       "('bottom', 'container_bottom'))")
                 log.critical(msg)
                 raise TypeError(msg)
 
@@ -180,12 +190,12 @@ class DynamicColumnManager(object):
             if isinstance(container_list[0], (list, tuple)):
                 self._css_containers += list(container_list)
                 self._css_container_map.update(dict(self._css_containers))
-            else: # This method will be deprecated in version 1.0
+            else: # This format will be deprecated in version 1.3
                 warnings.warn(
                     "Deprecation Warning: The enumeration method of "
                     "generating the display location will be deprecated "
-                    "with the release of version 1.0.0.",
-                    RemovedInDColumns100Warning)
+                    "with the release of version 1.3.0.",
+                    RemovedInDColumns130Warning)
                 self._css_containers += [
                     (key, css) for key, css in enumerate(container_list)]
                 self._css_container_map.update(dict(self._css_containers))
@@ -197,8 +207,14 @@ class DynamicColumnManager(object):
 
     def _unregester_css_containers(self, container_list):
         """
-        Unregister css containers from the manager (Used for testing only,
-        should not be used in code).
+        Unregister css containers from the manager.
+
+        .. note::
+            This is an undocumented method and should only be used for testing.
+
+        :param container_list: A list of lists as in:
+                               (('top', 'container_top'),
+                                ('bottom', 'container_bottom')).
         """
         for item in container_list:
             self._css_containers.remove(item)
@@ -212,8 +228,8 @@ class DynamicColumnManager(object):
         A property that returns a list of tuples where the key is the
         template variable name and the CSS container class.
 
-        :Returns:
-          A list of tuples where the tuple is (template var, css class)
+        :rtype: A list of tuples where the tuple is
+                ``(<template var>, <CSS class name>)``.
         """
         return self._css_containers
 
@@ -224,22 +240,20 @@ class DynamicColumnManager(object):
         number and the value is the CSS class or id. This property should be
         used in templates to designate location in the HTML.
 
-        :Returns:
-          A dict of the CSS containers.
+        :rtype: A ``dict`` of the CSS container classes.
         """
         return self._css_container_map
 
     def get_collection_name(self, model_name):
         """
-        Gets the `ColumnCollection` name of the model name. The model name can
-        be all lowercase without underscores or the camel case class name.
+        Gets the ``ColumnCollection`` name of the model name. The model name
+        can be all lowercase without underscores or the camel case class name.
 
-        :Parameters:
-          model_name : str
-            The dynamic column model name.
-
-        :Returns:
-          The `ColumnCollection` name.
+        :param model_name: The dynamic column model name.
+        :type model_name: str
+        :rtype: The ``ColumnCollection`` name.
+        :raises ValueError: If a ``ColumnCollection`` objects could not be
+                            found.
         """
         paths = [app for app in settings.INSTALLED_APPS
                  if 'django.contrib' not in app]
@@ -247,7 +261,10 @@ class DynamicColumnManager(object):
         result = obj = None
 
         for path in paths:
-            module = __import__(path, globals(), locals(), -1)
+            try:
+                module = __import__(path, globals(), locals(), -1)
+            except ImportError:
+                continue
 
             for name in dir(module):
                 if model_name == name or model_name == name.lower():
@@ -278,7 +295,12 @@ class DynamicColumnManager(object):
     @property
     def api_auth_state(self):
         """
-        Gets the value of settings.DYNAMIC_COLUMNS.INACTIVATE_API_AUTH.
+        Gets the value of settings.DYNAMIC_COLUMNS.INACTIVATE_API_AUTH. The
+        state of this variable determines if the backend AJAX API needs
+        authorization. The defaults is ``False`` indicating that authorization
+        is active.
+
+        :rtype: ``True`` or ``False``.
         """
         return settings.DYNAMIC_COLUMNS.get('INACTIVATE_API_AUTH', False)
 
@@ -287,12 +309,10 @@ class DynamicColumnManager(object):
         Gets the model object and the field used in the HTML select option
         text value. e.g. (example_site.books.models.Author, 'name')
 
-        :Parameters:
-          relation : int
-            The value in the `DynamicColumn` relation field.
-
-        :Returns:
-          The model object and field used in the HTML select option text value.
+        :param relation: The value in the ``DynamicColumn`` relation field.
+        :type relation: int
+        :rtype: The model object and field used in the HTML select option text
+                value.
         """
         return self.choice_map.get(self.choice_relation_map.get(relation),
                                    (None, None))

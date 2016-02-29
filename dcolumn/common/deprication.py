@@ -8,7 +8,7 @@ Dynamic Column deprication warning exceptions.
 __docformat__ = "restructuredtext en"
 
 
-class RemovedInDColumns100Warning(DeprecationWarning):
+class RemovedInDColumns130Warning(DeprecationWarning):
     """
     Deprication warning exception.
     """
