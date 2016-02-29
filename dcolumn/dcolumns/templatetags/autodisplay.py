@@ -5,10 +5,6 @@
 
 """
 Template tags used for displaying dynamic columns.
-
-by: Carl J. Nobile
-
-email: carl.nobile@gmail.com
 """
 __docformat__ = "restructuredtext en"
 
@@ -165,12 +161,9 @@ class AutoDisplayNode(template.Node):
         """
         Render the results in an HTML friendly way.
 
-        :Parameters:
-          context
-            The context as profided bt django.
-
-        :Return:
-          The HTML element rendered for a specific dynamic column slug.
+        :param context: The context as provided by django.
+        :type context: dict
+        :rtype: The HTML element rendered for a specific dynamic column slug.
         """
         try:
             relation = self.relation.resolve(context)
@@ -232,15 +225,12 @@ class AutoDisplayNode(template.Node):
         The fk_option argument can either be the options we need in a list or
         tuple or a dict of all options for all choice type objects.
 
-        :Parameters:
-          relation : dict
-            The meta data for a dynamic column.
-          fk_options : list or dict
-            Can be the list of a specific slug's display options or the full
-            `dynamicColumns` dict object.
-
-        :Returns:
-          The list of options.
+        :param relation: The meta data for a dynamic column.
+        :type relation: dict
+        :param fk_options: Can be the list of a specific slug's display
+                           options or the full ``dynamicColumns`` dict object.
+        :type fk_options: list or dict
+        :rtype: The list of options.
         """
         if isinstance(fk_options, (list, tuple,)):
             options = fk_options
@@ -265,18 +255,16 @@ class AutoDisplayNode(template.Node):
         find the selected option by the actual value as the PK is not
         available in this case.
 
-        :Parameters:
-          elem : str
-            The HTML element.
-          attr : str
-            Text object to be used when creating the element's attributes.
-          options : list
-            The options used when creating the HTML select element.
-          relation : dict
-            The meta data for a dynamic column.
-
-        :Returns:
-          The populated HTML element.
+        :param elem: The HTML element.
+        :type elem: str
+        :param attr: Text object to be used when creating the element's
+                     attributes.
+        :type attr: str
+        :param options: The options used when creating the HTML select element.
+        :type options: list
+        :param relation: The meta data for a dynamic column.
+        :type relation: dict
+        :rtype: The populated HTML element.
         """
         elem = elem.format("id-" + attr, attr)
         buff = StringIO(elem)
@@ -310,18 +298,16 @@ class AutoDisplayNode(template.Node):
         Produce the element filled with the value. This method is used only
         for display mode and the element is usually a <span>.
 
-        :Parameters:
-          elem : str
-            The HTML element.
-          attr : str
-            Text object to be used when creating the element's attributes.
-          options : list
-            The options used when creating the HTML select element.
-          relation : dict
-            The meta data for a dynamic column.
-
-        :Returns:
-          The populated HTML element.
+        :param elem: The HTML element.
+        :type eleb: str
+        :param attr: Text object to be used when creating the element's
+                     attributes.
+        :type attr: str
+        :param options: The options used when creating the HTML select element.
+        :type options: list
+        :param relation: The meta data for a dynamic column.
+        :type relation: dict
+        :rtype: The populated HTML element.
         """
         log.debug("elem: %s, attr: %s, options: %s, relation: %s",
                   elem, attr, options, relation)
@@ -381,7 +367,7 @@ def single_display(parser, token):
 
 class SingleDisplayNode(template.Node):
     """
-    Node class for the `single_display` tag.
+    Node class for the ``single_display`` tag.
     """
 
     def __init__(self, tag_name, obj, slug, name):
@@ -445,6 +431,13 @@ class SingleDisplayNode(template.Node):
         }
 
     def render(self, context):
+        """
+        Render the results into the context.
+
+        :param context: The context as provided by django.
+        :type context: dict
+        :rtype: empty string
+        """
         try:
             obj = self.obj.resolve(context)
         except template.VariableDoesNotExist:
@@ -473,16 +466,17 @@ class SingleDisplayNode(template.Node):
 #
 # combine_contexts
 #
-# NOTE: Formatting of the doc string is to conform with django docs not epydoc.
+# NOTE: Formatting of the doc string is to conform with django docs not Sphinx.
 #
 @register.tag(name='combine_contexts')
 def combine_contexts(parser, token):
     """
-    Combines two context variables. Helps make the HTML a less cluttered.
+    Combines two context variables. Helps make the HTML a little less
+    cluttered.
 
     Arguments::
 
-      obj      -- An object in the contect that has member objects.
+      obj      -- An object in the context that has member objects.
       variable -- A variable that defines a member object name.
 
     Usage Examples::
@@ -501,7 +495,7 @@ def combine_contexts(parser, token):
 
 class CombineContextsNode(template.Node):
     """
-    Node class for the `combine_contexts` tag.
+    Node class for the ``combine_contexts`` tag.
     """
 
     def __init__(self, tag_name, obj, variable):
@@ -510,6 +504,13 @@ class CombineContextsNode(template.Node):
         self.variable = template.Variable(variable)
 
     def render(self, context):
+        """
+        Render the results as a template variable.
+
+        :param context: The context as provided by django.
+        :type context: dict
+        :rtype: empty string
+        """
         result = self.obj.resolve(context).get(self.variable.resolve(context))
         return result and result or ''
 
