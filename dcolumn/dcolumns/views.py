@@ -2,6 +2,10 @@
 #
 # dcolumn/dcolumns/views.py
 #
+"""
+Dynamic Column dependent views.
+"""
+__docformat__ = "restructuredtext en"
 
 import logging
 
