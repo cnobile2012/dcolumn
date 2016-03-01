@@ -306,8 +306,8 @@ class DynamicColumnManager(object):
 
     def get_relation_model_field(self, relation):
         """
-        Gets the model object and the field used in the HTML select option
-        text value. e.g. (example_site.books.models.Author, 'name')
+        Gets the model class object and the field used in the HTML select
+        option text value. e.g. (example_site.books.models.Author, 'name')
 
         :param relation: The value in the ``DynamicColumn`` relation field.
         :type relation: int
