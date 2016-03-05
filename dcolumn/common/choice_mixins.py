@@ -9,92 +9,13 @@ Dynamic Column dependent choice mixins.
 __docformat__ = "restructuredtext en"
 
 import logging
-import inspect
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 
-from dcolumn.common import ChoiceManagerImplementation
+from . import ChoiceManagerImplementation
+from .decorators import InspectChoice
 
 log = logging.getLogger('dcolumns.common.choices')
-
-
-#
-# InspectChoice
-#
-class InspectChoice(object):
-    """
-    This class does introspection on a non-model ``CHOICE`` object. It should
-    not be necessary to use this class outside of DColumns itself.
-    """
-
-    def __init__(self):
-        self._path, self._caller_name = self._caller_info(skip=4)
-
-    def _caller_info(self, skip=2):
-        """
-        Get a name of a caller in the format module.class.method.
-
-        :param skip: Specifies how many levels of stack to skip while getting
-                     caller name. skip=1 means 'who calls me', skip=2 'who
-                     calls my caller' etc.
-        :type skip: int
-        :rtype: A list or empty string
-
-        An empty string is returned if skipped levels exceed stack height.
-
-        See: https://gist.github.com/techtonik/2151727
-        """
-        stack = inspect.stack()
-        start = 0 + skip
-
-        if len(stack) < start + 1:
-            return ''
-
-        parentframe = stack[start][0]    
-        name_list = []
-        module = inspect.getmodule(parentframe)
-        # `modname` can be None when frame is executed directly in console
-        # TODO(techtonik): consider using __main__
-
-        if module:
-            name_list.append(module.__name__)
-
-        # detect classname
-        if 'self' in parentframe.f_locals:
-            # I don't know any way to detect call from the object method
-            # XXX: there seems to be no way to detect static method call--it
-            # will be just a function call
-            name_list.append(parentframe.f_locals['self'].__class__.__name__)
-
-        codename = parentframe.f_code.co_name
-
-        if codename != '<module>':  # top level usually
-            name_list.append( codename ) # function or a method
-
-        del parentframe
-        #log.debug("name_list: %s", name_list)
-        return name_list
-
-    @classmethod
-    def set_model(self, method):
-        """
-        A decorator to set the choice/model object of the calling class.
-
-        :param method: The method name to be decorated.
-        :type method: str
-        :rtype: The enclosed function embedded in this method.
-        """
-        def wrapper(this):
-            modules = __import__(this._path, globals(), locals(),
-                                 (this._caller_name,), -1)
-            this.model = getattr(modules, this._caller_name)
-            return method(this)
-
-        # Make the wrapper look like the decorated method.
-        wrapper.__name__ = method.__name__
-        wrapper.__dict__ = method.__dict__
-        wrapper.__doc__ = method.__doc__
-        return wrapper
 
 
 #
@@ -103,9 +24,29 @@ class InspectChoice(object):
 class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
     """
     This class must be used in any non-django model ``CHOICE`` object.
+
+    .. note::
+
+      The ``PK`` field is manditory, however it does not need to be put into
+      the ``FIELD_LIST`` object. It will be removed before processing if found.
+      The list could look like this: ``('pk', 'name', 'version',)`` or
+      ``('name', 'version',)``.
+
+      There are two ways to populate the ``VALUES`` object in a choice model.
+
+        1. A flat list of objects as such: ``('Good', 'Better',)``
+
+        2. List in list as such:
+           ``(('Arduino', 'Mega2560'), ('Raspberry Pi', 'B+'),)``
+
+      The second method permits multiple fields whereas the first method
+      permits only one field. In neither case does the ``PK`` count as a field.
+
+      Both the ``FIELD_LIST`` and ``VALUES`` objects can be either a ``list``
+      or ``tuple``.
     """
-    VALUES = None
-    FIELD_LIST = None
+    VALUES = []
+    FIELD_LIST = []
 
     def __init__(self):
         super(BaseChoiceManager, self).__init__()
@@ -128,7 +69,7 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
     def model_objects(self):
         """
         This method creates and returns the choice objects the first time it
-        is run, on subsequent runs it just returns the objects.
+        is run, on subsequent runs it returns the stored objects.
 
         :rtype: A list of non-django model ``CHOICE`` objects.
         """
@@ -169,13 +110,16 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
             try:
                 obj = self.container_map.get(pk)
             except AttributeError as e:
-                log.error("Access to PK %s failed, %s", pk, e)
+                msg = _("Access to PK %s failed, %s")
+                log.error(ugettext(msg), pk, e)
+                raise e
             else:
-                if hasattr(obj, field):
+                try:
                     value = getattr(obj, field)
-                else:
-                    log.error("The field value '%s' is not on object '%s'",
-                              field, obj)
+                except AttributeError as e:
+                    msg = _("The field value '%s' is not on object '%s'")
+                    log.error(ugettext(msg), field, obj)
+                    raise e
 
         return value
 

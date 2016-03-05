@@ -448,15 +448,16 @@ class CollectionBaseManager(models.Manager):
             try:
                 obj = self.get(pk=pk)
             except self.model.DoesNotExist as e:
-                log.error("Access to PK %s failed, %s", pk, e)
+                msg = _("Access to PK %s failed, %s")
+                log.error(ugettext(msg), pk, e)
+                raise e
             else:
-                if hasattr(obj, field):
+                try:
                     value = getattr(obj, field)
-                else:
-                    msg = "The field value '{}' is not on object '{}'".format(
-                        field, obj)
-                    log.error(msg)
-                    raise AttributeError(msg)
+                except AttributeError as e:
+                    msg = _("The field value '%s' is not on object '%s'")
+                    log.error(ugettext(msg), field, obj)
+                    raise e
 
         return value
 

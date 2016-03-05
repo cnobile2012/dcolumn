@@ -441,7 +441,10 @@ class TestCollectionBase(BaseDcolumns):
         result = Book.objects.get_value_by_pk(book.pk, 'title')
         msg = "result: {}".format(result)
         self.assertEqual(result, book.title, msg)
-        # Test that an exception is raised with an invalif field argument.
+        # Test that an exception is raised with invalid PK.
+        with self.assertRaises(Book.DoesNotExist) as cm:
+            Book.objects.get_value_by_pk(5000, 'title')
+        # Test that an exception is raised with an invalid field argument.
         with self.assertRaises(AttributeError) as cm:
             Book.objects.get_value_by_pk(book.pk, 'bad_field')
 
