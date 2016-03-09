@@ -46,6 +46,11 @@ class Country(object):
         return "{}--{}".format(self.name, self.language).encode('utf-8')
 
 
+# Invalid choice model.
+class InvalidChoice(object):
+    pass
+
+
 class TestManager(BaseDcolumns):
 
     def __init__(self, name):
@@ -91,6 +96,17 @@ class TestManager(BaseDcolumns):
             self.manager._choice_map.get(Country.__name__)[0] is Country, msg)
         self.assertTrue(
             self.manager._choice_map.get(Country.__name__)[1] == 'name', msg)
+        #Test that an exception is raised if we try to use the same
+        # relation_num.
+        with self.assertRaises(ValueError) as cm:
+            self.manager.register_choice(Country, 99, 'name')
+        # Test that an exception is raised if we try to use an invalid choice
+        # model.
+        with self.assertRaises(AttributeError) as cm:
+            self.manager.register_choice(InvalidChoice, 100, 'name')
+        # Test thatan exception is raised when an invalid field is passed in.
+        with self.assertRaises(AttributeError) as cm:
+            self.manager.register_choice(Country, 101, 'bad_field')
         # Cleanup
         self.manager._unregister_choice(Country)
 
@@ -112,6 +128,10 @@ class TestManager(BaseDcolumns):
             self.manager._choice_map.get(Country.__name__) is None, msg)
         self.assertTrue(
             self.manager._choice_map.get(Country.__name__) is None, msg)
+        # Test that an exception is raised when trying to remove an invalid
+        # choice model.
+        with self.assertRaises(ValueError) as cm:
+            self.manager._unregister_choice(InvalidChoice)
 
     def test_choice_relations(self):
         """
@@ -192,6 +212,14 @@ class TestManager(BaseDcolumns):
             self.assertTrue(
                 self.manager._css_container_map.get(key) == css_cont_map.get(
                     key), msg)
+
+        # Test that an exception is raised when a zero length list or tuple
+        # container_list passed in.
+        with self.assertRaises(TypeError) as cm:
+            self.manager.register_css_containers([])
+        # Test that an exception is raised with an invalid container_list type.
+        with self.assertRaises(TypeError) as cm:
+            self.manager.register_css_containers('bad container type')
         # Cleanup
         self.manager._unregester_css_containers(css_cont)
 

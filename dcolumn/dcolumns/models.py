@@ -179,7 +179,7 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
         super(DynamicColumn, self).save(*args, **kwargs)
 
     def __str__(self):
-        # int 
+        # TODO Remove in version 1.3
         if self.location.isdigit():
             location = int(self.location)
         else:
@@ -291,7 +291,7 @@ class ColumnCollectionManager(StatusModelManagerMixin):
             rec['required'] = record.required
 
             if record.location.isdigit():
-                # This will become depricated in version 1.3.0.
+                # TODO This will become depricated in version 1.3.0.
                 location = int(record.location)
             else:
                 location = record.location
