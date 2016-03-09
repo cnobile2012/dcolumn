@@ -446,7 +446,7 @@ class SingleDisplayNode(template.Node):
         value = ''
 
         try:
-            key_value = obj.keyvalue_pairs.select_related(
+            key_value = obj.keyvalues.select_related(
                 'dynamic_column__slug').get(dynamic_column__slug=self.slug)
             dc = key_value.dynamic_column
             value_type = dc.value_type

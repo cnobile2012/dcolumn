@@ -14,7 +14,7 @@ __docformat__ = "restructuredtext en"
 class ChoiceManagerImplementation(object):
     """
     Manditory methods that must be defined in both choice models and Django
-    models that are used as or in Dcolumns.
+    models.
     """
 
     def get_value_by_pk(self, pk, field=None):

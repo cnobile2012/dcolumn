@@ -494,16 +494,16 @@ class TestCollectionBase(BaseDcolumns):
         msg = "result: {}".format(result)
         self.assertEqual(len(result), 10, msg)
 
-    def test_serialize_key_value_pairs(self):
+    def test_serialize_key_values(self):
         """
-        Test that the key valie pairs get serialized in a dict.
+        Test that the key values get serialized in a dict.
         """
         #self.skipTest("Temporarily skipped")
         author, a_cc, a_values = self._create_author_objects()
         publisher, p_cc, p_values = self._create_publisher_objects()
         book, b_cc, b_values = self._create_book_objects(
             author_pk=author.pk, publisher_pk=publisher.pk)
-        result = book.serialize_key_value_pairs(by_slug=True)
+        result = book.serialize_key_values(by_slug=True)
         msg = "result: {}".format(result)
 
         for key, value in result.items():
@@ -787,7 +787,7 @@ class TestCollectionBase(BaseDcolumns):
         b_values[slug] = value
         msg = "found_value: {}, new_value: {}".format(found_value, value)
         self.assertEqual(found_value, value, msg)
-        result = book.serialize_key_value_pairs(by_slug=True)
+        result = book.serialize_key_values(by_slug=True)
         msg = "result: {}, b_values: ()".format(result, b_values)
         self.assertEqual(len(result), len(b_values), msg)
         # Test general error condition.

@@ -270,7 +270,7 @@ class ColumnCollectionManager(StatusModelManagerMixin):
         result = OrderedDict()
 
         if obj:
-            key_value_map = obj.serialize_key_value_pairs()
+            key_value_map = obj.serialize_key_values()
 
         if by_slug:
             key = 'slug'
@@ -492,7 +492,7 @@ class CollectionBaseManager(models.Manager):
         return [field.name.encode('utf-8')
                 for field in self.model._meta.get_fields()
                 if 'collection' not in field.name and
-                field.name != 'keyvalue_pairs']
+                field.name != 'keyvalues']
 
     def get_all_fields_and_slugs(self):
         """
@@ -518,7 +518,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         """
         super(CollectionBase, self).save(*args, **kwargs)
 
-    def serialize_key_value_pairs(self, by_slug=False):
+    def serialize_key_values(self, by_slug=False):
         """
         Returns a dict of the ``DynamicColumn`` PK and the ``KeyValue`` value.
 
@@ -535,7 +535,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         else:
             field = 'pk'
 
-        for kv in self.keyvalue_pairs.select_related('dynamic_column').all():
+        for kv in self.keyvalues.select_related('dynamic_column').all():
             result[getattr(kv.dynamic_column, field)] = kv.value.encode('utf-8')
 
         return result
@@ -577,8 +577,8 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         dc = self.get_dynamic_column(slug)
 
         try:
-            obj = self.keyvalue_pairs.get(dynamic_column=dc)
-        except self.keyvalue_pairs.model.DoesNotExist:
+            obj = self.keyvalues.get(dynamic_column=dc)
+        except self.keyvalues.model.DoesNotExist:
             log.error("Could not find value for slug '%s'.", slug)
             value = ''
         else:
@@ -705,7 +705,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                     self._raise_exception(dc, value)
 
                 value = value.encode('utf-8')
-                kv, created = self.keyvalue_pairs.get_or_create(
+                kv, created = self.keyvalues.get_or_create(
                     dynamic_column=dc, defaults={'value': value})
 
                 if not created:
@@ -783,10 +783,10 @@ class KeyValueManager(models.Manager):
 class KeyValue(ValidateOnSaveMixin):
     collection = models.ForeignKey(
         CollectionBase, verbose_name=_("Collection Type"),
-        related_name='keyvalue_pairs')
+        related_name='keyvalues')
     dynamic_column = models.ForeignKey(
         DynamicColumn, verbose_name=_("Dynamic Column"),
-        related_name='keyvalue_pairs')
+        related_name='keyvalues')
     value = models.TextField(verbose_name=_("Value"), null=True, blank=True)
 
     objects = KeyValueManager()

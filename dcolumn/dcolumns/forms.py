@@ -123,7 +123,7 @@ class CollectionFormMixin(forms.ModelForm):
         # Be sure we have an instance and it is an update on the instance
         # not a new instance.
         if self.instance and self.instance.pk is not None:
-            for pk, value in self.instance.serialize_key_value_pairs().items():
+            for pk, value in self.instance.serialize_key_values().items():
                 log.debug("pk: %s, value: %s", pk, value)
                 relation = self.relations.setdefault(pk, {})
                 # We only want to add new data not overwrite data that is
@@ -303,11 +303,11 @@ class CollectionFormMixin(forms.ModelForm):
 
         if commit:
             inst.save()
-            self._save_keyvalue_pairs()
+            self._save_keyvalues()
 
         return inst
 
-    def _save_keyvalue_pairs(self):
+    def _save_keyvalues(self):
         """
         Save all the ``KeyValue`` objects.
         """
@@ -318,7 +318,7 @@ class CollectionFormMixin(forms.ModelForm):
                       pk, relation.get('slug'), relation.get('value'))
 
             try:
-                obj, created = self.instance.keyvalue_pairs.get_or_create(
+                obj, created = self.instance.keyvalues.get_or_create(
                     collection=self.instance, dynamic_column_id=int(pk),
                     defaults={'value': value})
             except self.instance.MultipleObjectsReturned as e:
