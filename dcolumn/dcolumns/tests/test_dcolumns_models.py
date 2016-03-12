@@ -89,6 +89,154 @@ class BaseDcolumns(TestCase):
         kwargs['value'] = value
         return KeyValue.objects.create(**kwargs)
 
+    def _create_author_objects(self, extra_dcs=[]):
+        """
+        Create  a set of Author objects.
+        """
+        if extra_dcs:
+            dcs = extra_dcs
+        else:
+            dcs = []
+
+        dc0 = self._create_dynamic_column_record(
+            "Web Site", DynamicColumn.TEXT, 'author_top', 1)
+        dcs.append(dc0)
+        # Add to a collection.
+        cc = self._create_column_collection_record(
+            "Authors", dynamic_columns=dcs)
+        # Create a book entry.
+        author = self._create_dcolumn_record(
+            Author, cc, name='Pickup Andropoff')
+        value = "example.org"
+        kv0 = self._create_key_value_record(author, dc0, value)
+        return author, cc, {dc0.slug: kv0.value}
+
+    def _create_publisher_objects(self, extra_dcs=[]):
+        """
+        Create  a set of Publisher objects.
+        """
+        if extra_dcs:
+            dcs = extra_dcs
+        else:
+            dcs = []
+
+        dc0 = self._create_dynamic_column_record(
+            "Web Site", DynamicColumn.TEXT, 'publisher_top', 1)
+        dcs.append(dc0)
+        # Add to a collection.
+        cc = self._create_column_collection_record(
+            "Publishers", dynamic_columns=dcs)
+        # Create a book entry.
+        publisher = self._create_dcolumn_record(
+            Publisher, cc, name='Some big Publisher')
+        value = "example.org"
+        kv0 = self._create_key_value_record(publisher, dc0, value)
+        return publisher, cc, {dc0.slug: kv0.value}
+
+    def _create_promotion_objects(self, extra_dcs=[]):
+        """
+        Create  a set of Promotion objects.
+        """
+        if extra_dcs:
+            dcs = extra_dcs
+        else:
+            dcs = []
+
+        # Create promotion description
+        dc0 = self._create_dynamic_column_record(
+            "Description", DynamicColumn.TEXT, 'publisher_top', 1)
+        dcs.append(dc0)
+        # Create promotion start date.
+        dc1 = self._create_dynamic_column_record(
+            "Start Date", DynamicColumn.DATE, 'publisher_top', 2)
+        dcs.append(dc1)
+        # Create promotion start time.
+        dc2 = self._create_dynamic_column_record(
+            "Start Time", DynamicColumn.TIME, 'publisher_top', 3)
+        dcs.append(dc2)
+        # Add to a collection.
+        cc = self._create_column_collection_record(
+            "Promotion", dynamic_columns=dcs)
+        # Create a book entry.
+        promotion = self._create_dcolumn_record(
+            Promotion, cc, name='Promotion')
+        value = "50% off everything for ever."
+        kv0 = self._create_key_value_record(promotion, dc0, value)
+        value = datetime.date.today().isoformat()
+        kv1 = self._create_key_value_record(promotion, dc1, value)
+        dt = datetime.datetime.now(pytz.utc)
+        value = datetime.time(hour=dt.hour, minute=dt.minute, second=dt.second,
+                              microsecond=dt.microsecond, tzinfo=dt.tzinfo)
+        kv2 = self._create_key_value_record(promotion, dc2, value.isoformat())
+        return promotion, cc, {dc0.slug: kv0.value, dc1.slug: kv1.value,
+                               dc2.slug: kv2.value}
+
+    def _create_book_objects(self, author_pk=0, publisher_pk=0, promotion_pk=0,
+                             language_pk=0, extra_dcs=[]):
+        """
+        Create  a set of Book objects.
+        """
+        if extra_dcs:
+            dcs = extra_dcs
+        else:
+            dcs = []
+
+        dc0 = self._create_dynamic_column_record(
+            "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 1)
+        dcs.append(dc0)
+
+        if author_pk: # Database table
+            dc1 = self._create_dynamic_column_record(
+                "Author", DynamicColumn.CHOICE, 'book_top', 2,
+                relation=self.choice2index.get("Author"))
+            dcs.append(dc1)
+
+        if publisher_pk: # Database table
+            dc2 = self._create_dynamic_column_record(
+                "Publisher", DynamicColumn.CHOICE, 'book_top', 3,
+                relation=self.choice2index.get("Publisher"))
+            dcs.append(dc2)
+
+        if promotion_pk: # Database table
+            dc3 = self._create_dynamic_column_record(
+                "Promotion", DynamicColumn.CHOICE, 'book_top', 4,
+                relation=self.choice2index.get("Promotion"),
+                store_relation=DynamicColumn.YES)
+            dcs.append(dc3)
+
+        if language_pk: # Choice object
+            dc4 =self._create_dynamic_column_record(
+                "Language", DynamicColumn.CHOICE, 'book_top', 5,
+                relation=self.choice2index.get("Language"))
+            dcs.append(dc4)
+
+        # Add to a collection.
+        cc = self._create_column_collection_record(
+            "Books", dynamic_columns=dcs)
+        # Create a book entry.
+        book = self._create_dcolumn_record(Book, cc, title='Test Book')
+        value = "Very very short abstract"
+        kv0 = self._create_key_value_record(book, dc0, value)
+        values = {dc0.slug: kv0.value}
+
+        if author_pk:
+            kv1 = self._create_key_value_record(book, dc1, author_pk)
+            values[dc1.slug] = kv1.value
+
+        if publisher_pk:
+            kv2 = self._create_key_value_record(book, dc2, publisher_pk)
+            values[dc2.slug] = kv2.value
+
+        if promotion_pk:
+            kv3 = self._create_key_value_record(book, dc3, promotion_pk)
+            values[dc3.slug] = kv3.value
+
+        if language_pk:
+            kv4 = self._create_key_value_record(book, dc4, language_pk)
+            values[dc4.slug] = kv4.value
+
+        return book, cc, values
+
 
 class TestDynamicColumn(BaseDcolumns):
 
@@ -803,151 +951,3 @@ class TestCollectionBase(BaseDcolumns):
 
         with self.assertRaises(ValueError) as cm:
             book.set_key_value_pair(slug, value, force=force)
-
-    def _create_author_objects(self, extra_dcs=[]):
-        """
-        Create  a set of Author objects.
-        """
-        if extra_dcs:
-            dcs = extra_dcs
-        else:
-            dcs = []
-
-        dc0 = self._create_dynamic_column_record(
-            "Web Site", DynamicColumn.TEXT, 'author_top', 1)
-        dcs.append(dc0)
-        # Add to a collection.
-        cc = self._create_column_collection_record(
-            "Authors", dynamic_columns=dcs)
-        # Create a book entry.
-        author = self._create_dcolumn_record(
-            Author, cc, name='Pickup Andropoff')
-        value = "example.org"
-        kv0 = self._create_key_value_record(author, dc0, value)
-        return author, cc, {dc0.slug: kv0.value}
-
-    def _create_publisher_objects(self, extra_dcs=[]):
-        """
-        Create  a set of Publisher objects.
-        """
-        if extra_dcs:
-            dcs = extra_dcs
-        else:
-            dcs = []
-
-        dc0 = self._create_dynamic_column_record(
-            "Web Site", DynamicColumn.TEXT, 'publisher_top', 1)
-        dcs.append(dc0)
-        # Add to a collection.
-        cc = self._create_column_collection_record(
-            "Publishers", dynamic_columns=dcs)
-        # Create a book entry.
-        publisher = self._create_dcolumn_record(
-            Publisher, cc, name='Some big Publisher')
-        value = "example.org"
-        kv0 = self._create_key_value_record(publisher, dc0, value)
-        return publisher, cc, {dc0.slug: kv0.value}
-
-    def _create_promotion_objects(self, extra_dcs=[]):
-        """
-        Create  a set of Promotion objects.
-        """
-        if extra_dcs:
-            dcs = extra_dcs
-        else:
-            dcs = []
-
-        # Create promotion description
-        dc0 = self._create_dynamic_column_record(
-            "Description", DynamicColumn.TEXT, 'publisher_top', 1)
-        dcs.append(dc0)
-        # Create promotion start date.
-        dc1 = self._create_dynamic_column_record(
-            "Start Date", DynamicColumn.DATE, 'publisher_top', 2)
-        dcs.append(dc1)
-        # Create promotion start time.
-        dc2 = self._create_dynamic_column_record(
-            "Start Time", DynamicColumn.TIME, 'publisher_top', 3)
-        dcs.append(dc2)
-        # Add to a collection.
-        cc = self._create_column_collection_record(
-            "Promotion", dynamic_columns=dcs)
-        # Create a book entry.
-        promotion = self._create_dcolumn_record(
-            Promotion, cc, name='Promotion')
-        value = "50% off everything for ever."
-        kv0 = self._create_key_value_record(promotion, dc0, value)
-        value = datetime.date.today().isoformat()
-        kv1 = self._create_key_value_record(promotion, dc1, value)
-        dt = datetime.datetime.now(pytz.utc)
-        value = datetime.time(hour=dt.hour, minute=dt.minute, second=dt.second,
-                              microsecond=dt.microsecond, tzinfo=dt.tzinfo)
-        kv2 = self._create_key_value_record(promotion, dc2, value.isoformat())
-        return promotion, cc, {dc0.slug: kv0.value, dc1.slug: kv1.value,
-                               dc2.slug: kv2.value}
-
-    def _create_book_objects(self, author_pk=0, publisher_pk=0, promotion_pk=0,
-                             language_pk=0, extra_dcs=[]):
-        """
-        Create  a set of Book objects.
-        """
-        if extra_dcs:
-            dcs = extra_dcs
-        else:
-            dcs = []
-
-        dc0 = self._create_dynamic_column_record(
-            "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 1)
-        dcs.append(dc0)
-
-        if author_pk: # Database table
-            dc1 = self._create_dynamic_column_record(
-                "Author", DynamicColumn.CHOICE, 'book_top', 2,
-                relation=self.choice2index.get("Author"))
-            dcs.append(dc1)
-
-        if publisher_pk: # Database table
-            dc2 = self._create_dynamic_column_record(
-                "Publisher", DynamicColumn.CHOICE, 'book_top', 3,
-                relation=self.choice2index.get("Publisher"))
-            dcs.append(dc2)
-
-        if promotion_pk: # Database table
-            dc3 = self._create_dynamic_column_record(
-                "Promotion", DynamicColumn.CHOICE, 'book_top', 4,
-                relation=self.choice2index.get("Promotion"),
-                store_relation=DynamicColumn.YES)
-            dcs.append(dc3)
-
-        if language_pk: # Choice object
-            dc4 =self._create_dynamic_column_record(
-                "Language", DynamicColumn.CHOICE, 'book_top', 5,
-                relation=self.choice2index.get("Language"))
-            dcs.append(dc4)
-
-        # Add to a collection.
-        cc = self._create_column_collection_record(
-            "Books", dynamic_columns=dcs)
-        # Create a book entry.
-        book = self._create_dcolumn_record(Book, cc, title='Test Book')
-        value = "Very very short abstract"
-        kv0 = self._create_key_value_record(book, dc0, value)
-        values = {dc0.slug: kv0.value}
-
-        if author_pk:
-            kv1 = self._create_key_value_record(book, dc1, author_pk)
-            values[dc1.slug] = kv1.value
-
-        if publisher_pk:
-            kv2 = self._create_key_value_record(book, dc2, publisher_pk)
-            values[dc2.slug] = kv2.value
-
-        if promotion_pk:
-            kv3 = self._create_key_value_record(book, dc3, promotion_pk)
-            values[dc3.slug] = kv3.value
-
-        if language_pk:
-            kv4 = self._create_key_value_record(book, dc4, language_pk)
-            values[dc4.slug] = kv4.value
-
-        return book, cc, values
