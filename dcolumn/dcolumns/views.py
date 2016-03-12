@@ -27,7 +27,7 @@ class ContextDataMixin(object):
     Mixin for context data.
     """
 
-    def get_dynamic_column_context_data(self, class_name=''):
+    def get_dynamic_column_context_data(self, class_name='', **kwargs):
         """
         Generates the data needed for HTML select option tags. This data is
         in a dict keyed by ``dynamicColumns`` giving it a namespace in the
@@ -78,7 +78,8 @@ class ContextDataMixin(object):
         log.debug("context: %s", context)
         return context
 
-    def get_relation_context_data(self, class_name='', obj=None, form=None):
+    def get_relation_context_data(self, class_name='', obj=None, form=None,
+                                  **kwargs):
         """
         Generates an OrderedDict of meta data needed to determine how the
         values of a ``KeyValue`` is to interpreted. If ``obj`` is supplied
@@ -191,8 +192,8 @@ class CollectionCreateUpdateViewMixin(ContextDataMixin):
         Get context data for the ``KeyValue`` objects.
         """
         kwargs['class_name'] = self.model.__name__
-        context = super(CollectionCreateUpdateViewMixin,
-                        self).get_context_data(**kwargs)
+        context = super(CollectionCreateUpdateViewMixin, self
+                        ).get_context_data(**kwargs)
         context.update(self.get_dynamic_column_context_data(**kwargs))
         context.update(self.get_relation_context_data(
             obj=self.object, **kwargs))

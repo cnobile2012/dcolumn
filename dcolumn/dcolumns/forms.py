@@ -13,7 +13,7 @@ import datetime
 import dateutil
 
 from django import forms
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 
 from .manager import dcolumn_manager
 from .models import DynamicColumn, ColumnCollection, KeyValue
@@ -141,7 +141,15 @@ class CollectionFormMixin(forms.ModelForm):
         :raises DoesNotExist: If the record does not exist.
         :raises MultipleObjectsReturned: If multiple objects were returned.
         """
-        return ColumnCollection.objects.active().get(name=self.coll_name)
+        try:
+            obj = ColumnCollection.objects.active().get(name=self.coll_name)
+        except ColumnCollection.DoesNotExist as e:
+            msg = _("A ColumnCollection needs to exist before creating this "
+                    "object, found collection name {}.").format(self.coll_name)
+            log.critical("%s, %s", ugettext(msg), e)
+            raise forms.ValidationError(msg)
+
+        return obj
 
     def clean(self):
         """
@@ -190,20 +198,14 @@ class CollectionFormMixin(forms.ModelForm):
             model, field = dcolumn_manager.get_relation_model_field(
                 relation.get('relation', ''))
 
-            if not relation.get('store_relation', False):
+            if relation.get('store_relation', False):
                 if value.isdigit():
                     try:
-                        obj = model.objects.get(pk=value)
-                    except model.DoesNotExist:
+                        value = model.objects.get_value_by_pk(value, field)
+                    except Exception:
                         self._errors[key] = self.error_class(
                             [_("Could not find object with '{}'.").format(
                                 value)])
-                    except model.MultipleObjectsReturned:
-                        self._errors[key] = self.error_class(
-                            [_("Found multiple objects with '{}'.").format(
-                                value)])
-                    else:
-                        value = getattr(obj, field)
                 else:
                     self._errors[key] = self.error_class(
                         [_("Invalid value '{}', must be a number.").format(
@@ -270,11 +272,11 @@ class CollectionFormMixin(forms.ModelForm):
         :param key: The tag attribute value from the POST request.
         :param value: The possibly prepossessed value from the POST request
         """
-        value_type = relation.get('value_type')
-
         # If store_relation is True then the storage type is DynamicColumn.TEXT.
         if relation.get('store_relation', False):
             value_type = DynamicColumn.TEXT
+        else:
+            value_type = relation.get('value_type')
 
         log.debug("key: %s, value: %s", key, value)
 
