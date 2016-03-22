@@ -233,14 +233,17 @@ class ColumnCollectionManager(StatusModelManagerMixin):
                            collection yet.
         :type unassigned: bool
         :rtype: A queryset of objects that inherit ``CollectionBase``.
+        :raises DoesNotExist: If the collection name is not found and
+                              unassigned is False.
         """
         log.debug("Collection name: %s, unassigned: %s", name, unassigned)
         queryset = self.none()
 
         try:
             queryset = self.active().get(name=name).dynamic_column.active()
-        except self.model.DoesNotExist:
-            pass
+        except self.model.DoesNotExist as e:
+            if not unassigned:
+                raise e
 
         if unassigned:
             queryset = queryset | DynamicColumn.objects.active().filter(
@@ -557,7 +560,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return dc
 
-    def get_key_value_pair(self, slug, field=None):
+    def get_key_value(self, slug, field=None):
         """
         Return the ``KeyValue`` object value for the ``DynamicColumn`` slug.
 
@@ -661,10 +664,10 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return result
 
-    def set_key_value_pair(self, slug, value, field=None, force=False):
+    def set_key_value(self, slug, value, field=None, force=False):
         """
-        This method sets an arbitrary key/value pair, it will log an error
-        if the key/value pair could not be found.
+        This method sets an arbitrary key/value object, it will log an error
+        if the key/value object could not be found.
 
         If the argument value contains the value 'increment' or 'decrement'
         the value associated with the slug will be incremented or decremented.
@@ -723,7 +726,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         else:
             msg = ("Could not process the data as passed into {}, "
                    "slug: {}, value: {}, field: {}, force: {}").format(
-                self.set_key_value_pair.__name__, slug, value, field, force)
+                self.set_key_value.__name__, slug, value, field, force)
             log.error(msg)
             raise ValueError(msg)
 

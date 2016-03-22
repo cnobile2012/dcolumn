@@ -95,10 +95,8 @@ class CollectionFormMixin(forms.ModelForm):
         The constructor sets up the proper field HTML object.
         """
         super(CollectionFormMixin, self).__init__(*args, **kwargs)
-        self.coll_name = dcolumn_manager.get_collection_name(
-            self.Meta.model.__name__)
-        self.relations = ColumnCollection.objects.serialize_columns(
-            self.coll_name)
+        self.coll_name = ''
+        self.relations = {}
         self.fields['column_collection'].required = False
 
         if 'created' in self.fields:
@@ -110,7 +108,8 @@ class CollectionFormMixin(forms.ModelForm):
         log.debug("args: %s, kwargs: %s", args, kwargs)
         log.debug("fields: %s, data: %s", self.fields, self.data)
 
-    def get_display_data(self):
+    @property
+    def display_data(self):
         """
         Update objects derived from
         ``ColumnCollection.objects.serialize_columns()`` which are now in
@@ -142,12 +141,19 @@ class CollectionFormMixin(forms.ModelForm):
         :raises MultipleObjectsReturned: If multiple objects were returned.
         """
         try:
+            self.coll_name = dcolumn_manager.get_collection_name(
+                self.Meta.model.__name__)
+        except ValueError as e:
+            self._errors['collection_name'] = self.error_class([str(e)])
+
+        try:
             obj = ColumnCollection.objects.active().get(name=self.coll_name)
         except ColumnCollection.DoesNotExist as e:
             msg = _("A ColumnCollection needs to exist before creating this "
                     "object, found collection name {}.").format(self.coll_name)
             log.critical("%s, %s", ugettext(msg), e)
-            raise forms.ValidationError(msg)
+            self._errors['missing_collection'] = self.error_class([msg])
+            obj = None
 
         return obj
 
@@ -158,7 +164,15 @@ class CollectionFormMixin(forms.ModelForm):
         :rtype: The Django ``cleaned_data`` dict.
         """
         cleaned_data = super(CollectionFormMixin, self).clean()
+
+        try:
+            self.relations = ColumnCollection.objects.serialize_columns(
+                self.coll_name)
+        except Exception as e:
+            self._errors['missing_collection'] = self.error_class([str(e)])
+
         self.validate_dynamic_fields()
+        log.debug("Validations errors: %s", self._errors)
         log.debug("cleaned_data: %s", cleaned_data)
         return cleaned_data
 
@@ -166,27 +180,25 @@ class CollectionFormMixin(forms.ModelForm):
         """
         Validate all validators.
         """
-        for relation in  self.relations.values():
+        for relation in self.relations.values():
             log.debug("relation: %s", relation)
-
-            for key, value in self.data.items():
-                if key == relation.get('slug'):
-                    value = value.encode('utf-8')
-                    value = self.validate_choice_relations(relation, key, value)
-                    value = self.validate_date_types(relation, key, value)
-                    relation['value'] = value
-                    self.validate_required(relation, key, value)
-                    self.validate_numeric_type(relation, key, value)
-                    self.validate_value_length(relation, key, value)
+            key = relation.get('slug')
+            value = self.data.get(key, '').encode('utf-8')
+            value = self.validate_choice_relations(relation, key, value)
+            self.validate_date_types(relation, key, value)
+            self.validate_required(relation, key, value)
+            self.validate_numeric_type(relation, key, value)
+            self.validate_value_length(relation, key, value)
+            relation['value'] = value
 
         log.warn("form.errors: %s", self._errors)
 
     def validate_choice_relations(self, relation, key, value):
         """
-        If ``store_relation`` is False then return the value as is from the
-        ``KeyValue`` object (should be a PK). If ``store_relation`` is True
-        then lookup in the ``CHOICE`` object using the PK and return the
-        actual value from the ``KeyValue`` object.
+        If ``store_relation`` is False then return the value as is (should be
+        a PK). If ``store_relation`` is True then look it up in the related
+        ``DynamicColumn.CHOICE`` object using the PK then return the actual
+        value for eventual storage in the ``KeyValue`` object.
 
         :param relation: A single value set from
                          ``ColumnCollection.objects.serialize_columns()``.
@@ -199,17 +211,21 @@ class CollectionFormMixin(forms.ModelForm):
                 relation.get('relation', ''))
 
             if relation.get('store_relation', False):
-                if value.isdigit():
+                if not value.isdigit():
+                    self._errors[key] = self.error_class(
+                        [_("Invalid value '{}', must not be a number."
+                           ).format(value)])
+                elif int(value) != 0:
                     try:
                         value = model.objects.get_value_by_pk(value, field)
                     except Exception:
                         self._errors[key] = self.error_class(
-                            [_("Could not find object with '{}'.").format(
-                                value)])
-                else:
-                    self._errors[key] = self.error_class(
-                        [_("Invalid value '{}', must be a number.").format(
-                            value)])
+                            [_("Could not find record with value '{}'."
+                               ).format(value)])
+
+        # A zero would be the "Choose a value" option which we don't want.
+        if value.isdigit() and int(value) == 0:
+            value = ''.encode('utf-8')
 
         return value
 
@@ -223,16 +239,15 @@ class CollectionFormMixin(forms.ModelForm):
         :param value: The possibly prepossessed value from the POST request
         :rtype: The ``str`` value.
         """
-        if relation.get('value_type') in (DynamicColumn.TIME,
-                                          DynamicColumn.DATE,
-                                          DynamicColumn.DATETIME):
+        if value and relation.get('value_type') in (DynamicColumn.TIME,
+                                                    DynamicColumn.DATE,
+                                                    DynamicColumn.DATETIME):
             try:
                 dt = dateutil.parser.parse(value)
             except ValueError as e:
                 self._errors[key] = self.error_class(
-                    [_("Invalid calendar object '{}', {}.").format(value, e)])
-
-        return value
+                    [_("Invalid date and/or time object '{}', {}."
+                       ).format(value, e)])
 
     def validate_required(self, relation, key, value):
         """
@@ -244,7 +259,7 @@ class CollectionFormMixin(forms.ModelForm):
         :param key: The tag attribute value from the POST request.
         :param value: The possibly prepossessed value from the POST request
         """
-        if relation.get('required', False) and value == '':
+        if relation.get('required', False) and len(value) == 0:
             self._errors[key] = self.error_class(
                 [_("{} field is required.").format(relation.get('name'))])
 
@@ -313,7 +328,7 @@ class CollectionFormMixin(forms.ModelForm):
         """
         Save all the ``KeyValue`` objects.
         """
-        for pk, relation in self.get_display_data().items():
+        for pk, relation in self.display_data.items():
             required = relation.get('required', False)
             value = relation.get('value', '')
             log.debug("pk: %s, slug: %s, value: %s",

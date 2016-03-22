@@ -12,7 +12,7 @@ import logging
 import warnings
 
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 from django.db.models.query import QuerySet
 
 from dcolumn.common.deprication import RemovedInDColumns130Warning
@@ -251,7 +251,7 @@ class DynamicColumnManager(object):
 
         :param model_name: The dynamic column model name.
         :type model_name: str
-        :rtype: The ``ColumnCollection`` name.
+        :rtype: A str representing the ``ColumnCollection`` name.
         :raises ValueError: If a ``ColumnCollection`` objects could not be
                             found.
         """
@@ -283,11 +283,14 @@ class DynamicColumnManager(object):
                     elif obj is None:
                         break
                     else:
-                        log.error("No records in model %s.", name)
+                        msg = _("The model {} has no collection assigned to it."
+                                ).format(name)
+                        log.error(ugettext(msg))
+                        raise ValueError(msg)
 
         if obj is None:
             msg = _("Invalid model name: {}".format(model_name))
-            log.error(msg)
+            log.error(ugettext(msg))
             raise ValueError(msg)
 
         return result

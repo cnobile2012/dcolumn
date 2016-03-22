@@ -89,7 +89,7 @@ class BaseDcolumns(TestCase):
         kwargs['value'] = value
         return KeyValue.objects.create(**kwargs)
 
-    def _create_author_objects(self, extra_dcs=[]):
+    def _create_author_objects(self, extra_dcs=[], required=DynamicColumn.NO):
         """
         Create  a set of Author objects.
         """
@@ -99,11 +99,11 @@ class BaseDcolumns(TestCase):
             dcs = []
 
         dc0 = self._create_dynamic_column_record(
-            "Web Site", DynamicColumn.TEXT, 'author_top', 1)
+            "Web Site", DynamicColumn.TEXT, 'author_top', 1, required=required)
         dcs.append(dc0)
         # Add to a collection.
         cc = self._create_column_collection_record(
-            "Authors", dynamic_columns=dcs)
+            "Author Current", dynamic_columns=dcs)
         # Create a book entry.
         author = self._create_dcolumn_record(
             Author, cc, name='Pickup Andropoff')
@@ -111,7 +111,8 @@ class BaseDcolumns(TestCase):
         kv0 = self._create_key_value_record(author, dc0, value)
         return author, cc, {dc0.slug: kv0.value}
 
-    def _create_publisher_objects(self, extra_dcs=[]):
+    def _create_publisher_objects(self, extra_dcs=[],
+                                  required=DynamicColumn.NO):
         """
         Create  a set of Publisher objects.
         """
@@ -121,11 +122,12 @@ class BaseDcolumns(TestCase):
             dcs = []
 
         dc0 = self._create_dynamic_column_record(
-            "Web Site", DynamicColumn.TEXT, 'publisher_top', 1)
+            "Web Site", DynamicColumn.TEXT, 'publisher_top', 1,
+            required=required)
         dcs.append(dc0)
         # Add to a collection.
         cc = self._create_column_collection_record(
-            "Publishers", dynamic_columns=dcs)
+            "Publisher Current", dynamic_columns=dcs)
         # Create a book entry.
         publisher = self._create_dcolumn_record(
             Publisher, cc, name='Some big Publisher')
@@ -133,7 +135,8 @@ class BaseDcolumns(TestCase):
         kv0 = self._create_key_value_record(publisher, dc0, value)
         return publisher, cc, {dc0.slug: kv0.value}
 
-    def _create_promotion_objects(self, extra_dcs=[]):
+    def _create_promotion_objects(self, extra_dcs=[], required=[
+        DynamicColumn.NO, DynamicColumn.NO, DynamicColumn.NO]):
         """
         Create  a set of Promotion objects.
         """
@@ -144,19 +147,22 @@ class BaseDcolumns(TestCase):
 
         # Create promotion description
         dc0 = self._create_dynamic_column_record(
-            "Description", DynamicColumn.TEXT, 'publisher_top', 1)
+            "Description", DynamicColumn.TEXT, 'publisher_top', 1,
+            required=required[0])
         dcs.append(dc0)
         # Create promotion start date.
         dc1 = self._create_dynamic_column_record(
-            "Start Date", DynamicColumn.DATE, 'publisher_top', 2)
+            "Start Date", DynamicColumn.DATE, 'publisher_top', 2,
+            required=required[1])
         dcs.append(dc1)
         # Create promotion start time.
         dc2 = self._create_dynamic_column_record(
-            "Start Time", DynamicColumn.TIME, 'publisher_top', 3)
+            "Start Time", DynamicColumn.TIME, 'publisher_top', 3,
+            required=required[2])
         dcs.append(dc2)
         # Add to a collection.
         cc = self._create_column_collection_record(
-            "Promotion", dynamic_columns=dcs)
+            "Promotion Current", dynamic_columns=dcs)
         # Create a book entry.
         promotion = self._create_dcolumn_record(
             Promotion, cc, name='Promotion')
@@ -171,8 +177,11 @@ class BaseDcolumns(TestCase):
         return promotion, cc, {dc0.slug: kv0.value, dc1.slug: kv1.value,
                                dc2.slug: kv2.value}
 
-    def _create_book_objects(self, author_pk=0, publisher_pk=0, promotion_pk=0,
-                             language_pk=0, extra_dcs=[]):
+    def _create_book_objects(
+        self, author_pk=0, publisher_pk=0, promotion_pk=0, language_pk=0,
+        extra_dcs=[], required=[
+            DynamicColumn.NO, DynamicColumn.NO, DynamicColumn.NO,
+            DynamicColumn.NO, DynamicColumn.NO]):
         """
         Create  a set of Book objects.
         """
@@ -182,37 +191,40 @@ class BaseDcolumns(TestCase):
             dcs = []
 
         dc0 = self._create_dynamic_column_record(
-            "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 1)
+            "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 1,
+            required=required[0])
         dcs.append(dc0)
 
         if author_pk: # Database table
             dc1 = self._create_dynamic_column_record(
                 "Author", DynamicColumn.CHOICE, 'book_top', 2,
-                relation=self.choice2index.get("Author"))
+                relation=self.choice2index.get("Author"), required=required[1])
             dcs.append(dc1)
 
         if publisher_pk: # Database table
             dc2 = self._create_dynamic_column_record(
                 "Publisher", DynamicColumn.CHOICE, 'book_top', 3,
-                relation=self.choice2index.get("Publisher"))
+                relation=self.choice2index.get("Publisher"),
+                required=required[2])
             dcs.append(dc2)
 
         if promotion_pk: # Database table
             dc3 = self._create_dynamic_column_record(
                 "Promotion", DynamicColumn.CHOICE, 'book_top', 4,
                 relation=self.choice2index.get("Promotion"),
-                store_relation=DynamicColumn.YES)
+                store_relation=DynamicColumn.YES, required=required[3])
             dcs.append(dc3)
 
         if language_pk: # Choice object
             dc4 =self._create_dynamic_column_record(
                 "Language", DynamicColumn.CHOICE, 'book_top', 5,
-                relation=self.choice2index.get("Language"))
+                relation=self.choice2index.get("Language"),
+                required=required[4])
             dcs.append(dc4)
 
         # Add to a collection.
         cc = self._create_column_collection_record(
-            "Books", dynamic_columns=dcs)
+            "Book Current", dynamic_columns=dcs)
         # Create a book entry.
         book = self._create_dcolumn_record(Book, cc, title='Test Book')
         value = "Very very short abstract"
@@ -529,7 +541,7 @@ class TestCollectionBase(BaseDcolumns):
             author_pk=author.pk, promotion_pk=promotion.pk)
         # Get serialized object.
         result = ColumnCollection.objects.serialize_columns(
-            'Books', obj=book, by_slug=True)
+            'Book Current', obj=book, by_slug=True)
         msg = "result: {}, b_values: {}".format(result, b_values)
 
         for slug, dc_value in b_values.items():
@@ -673,7 +685,7 @@ class TestCollectionBase(BaseDcolumns):
         self.assertEqual(obj.name, 'Abstract', msg)
         self.assertEqual(obj.value_type, DynamicColumn.TEXT_BLOCK, msg)
 
-    def test_get_key_value_pair(self):
+    def test_get_key_value(self):
         """
         Check that all the ppossible combinations of this method work
         correctly.
@@ -718,22 +730,22 @@ class TestCollectionBase(BaseDcolumns):
         b_values[dc5.slug] = kv5.value
         # Test Choice mode with store_relation set to True.
         slug = 'promotion'
-        value = book.get_key_value_pair(slug)
+        value = book.get_key_value(slug)
         msg = "value: {}, b_values: {}, p_values: {}".format(
             value, b_values, p_values)
         self.assertEqual(value, b_values.get(slug), msg)
         # Test Choice ForeignKey mode with store_relation set to False.
         slug = 'author'
-        value = book.get_key_value_pair(slug)
+        value = book.get_key_value(slug)
         msg = "value: {}, b_values: {}, a_values: {}, author.name: {}".format(
             value, b_values, a_values, author.name)
         self.assertEqual(value, author.name, msg)
         # Test Choice exception.
         with self.assertRaises(AttributeError) as cm:
-            value = book.get_key_value_pair(slug, 'bad_field')
+            value = book.get_key_value(slug, 'bad_field')
         # Test TIME
         slug = 'start-time'
-        value = promotion.get_key_value_pair(slug)
+        value = promotion.get_key_value(slug)
         msg = "value: {}, b_values: {}, p_values: {}".format(
             value, b_values, p_values)
         dt = dateutil.parser.parse(p_values.get(slug))
@@ -742,7 +754,7 @@ class TestCollectionBase(BaseDcolumns):
         self.assertEqual(value, t, msg)
         # Test DATE
         slug = 'start-date'
-        value = promotion.get_key_value_pair(slug)
+        value = promotion.get_key_value(slug)
         msg = "value: {}, b_values: {}, p_values: {}".format(
             value, b_values, p_values)
         dt = dateutil.parser.parse(p_values.get(slug))
@@ -750,13 +762,13 @@ class TestCollectionBase(BaseDcolumns):
         self.assertEqual(value, d, msg)
         # Test DATETIME
         slug = 'date-time'
-        value = book.get_key_value_pair(slug)
+        value = book.get_key_value(slug)
         msg = "value: {}, b_values: {}".format(value, b_values)
         dt = dateutil.parser.parse(b_values.get(slug))
         self.assertEqual(value, dt, msg)
         # Test BOOLEAN
         slug = 'ignore'
-        value = book.get_key_value_pair(slug)
+        value = book.get_key_value(slug)
         msg = "value: {}, b_values: {}".format(value, b_values)
         bool_value = True if b_values.get(slug).lower() == 'true' else False
         self.assertEqual(value, bool_value, msg)
@@ -764,39 +776,39 @@ class TestCollectionBase(BaseDcolumns):
         slug = 'bad-bool'
 
         with self.assertRaises(ValueError) as cm:
-            value = book.get_key_value_pair(slug)
+            value = book.get_key_value(slug)
         # Test NUMBER
         slug = 'edition'
-        value = book.get_key_value_pair(slug)
+        value = book.get_key_value(slug)
         msg = "value: {}, b_values: {}".format(value, b_values)
         self.assertEqual(value, int(b_values.get(slug)), msg)
         # Test FLOAT
         slug = 'percentage'
-        value = book.get_key_value_pair(slug)
+        value = book.get_key_value(slug)
         msg = "value: {}, b_values: {}".format(value, b_values)
         self.assertEqual(value, float(b_values.get(slug)), msg)
         # Test TEXT
         slug = 'description'
-        value = promotion.get_key_value_pair(slug)
+        value = promotion.get_key_value(slug)
         msg = "value: {}, b_values: {}, p_values: {}".format(
             value, b_values, p_values)
         self.assertEqual(value, p_values.get(slug), msg)
         # Test TEXT_BLOCK
         slug = 'abstract'
-        value = book.get_key_value_pair(slug)
+        value = book.get_key_value(slug)
         msg = "value: {}, b_values: {}".format(value, b_values)
         self.assertEqual(value, b_values.get(slug), msg)
         # Test that an empty string is returned for a bad slug.
-        value = book.get_key_value_pair('not-a-slug')
+        value = book.get_key_value('not-a-slug')
         msg = "value: {}, b_values: {}".format(value, b_values)
         self.assertEqual(value, '', msg)
         # Test invalid value other that a bad bolean.
         slug = 'bad-date'
 
         with self.assertRaises(ValueError) as cm:
-            value = book.get_key_value_pair(slug)
+            value = book.get_key_value(slug)
 
-    def test_set_key_value_pair(self):
+    def test_set_key_value(self):
         """
         Check that all the ppossible combinations of this method work
         correctly.
@@ -837,15 +849,15 @@ class TestCollectionBase(BaseDcolumns):
         b_values[dc3.slug] = kv3.value
         # Test CHOICE ForeignKey mode with store_relation set to False.
         slug = 'author'
-        book.set_key_value_pair(slug, new_author)
-        found_value = book.get_key_value_pair(slug)
+        book.set_key_value(slug, new_author)
+        found_value = book.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_pk: {}".format(
             author.pk, found_value, new_author.pk)
         self.assertEqual(found_value, new_author.name, msg)
         # Test CHOICE mode with store_relation set to True.
         slug = 'promotion'
-        book.set_key_value_pair(slug, new_promotion)
-        found_value = book.get_key_value_pair(slug)
+        book.set_key_value(slug, new_promotion)
+        found_value = book.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_pk: {}".format(
             promotion.name, found_value, new_promotion.name)
         self.assertEqual(found_value, new_promotion.name, msg)
@@ -853,85 +865,85 @@ class TestCollectionBase(BaseDcolumns):
         slug = 'author'
 
         with self.assertRaises(ValueError) as cm:
-            value = book.set_key_value_pair(slug, new_author, field='junk')
+            value = book.set_key_value(slug, new_author, field='junk')
 
         # Test TIME
         slug = 'start-time'
         dt = datetime.datetime.now(pytz.utc)
         time = datetime.time(hour=dt.hour, minute=dt.minute, second=dt.second,
                              microsecond=dt.microsecond, tzinfo=dt.tzinfo)
-        promotion.set_key_value_pair(slug, time)
-        found_value = promotion.get_key_value_pair(slug)
+        promotion.set_key_value(slug, time)
+        found_value = promotion.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_time: {}".format(
             p_values.get(slug), found_value, time)
         self.assertEqual(found_value, time, msg)
         # Test DATE
         slug = 'start-date'
         date = datetime.date.today() + datetime.timedelta(days=1)
-        promotion.set_key_value_pair(slug, date)
-        found_value = promotion.get_key_value_pair(slug)
+        promotion.set_key_value(slug, date)
+        found_value = promotion.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_date: {}".format(
             p_values.get(slug), found_value, date)
         self.assertEqual(found_value, date, msg)
         # Test DATETIME
         slug = 'date-time'
         dt = datetime.datetime.now(pytz.utc)
-        book.set_key_value_pair(slug, dt)
-        found_value = book.get_key_value_pair(slug)
+        book.set_key_value(slug, dt)
+        found_value = book.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_datetime: {}".format(
             b_values.get(slug), found_value, dt)
         self.assertEqual(found_value, dt, msg)
         # Test BOOLEAN
         slug = 'ignore'
         value = 1
-        book.set_key_value_pair(slug, value)
-        found_value = book.get_key_value_pair(slug)
+        book.set_key_value(slug, value)
+        found_value = book.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_bool: {}".format(
             b_values.get(slug), found_value, value)
         self.assertEqual(found_value, True, msg)
         # Test FLOAT
         slug = 'percentage'
         value = 30.0
-        book.set_key_value_pair(slug, value)
-        found_value = book.get_key_value_pair(slug)
+        book.set_key_value(slug, value)
+        found_value = book.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_float: {}".format(
             b_values.get(slug), found_value, value)
         self.assertEqual(found_value, value, msg)
         # Test NUMBER (normal numeric case).
         slug = 'edition'
         value = 1
-        book.set_key_value_pair(slug, value)
-        found_value = book.get_key_value_pair(slug)
+        book.set_key_value(slug, value)
+        found_value = book.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_int: {}".format(
             b_values.get(slug), found_value, value)
         self.assertEqual(found_value, value, msg)
         # Test NUMBER by `increment` on a number.
         slug = 'edition'
-        book.set_key_value_pair(slug, 'increment')
-        found_value = book.get_key_value_pair(slug)
+        book.set_key_value(slug, 'increment')
+        found_value = book.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_int: {}".format(
             b_values.get(slug), found_value, 2)
         self.assertEqual(found_value, 2, msg)
         # Test NUMBER by `decrement` on a number.
         slug = 'edition'
-        book.set_key_value_pair(slug, 'decrement')
-        found_value = book.get_key_value_pair(slug)
+        book.set_key_value(slug, 'decrement')
+        found_value = book.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_int: {}".format(
             b_values.get(slug), found_value, 1)
         self.assertEqual(found_value, 1, msg)
         # Test TEXT (normal text case).
         slug = 'abstract'
         value = "A new abstract"
-        book.set_key_value_pair(slug, value)
-        found_value = book.get_key_value_pair(slug)
+        book.set_key_value(slug, value)
+        found_value = book.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_value: {}".format(
             b_values.get(slug), found_value, value)
         self.assertEqual(found_value, value, msg)
         # Test creating a TEXT KeyValue object.
         slug = 'web-site'
         value = "www.example.org"
-        book.set_key_value_pair(slug, value)
-        found_value = book.get_key_value_pair(slug)
+        book.set_key_value(slug, value)
+        found_value = book.get_key_value(slug)
         b_values[slug] = value
         msg = "found_value: {}, new_value: {}".format(found_value, value)
         self.assertEqual(found_value, value, msg)
@@ -943,11 +955,11 @@ class TestCollectionBase(BaseDcolumns):
         value = 'Should never get set.'
 
         with self.assertRaises(ValueError) as cm:
-            book.set_key_value_pair(slug, value)
+            book.set_key_value(slug, value)
 
         # Test for exception when invalid arguments are passed.
         value = None
         force = True
 
         with self.assertRaises(ValueError) as cm:
-            book.set_key_value_pair(slug, value, force=force)
+            book.set_key_value(slug, value, force=force)

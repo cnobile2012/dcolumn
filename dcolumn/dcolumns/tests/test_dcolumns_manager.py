@@ -279,10 +279,9 @@ class TestManager(BaseDcolumns):
             for model in models:
                 name = self.manager.get_collection_name(model.encode('utf-8'))
 
-        # Test that a valid model with no records returns a None.
-        name = self.manager.get_collection_name('Author'.encode('utf-8'))
-        msg = "name: {}".format(name)
-        self.assertFalse(name, msg)
+        # Test a valid model, but with no collection raises an exception.
+        with self.assertRaises(ValueError) as cm:
+            name = self.manager.get_collection_name('Author'.encode('utf-8'))
 
         # Test for correct models, both model class names and names all
         # lowercase.

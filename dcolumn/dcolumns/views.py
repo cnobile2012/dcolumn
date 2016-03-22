@@ -27,7 +27,7 @@ class ContextDataMixin(object):
     Mixin for context data.
     """
 
-    def get_dynamic_column_context_data(self, class_name='', **kwargs):
+    def get_dynamic_column_context_data(self, **kwargs):
         """
         Generates the data needed for HTML select option tags. This data is
         in a dict keyed by ``dynamicColumns`` giving it a namespace in the
@@ -55,14 +55,11 @@ class ContextDataMixin(object):
            ...}
           }
 
-        :param class_name: This is a mandatory keyword that defines the
-                           ``ColumnCollection`` name.
-        :type class_name: str
         :rtype: dict
         """
         context = {}
         fk_slugs = DynamicColumn.objects.get_fk_slugs()
-        name = dcolumn_manager.get_collection_name(class_name)
+        name = dcolumn_manager.get_collection_name(self.model.__name__)
 
         for model_name in ColumnCollection.objects.get_active_relation_items(
             name):
@@ -78,8 +75,7 @@ class ContextDataMixin(object):
         log.debug("context: %s", context)
         return context
 
-    def get_relation_context_data(self, class_name='', obj=None, form=None,
-                                  **kwargs):
+    def get_relation_context_data(self, obj=None, form=None, **kwargs):
         """
         Generates an OrderedDict of meta data needed to determine how the
         values of a ``KeyValue`` is to interpreted. If ``obj`` is supplied
@@ -112,19 +108,16 @@ class ContextDataMixin(object):
                'value_type': 2}),
             ...])
 
-        :param class_name: This is a mandatory keyword that defines the
-                           ``ColumnCollection`` name.
-        :type class_name: str
         :param obj: Optional model object that inherits from ``CollectionBase``.
         :type obj: object
         :param form: Optional form object.
-        :type: Django Form object.
+        :type form: Django Form object.
         :rtype: OrderedDict
         """
         if form:
-            relations = form.get_display_data()
+            relations = form.display_data
         else:
-            name = dcolumn_manager.get_collection_name(class_name)
+            name = dcolumn_manager.get_collection_name(self.model.__name__)
             relations = ColumnCollection.objects.serialize_columns(
                 name, obj=obj)
 
@@ -191,7 +184,6 @@ class CollectionCreateUpdateViewMixin(ContextDataMixin):
         """
         Get context data for the ``KeyValue`` objects.
         """
-        kwargs['class_name'] = self.model.__name__
         context = super(CollectionCreateUpdateViewMixin, self
                         ).get_context_data(**kwargs)
         context.update(self.get_dynamic_column_context_data(**kwargs))
@@ -214,7 +206,6 @@ class CollectionDetailViewMixin(ContextDataMixin):
         """
         Get context data for the ``KeyValue`` objects.
         """
-        kwargs['class_name'] = self.model.__name__
         context = super(CollectionDetailViewMixin,
                         self).get_context_data(**kwargs)
         context.update(self.get_dynamic_column_context_data(**kwargs))

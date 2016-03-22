@@ -457,7 +457,7 @@ class SingleDisplayNode(template.Node):
 
                 value = self.METHOD_MAP[value_type](self, dc, key_value.value)
         except KeyValue.DoesNotExist:
-            log.warn("KeyValue pair does not exist for slug %s", self.slug)
+            log.warn("A KeyValue object does not exist for slug %s", self.slug)
 
         context[self.name] = value
         return ''
