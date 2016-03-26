@@ -255,41 +255,16 @@ class DynamicColumnManager(object):
         :raises ValueError: If a ``ColumnCollection`` objects could not be
                             found.
         """
-        paths = [app for app in settings.INSTALLED_APPS
-                 if 'django.contrib' not in app]
-        paths = ['{}.models'.format(p) for p in paths]
-        result = obj = None
+        result = None
+        relation_names = [
+            key for key, name in self.get_related_object_names(choose=False)]
+        name = model_name.lower()
 
-        for path in paths:
-            try:
-                module = __import__(path, globals(), locals(), -1)
-            except ImportError:
-                continue
-
-            for name in dir(module):
-                if model_name == name or model_name == name.lower():
-                    try:
-                        obj = getattr(module, name).objects.select_related(
-                            'column_collection__name').all()
-                    except AttributeError:
-                        pass
-
-                    if isinstance(obj, QuerySet) and obj.count() > 0:
-                        obj = obj[0]
-
-                        if hasattr(obj, 'column_collection'):
-                            result = obj.column_collection.name
-                            break
-                    elif obj is None:
-                        break
-                    else:
-                        msg = _("The model {} has no collection assigned to it."
-                                ).format(name)
-                        log.error(ugettext(msg))
-                        raise ValueError(msg)
-
-        if obj is None:
-            msg = _("Invalid model name: {}".format(model_name))
+        if name in relation_names:
+            result = name
+        else:
+            msg = _("The model '{}' must be in this list '{}' to be a valid "
+                    "collection name.").format(name, relation_names)
             log.error(ugettext(msg))
             raise ValueError(msg)
 
@@ -306,6 +281,22 @@ class DynamicColumnManager(object):
         :rtype: ``True`` or ``False``.
         """
         return settings.DYNAMIC_COLUMNS.get('INACTIVATE_API_AUTH', False)
+
+    def get_related_object_names(self, choose=True):
+        """
+        """
+        from .models import CollectionBase
+
+        related_names = [
+            (ro.name, ro.related_model._meta.object_name)
+            for ro in CollectionBase._meta.related_objects
+            if ro.name != 'keyvalues']
+        related_names.sort(key=lambda x: x[1])
+
+        if choose:
+            related_names.insert(0, (None, _("Choose a Related Model")))
+
+        return related_names
 
     def get_relation_model_field(self, relation):
         """

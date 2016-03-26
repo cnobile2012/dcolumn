@@ -74,7 +74,7 @@ class TestManager(BaseDcolumns):
             methods.append(method)
 
         msg = "methods: {}".format(methods)
-        self.assertEqual(len(methods), 10, msg)
+        self.assertEqual(len(methods), 11, msg)
 
     def test_register_choice(self):
         """
@@ -277,11 +277,11 @@ class TestManager(BaseDcolumns):
 
         with self.assertRaises(ValueError) as cm:
             for model in models:
-                name = self.manager.get_collection_name(model.encode('utf-8'))
+                name = self.manager.get_collection_name(model)
 
         # Test a valid model, but with no collection raises an exception.
         with self.assertRaises(ValueError) as cm:
-            name = self.manager.get_collection_name('Author'.encode('utf-8'))
+            name = self.manager.get_collection_name('AuthorX')
 
         # Test for correct models, both model class names and names all
         # lowercase.
@@ -290,8 +290,8 @@ class TestManager(BaseDcolumns):
         cc0 = self._create_column_collection_record('Author Current', [dc0])
         dcr0 = self._create_dcolumn_record(Author, cc0,
                                            **{'name': 'Carl Nobile'})
-        model_map = {'Author': 'Author Current',
-                     'author': 'Author Current',
+        model_map = {'Author': 'author',
+                     'author': 'author',
                      }
 
         for model, expected_name in model_map.items():

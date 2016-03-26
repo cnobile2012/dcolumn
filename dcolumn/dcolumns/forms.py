@@ -39,6 +39,18 @@ class ColumnCollectionForm(forms.ModelForm):
         columns = ColumnCollection.objects.get_column_collection(
             self.instance.name, unassigned=True)
         self.fields['dynamic_column'].queryset = columns
+        choices = dcolumn_manager.get_related_object_names()
+        self.choice_map = dict(choices)
+        self.fields['related_model'] = forms.ChoiceField(choices=choices)
+        self.fields['related_model'].required = True
+
+    def clean_related_model(self):
+        related_model = self.cleaned_data.get('related_model')
+
+        if not related_model or related_model not in self.choice_map:
+            raise forms.ValidationError(_("Must choose a related model."))
+
+        return related_model
 
     class Meta:
         model = ColumnCollection
@@ -68,9 +80,9 @@ class DynamicColumnForm(forms.ModelForm):
 
 
 #
-# CollectionFormMixin
+# CollectionBaseFormMixin
 #
-class CollectionFormMixin(forms.ModelForm):
+class CollectionBaseFormMixin(forms.ModelForm):
     """
     This mixin must be used by all forms who's model inherits
     ``CollectionBase``.
@@ -94,7 +106,7 @@ class CollectionFormMixin(forms.ModelForm):
         """
         The constructor sets up the proper field HTML object.
         """
-        super(CollectionFormMixin, self).__init__(*args, **kwargs)
+        super(CollectionBaseFormMixin, self).__init__(*args, **kwargs)
         self.coll_name = ''
         self.relations = {}
         self.fields['column_collection'].required = False
@@ -147,7 +159,8 @@ class CollectionFormMixin(forms.ModelForm):
             self._errors['collection_name'] = self.error_class([str(e)])
 
         try:
-            obj = ColumnCollection.objects.active().get(name=self.coll_name)
+            obj = ColumnCollection.objects.active().get(
+                related_model=self.coll_name)
         except ColumnCollection.DoesNotExist as e:
             msg = _("A ColumnCollection needs to exist before creating this "
                     "object, found collection name {}.").format(self.coll_name)
@@ -163,7 +176,7 @@ class CollectionFormMixin(forms.ModelForm):
 
         :rtype: The Django ``cleaned_data`` dict.
         """
-        cleaned_data = super(CollectionFormMixin, self).clean()
+        cleaned_data = super(CollectionBaseFormMixin, self).clean()
 
         try:
             self.relations = ColumnCollection.objects.serialize_columns(
@@ -223,9 +236,9 @@ class CollectionFormMixin(forms.ModelForm):
                             [_("Could not find record with value '{}'."
                                ).format(value)])
 
-        # A zero would be the "Choose a value" option which we don't want.
-        if value.isdigit() and int(value) == 0:
-            value = ''.encode('utf-8')
+            # A zero would be the "Choose a value" option which we don't want.
+            if value.isdigit() and int(value) == 0:
+                value = ''.encode('utf-8')
 
         return value
 
@@ -306,7 +319,7 @@ class CollectionFormMixin(forms.ModelForm):
 
         :param commit: If ``True`` the record is saved else not saved.
         """
-        inst = super(CollectionFormMixin, self).save(commit=False)
+        inst = super(CollectionBaseFormMixin, self).save(commit=False)
         request = self.initial.get('request')
         log.debug("request: %s, inst: %s, instance: %s",
                   request, inst, self.instance)
@@ -367,7 +380,7 @@ class KeyValueForm(forms.ModelForm):
         log.debug("args: %s, kwargs: %s", args, kwargs)
 
         if hasattr(self.instance, 'collection'):
-            coll_name = self.instance.collection.column_collection.name
+            coll_name = self.instance.collection.column_collection.related_model
             columns = ColumnCollection.objects.get_column_collection(coll_name)
             self.fields['dynamic_column'].queryset = columns
 

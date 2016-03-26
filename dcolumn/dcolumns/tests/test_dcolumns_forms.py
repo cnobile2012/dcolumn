@@ -10,7 +10,7 @@ from django.test import TestCase, Client
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 
-from ..models import DynamicColumn
+from ..models import DynamicColumn, ColumnCollection
 
 from .test_dcolumns_models import BaseDcolumns
 
@@ -88,13 +88,14 @@ class TestCollectionFormMixin(BaseDcolumns):
         # Create the initial configuration objects.
         url = reverse('book-create')
         data = {'title': "Test Book Title"}
-        required = [DynamicColumn.YES, DynamicColumn.NO, DynamicColumn.NO,
-                    DynamicColumn.NO, DynamicColumn.NO]
+        required = DynamicColumn.YES
         book, cc, values = self._create_book_objects(required=required)
         # Test that we get a field required error on the 'abstract' slug.
         response = self.client.post(url, data)
         msg = "response status: {}, should be 200".format(response.status_code)
         self.assertEquals(response.status_code, 200, msg)
+        msg = "Should have errors: {}".format(response.context_data.get(
+            'form').errors)
         self.assertTrue(self._has_error(response), msg)
         self._test_errors(response, tests={
             'abstract': "Abstract field is required."})
@@ -115,12 +116,12 @@ class TestCollectionFormMixin(BaseDcolumns):
         """
         Test that updating a book works properly.
         """
+        #self.skipTest("Temporarily skipped")
         # Create the initial configuration objects.
         url = reverse('book-create')
         data = {'title': "Test Book Title",
                 'abstract': "Short abstract to satisfy the required field."}
-        required = [DynamicColumn.YES, DynamicColumn.NO, DynamicColumn.NO,
-                    DynamicColumn.NO, DynamicColumn.NO]
+        required = DynamicColumn.YES
         book, cc, values = self._create_book_objects(required=required)
         # Test that we get a valid response.
         response = self.client.post(url, data)
@@ -144,7 +145,41 @@ class TestCollectionFormMixin(BaseDcolumns):
             abstract, data.get('abstract'))
         self.assertEqual(abstract, data.get('abstract'), msg)
 
-# Test with specific form validations.
+    def test_validate_choice_relations(self):
+        """
+        Test that choice objects are validated properly.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create the DynamicColumn for the author.
+        author, a_cc, a_values = self._create_author_objects()
+        dc1 = self._create_dynamic_column_record(
+            "Author", DynamicColumn.CHOICE, 'book_top', 2,
+            relation=self.choice2index.get("Author"),
+            required=DynamicColumn.YES)
+        # Create the collection.
+        cc = self._create_column_collection_record(
+            "Book Current", 'book', dynamic_columns=[dc1])
+        # Create a book entry.
+        url = reverse('book-create')
+        data = {'title': "Test Book Title"}
+        response = self.client.post(url, data)
+        msg = "response status: {}, should be 200".format(response.status_code)
+        self.assertEquals(response.status_code, 200, msg)
+        msg = "Should have errors: {}".format(response.context_data.get(
+            'form').errors)
+        self.assertTrue(self._has_error(response), msg)
+        self._test_errors(response, tests={
+            'author': ""})
+
+
+
+
+
+        #author, a_cc, a_values = self._create_author_objects()
+
+
+
+
 
 
 

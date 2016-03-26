@@ -6,7 +6,7 @@ import logging
 
 from django import forms
 
-from dcolumn.dcolumns.forms import CollectionFormMixin
+from dcolumn.dcolumns.forms import CollectionBaseFormMixin
 from dcolumn.dcolumns.manager import dcolumn_manager
 
 from .models import Promotion, Author, Publisher, Book
@@ -22,7 +22,7 @@ log = logging.getLogger('examples.books.views')
 #
 # Promotion
 #
-class PromotionForm(CollectionFormMixin):
+class PromotionForm(CollectionBaseFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(PromotionForm, self).__init__(*args, **kwargs)
@@ -46,7 +46,7 @@ class PromotionForm(CollectionFormMixin):
 #
 # Author
 #
-class AuthorForm(CollectionFormMixin):
+class AuthorForm(CollectionBaseFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(AuthorForm, self).__init__(*args, **kwargs)
@@ -59,13 +59,13 @@ class AuthorForm(CollectionFormMixin):
 
     class Meta:
         model = Author
-        exclude = CollectionFormMixin.Meta.exclude
+        exclude = CollectionBaseFormMixin.Meta.exclude
 
 
 #
 # Publisher
 #
-class PublisherForm(CollectionFormMixin):
+class PublisherForm(CollectionBaseFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(PublisherForm, self).__init__(*args, **kwargs)
@@ -78,13 +78,13 @@ class PublisherForm(CollectionFormMixin):
 
     class Meta:
         model = Publisher
-        exclude = CollectionFormMixin.Meta.exclude
+        exclude = CollectionBaseFormMixin.Meta.exclude
 
 
 #
 # Book
 #
-class BookForm(CollectionFormMixin):
+class BookForm(CollectionBaseFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(BookForm, self).__init__(*args, **kwargs)
@@ -97,4 +97,4 @@ class BookForm(CollectionFormMixin):
 
     class Meta:
         model = Book
-        exclude = CollectionFormMixin.Meta.exclude
+        exclude = CollectionBaseFormMixin.Meta.exclude

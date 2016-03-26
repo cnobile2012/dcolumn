@@ -46,13 +46,13 @@ class ColumnCollectionAdmin(UserAdminMixin):
     Used internally to DColumn for the ``ColumnCollection`` model.
     """
     fieldsets = (
-        (None, {'fields': ('name', 'dynamic_column',)}),
+        (None, {'fields': ('name', 'related_model', 'dynamic_column',)}),
         (_('Status'), {'classes': ('collapse',),
                        'fields': ('active', 'creator', 'created', 'updater',
                                   'updated',)}),
         )
     readonly_fields = ('creator', 'created', 'updater', 'updated',)
-    list_display = ('name', 'updater', 'updated',)
+    list_display = ('name', 'related_model', 'updater', 'updated',)
     filter_horizontal = ('dynamic_column',)
     form = ColumnCollectionForm
 

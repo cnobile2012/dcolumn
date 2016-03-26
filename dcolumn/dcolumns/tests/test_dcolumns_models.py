@@ -66,10 +66,11 @@ class BaseDcolumns(TestCase):
         kwargs['updater'] = self.user
         return DynamicColumn.objects.create(**kwargs)
 
-    def _create_column_collection_record(self, name, dynamic_columns=[],
-                                         active=True):
+    def _create_column_collection_record(self, name, related_model,
+                                         dynamic_columns=[], active=True):
         kwargs = {}
         kwargs['name'] = name
+        kwargs['related_model'] = related_model
         kwargs['active'] = active
         kwargs['creator'] = self.user
         kwargs['updater'] = self.user
@@ -103,7 +104,7 @@ class BaseDcolumns(TestCase):
         dcs.append(dc0)
         # Add to a collection.
         cc = self._create_column_collection_record(
-            "Author Current", dynamic_columns=dcs)
+            "Author Current", 'author', dynamic_columns=dcs)
         # Create a book entry.
         author = self._create_dcolumn_record(
             Author, cc, name='Pickup Andropoff')
@@ -127,7 +128,7 @@ class BaseDcolumns(TestCase):
         dcs.append(dc0)
         # Add to a collection.
         cc = self._create_column_collection_record(
-            "Publisher Current", dynamic_columns=dcs)
+            "Publisher Current", 'publisher', dynamic_columns=dcs)
         # Create a book entry.
         publisher = self._create_dcolumn_record(
             Publisher, cc, name='Some big Publisher')
@@ -162,7 +163,7 @@ class BaseDcolumns(TestCase):
         dcs.append(dc2)
         # Add to a collection.
         cc = self._create_column_collection_record(
-            "Promotion Current", dynamic_columns=dcs)
+            "Promotion Current", 'promotion', dynamic_columns=dcs)
         # Create a book entry.
         promotion = self._create_dcolumn_record(
             Promotion, cc, name='Promotion')
@@ -179,9 +180,7 @@ class BaseDcolumns(TestCase):
 
     def _create_book_objects(
         self, author_pk=0, publisher_pk=0, promotion_pk=0, language_pk=0,
-        extra_dcs=[], required=[
-            DynamicColumn.NO, DynamicColumn.NO, DynamicColumn.NO,
-            DynamicColumn.NO, DynamicColumn.NO]):
+        extra_dcs=[], required=DynamicColumn.NO):
         """
         Create  a set of Book objects.
         """
@@ -192,39 +191,37 @@ class BaseDcolumns(TestCase):
 
         dc0 = self._create_dynamic_column_record(
             "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 1,
-            required=required[0])
+            required=required)
         dcs.append(dc0)
 
         if author_pk: # Database table
             dc1 = self._create_dynamic_column_record(
                 "Author", DynamicColumn.CHOICE, 'book_top', 2,
-                relation=self.choice2index.get("Author"), required=required[1])
+                relation=self.choice2index.get("Author"))
             dcs.append(dc1)
 
         if publisher_pk: # Database table
             dc2 = self._create_dynamic_column_record(
                 "Publisher", DynamicColumn.CHOICE, 'book_top', 3,
-                relation=self.choice2index.get("Publisher"),
-                required=required[2])
+                relation=self.choice2index.get("Publisher"))
             dcs.append(dc2)
 
         if promotion_pk: # Database table
             dc3 = self._create_dynamic_column_record(
                 "Promotion", DynamicColumn.CHOICE, 'book_top', 4,
                 relation=self.choice2index.get("Promotion"),
-                store_relation=DynamicColumn.YES, required=required[3])
+                store_relation=DynamicColumn.YES)
             dcs.append(dc3)
 
         if language_pk: # Choice object
             dc4 =self._create_dynamic_column_record(
                 "Language", DynamicColumn.CHOICE, 'book_top', 5,
-                relation=self.choice2index.get("Language"),
-                required=required[4])
+                relation=self.choice2index.get("Language"))
             dcs.append(dc4)
 
         # Add to a collection.
         cc = self._create_column_collection_record(
-            "Book Current", dynamic_columns=dcs)
+            "Book Current", 'book', dynamic_columns=dcs)
         # Create a book entry.
         book = self._create_dcolumn_record(Book, cc, title='Test Book')
         value = "Very very short abstract"
@@ -304,7 +301,7 @@ class TestDynamicColumn(BaseDcolumns):
             "Postal Code", DynamicColumn.TEXT, 'publisher_top', 1)
         cc_name = "Publisher"
         cc = self._create_column_collection_record(
-            cc_name, dynamic_columns=[dc0])
+            cc_name, 'publisher', dynamic_columns=[dc0])
         result = dc0._collection_producer()
         value = '<span>{}</span>'.format(cc_name)
         msg = "value {}, result".format(value, result)
@@ -377,7 +374,7 @@ class TestColumnCollection(BaseDcolumns):
         dc2 = self._create_dynamic_column_record(
             "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
         # Test that there are no dynamic columns.
-        cc = self._create_column_collection_record("Books")
+        cc = self._create_column_collection_record("Books", 'book')
         msg = "dynamic columns: {}".format(cc.dynamic_column.all())
         self.assertEqual(cc.dynamic_column.count(), 0, msg)
         # Test that there is one dynamic column.
@@ -409,9 +406,9 @@ class TestColumnCollection(BaseDcolumns):
             "Web Site", DynamicColumn.TEXT, 'author_top', 1)
         # Add two dynamic columns to the collections.
         cc0 = self._create_column_collection_record(
-            'Author', dynamic_columns=[dc2])
+            'Author', 'author', dynamic_columns=[dc2])
         cc1 = self._create_column_collection_record(
-            'Publisher', dynamic_columns=[dc0])
+            'Publisher', 'publisher', dynamic_columns=[dc0])
         # Test that there is one per collection.
         cc_set0 = ColumnCollection.objects.get_column_collection('Author')
         cc_set1 = ColumnCollection.objects.get_column_collection('Publisher')
@@ -443,8 +440,8 @@ class TestColumnCollection(BaseDcolumns):
             "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
         # Test that the serialized object is correct using pks and has no value.
         cc0 = self._create_column_collection_record(
-            "Books", dynamic_columns=[dc0, dc1, dc2])
-        result = ColumnCollection.objects.serialize_columns('Books')
+            "Books", 'book', dynamic_columns=[dc0, dc1, dc2])
+        result = ColumnCollection.objects.serialize_columns('book')
         msg = "result: {}".format(result)
 
         for pk in (dc0.pk, dc1.pk, dc2.pk):
@@ -455,7 +452,7 @@ class TestColumnCollection(BaseDcolumns):
         # Test that the serialized oject is correct using slugs and has no
         # value.
         result = ColumnCollection.objects.serialize_columns(
-            'Books', by_slug=True)
+            'book', by_slug=True)
         msg = "result: {}".format(result)
 
         for slug in (dc0.slug, dc1.slug, dc2.slug):
@@ -477,9 +474,9 @@ class TestColumnCollection(BaseDcolumns):
             relation=self.choice2index.get("Publisher"))
         # Add to a collection.
         cc0 = self._create_column_collection_record(
-            "Books", dynamic_columns=[dc0, dc1])
+            "Books", 'book', dynamic_columns=[dc0, dc1])
         # Test get_active_relation_items
-        result = ColumnCollection.objects.get_active_relation_items('Books')
+        result = ColumnCollection.objects.get_active_relation_items('book')
         msg = "result: {}".format(result)
 
         for name in ("Author", "Publisher",):
@@ -500,9 +497,9 @@ class TestColumnCollection(BaseDcolumns):
             "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
         # Add to a collection.
         cc0 = self._create_column_collection_record(
-            "Books", dynamic_columns=[dc0, dc1, dc2])
+            "Books", 'book', dynamic_columns=[dc0, dc1, dc2])
         # Test get_collection_choices using slugs.
-        result = ColumnCollection.objects.get_collection_choices('Books')
+        result = ColumnCollection.objects.get_collection_choices('book')
         msg = "result: {}".format(result)
 
         for key, value in (('author', 'Author'),
@@ -513,7 +510,7 @@ class TestColumnCollection(BaseDcolumns):
 
         # Test get_collection_choices using pks.
         result = ColumnCollection.objects.get_collection_choices(
-            'Books', use_pk=True)
+            'book', use_pk=True)
         msg = "result: {}".format(result)
 
         for key, value in ((dc0.pk, 'Author'),
@@ -541,7 +538,7 @@ class TestCollectionBase(BaseDcolumns):
             author_pk=author.pk, promotion_pk=promotion.pk)
         # Get serialized object.
         result = ColumnCollection.objects.serialize_columns(
-            'Book Current', obj=book, by_slug=True)
+            'book', obj=book, by_slug=True)
         msg = "result: {}, b_values: {}".format(result, b_values)
 
         for slug, dc_value in b_values.items():

@@ -240,7 +240,8 @@ class ColumnCollectionManager(StatusModelManagerMixin):
         queryset = self.none()
 
         try:
-            queryset = self.active().get(name=name).dynamic_column.active()
+            queryset = self.active().get(
+                related_model=name.lower()).dynamic_column.active()
         except self.model.DoesNotExist as e:
             if not unassigned:
                 raise e
@@ -352,6 +353,9 @@ class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin,
     dynamic_column = models.ManyToManyField(
         DynamicColumn, verbose_name=_("Dynamic Columns"),
         related_name='column_collection')
+    related_model = models.CharField(
+        verbose_name=_("Related Model"), unique=True, max_length=50,
+        help_text=_("Choose the related model."))
 
     objects = ColumnCollectionManager()
 
