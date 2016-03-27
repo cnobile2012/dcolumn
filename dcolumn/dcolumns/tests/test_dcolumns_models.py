@@ -148,17 +148,17 @@ class BaseDcolumns(TestCase):
 
         # Create promotion description
         dc0 = self._create_dynamic_column_record(
-            "Description", DynamicColumn.TEXT, 'publisher_top', 1,
+            "Description", DynamicColumn.TEXT, 'promotion_top', 1,
             required=required[0])
         dcs.append(dc0)
         # Create promotion start date.
         dc1 = self._create_dynamic_column_record(
-            "Start Date", DynamicColumn.DATE, 'publisher_top', 2,
+            "Start Date", DynamicColumn.DATE, 'promotion_top', 2,
             required=required[1])
         dcs.append(dc1)
         # Create promotion start time.
         dc2 = self._create_dynamic_column_record(
-            "Start Time", DynamicColumn.TIME, 'publisher_top', 3,
+            "Start Time", DynamicColumn.TIME, 'promotion_top', 3,
             required=required[2])
         dcs.append(dc2)
         # Add to a collection.

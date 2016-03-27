@@ -194,21 +194,34 @@ class TestCollectionFormMixin(BaseDcolumns):
 
     def test_validate_date_types(self):
         """
-        Test that choice objects are validated properly.
+        Test that date objects are validated properly.
         """
         #self.skipTest("Temporarily skipped")
-        pass
-
-
-
-
-
-
-
-
-
-
-# Redirect: ['allowed_schemes', 'charset', 'client', 'close', 'closed', 'content', 'context', 'cookies', 'delete_cookie', 'flush', 'get', 'getvalue', 'has_header', 'items', 'json', 'make_bytes', 'next', 'reason_phrase', 'request', 'resolver_match', 'serialize', 'serialize_headers', 'set_cookie', 'set_signed_cookie', 'setdefault', 'status_code', 'streaming', 'tell', 'templates', 'url', 'writable', 'write', 'writelines', 'wsgi_request']
-
-# Get: ['add_post_render_callback', 'charset', 'client', 'close', 'closed', 'content', 'context', 'context_data', 'cookies', 'delete_cookie', 'flush', 'get', 'getvalue', 'has_header', 'is_rendered', 'items', 'json', 'make_bytes', 'next', 'reason_phrase', 'render', 'rendered_content', 'rendering_attrs', 'request', 'resolve_context', 'resolve_template', 'resolver_match', 'serialize', 'serialize_headers', 'set_cookie', 'set_signed_cookie', 'setdefault', 'status_code', 'streaming', 'tell', 'template_name', 'templates', 'using', 'writable', 'write', 'writelines', 'wsgi_request']
-
+        # Create the collection
+        dc0 = self._create_dynamic_column_record(
+            "Start Date", DynamicColumn.DATE, 'promotion_top', 2,
+            required=DynamicColumn.NO)
+        dc1 = self._create_dynamic_column_record(
+            "Start Time", DynamicColumn.TIME, 'promotion_top', 3,
+            required=DynamicColumn.NO)
+        dc2 = self._create_dynamic_column_record(
+            "Date and Time", DynamicColumn.DATETIME, 'promotion_top', 3,
+            required=DynamicColumn.NO)
+        cc = self._create_column_collection_record(
+            "Promotions", 'promotion', dynamic_columns=[dc0, dc1, dc2])
+        # Try to create a publisher entry with errors.
+        url = reverse('promotion-create')
+        data = {'name': "100% off everything.",
+                'start-date': '03/01/20000',
+                'start-time': 'xxx',
+                'date-and-time': 'date and time'}
+        response = self.client.post(url, data)
+        msg = "response status: {}, should be 200".format(response.status_code)
+        self.assertEquals(response.status_code, 200, msg)
+        msg = "Should have errors: {}".format(response.context_data.get(
+            'form').errors)
+        self.assertTrue(self._has_error(response), msg)
+        self._test_errors(response, tests={
+            'start-date': "Invalid date and/or time object ",
+            'start-time': 'Invalid date and/or time object ',
+            'date-and-time': 'Invalid date and/or time object '})
