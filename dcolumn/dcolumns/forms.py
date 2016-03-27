@@ -223,10 +223,10 @@ class CollectionBaseFormMixin(forms.ModelForm):
             model, field = dcolumn_manager.get_relation_model_field(
                 relation.get('relation', ''))
 
-            if relation.get('store_relation', False):
+            if relation.get('store_relation', False) and value:
                 if not value.isdigit():
                     self._errors[key] = self.error_class(
-                        [_("Invalid value '{}', must not be a number."
+                        [_("Invalid value '{}', must be a number."
                            ).format(value)])
                 elif int(value) != 0:
                     try:

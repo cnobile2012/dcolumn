@@ -53,13 +53,18 @@ class TestCollectionFormMixin(BaseDcolumns):
             print errors
 
             for key, value in tests.items():
-                err_msg = errors.pop(key, '').as_text()
+                err_msg = errors.pop(key, None)
+                self.assertTrue(err_msg, "Could not find key: {}".format(key))
+                err_msg = err_msg.as_text()
                 msg = "For key '{}' value '{}' not found in '{}'".format(
                     key, value, err_msg)
                 self.assertTrue(value in err_msg, msg)
 
             msg = "Unaccounted for errors: {}".format(errors)
             self.assertFalse(len(errors), msg)
+        else:
+            msg = "No context_data"
+            self.assertTrue(False, msg)
 
     def test_proper_configuration(self):
         """
@@ -150,16 +155,21 @@ class TestCollectionFormMixin(BaseDcolumns):
         Test that choice objects are validated properly.
         """
         #self.skipTest("Temporarily skipped")
-        # Create the DynamicColumn for the author.
+        # Create the DynamicColumn for the author and promotion.
         author, a_cc, a_values = self._create_author_objects()
         dc1 = self._create_dynamic_column_record(
             "Author", DynamicColumn.CHOICE, 'book_top', 2,
             relation=self.choice2index.get("Author"),
             required=DynamicColumn.YES)
+        promotion, p_cc, p_values = self._create_promotion_objects()
+        dc2 = self._create_dynamic_column_record(
+            "Promotion", DynamicColumn.CHOICE, 'book_top', 4,
+            relation=self.choice2index.get("Promotion"),
+            store_relation=DynamicColumn.YES)
         # Create the collection.
         cc = self._create_column_collection_record(
-            "Book Current", 'book', dynamic_columns=[dc1])
-        # Create a book entry.
+            "Book Current", 'book', dynamic_columns=[dc1, dc2])
+        # Try to create a book entry with errors.
         url = reverse('book-create')
         data = {'title': "Test Book Title"}
         response = self.client.post(url, data)
@@ -169,13 +179,25 @@ class TestCollectionFormMixin(BaseDcolumns):
             'form').errors)
         self.assertTrue(self._has_error(response), msg)
         self._test_errors(response, tests={
-            'author': ""})
+            'author': "Author field is required."})
+        # Try to create a record with an invalid PK.
+        data['author'] = author.pk
+        data['promotion'] = 999999 # Should be invalid
+        response = self.client.post(url, data)
+        msg = "response status: {}, should be 200".format(response.status_code)
+        self.assertEquals(response.status_code, 200, msg)
+        msg = "Should have errors: {}".format(response.context_data.get(
+            'form').errors)
+        self.assertTrue(self._has_error(response), msg)
+        self._test_errors(response, tests={
+            'promotion': "Could not find record "})
 
-
-
-
-
-        #author, a_cc, a_values = self._create_author_objects()
+    def test_validate_date_types(self):
+        """
+        Test that choice objects are validated properly.
+        """
+        #self.skipTest("Temporarily skipped")
+        pass
 
 
 

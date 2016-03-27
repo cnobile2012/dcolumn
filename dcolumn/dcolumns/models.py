@@ -366,8 +366,7 @@ class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin,
         super(ColumnCollection, self).save(*args, **kwargs)
 
     def __str__(self):
-        return "{}-{}".format(
-            self.name, self.updated.isoformat()).encode('utf-8')
+        return "{}-{}".format(self.name, self.related_model).encode('utf-8')
 
     class Meta:
         ordering = ('name',)
