@@ -198,6 +198,7 @@ class CollectionBaseFormMixin(forms.ModelForm):
             key = relation.get('slug')
             value = self.data.get(key, '').encode('utf-8')
             value = self.validate_choice_relations(relation, key, value)
+            value = self.validate_boolean_type(relation, key, value)
             self.validate_date_types(relation, key, value)
             self.validate_required(relation, key, value)
             self.validate_numeric_type(relation, key, value)
@@ -239,6 +240,19 @@ class CollectionBaseFormMixin(forms.ModelForm):
             # A zero would be the "Choose a value" option which we don't want.
             if value.isdigit() and int(value) == 0:
                 value = ''.encode('utf-8')
+
+        return value
+
+    def validate_boolean_type(self, relation, key, value):
+        if relation.get('value_type') == DynamicColumn.BOOLEAN:
+            if value.isdigit():
+                value = int(value) != 0
+            elif value.lower() in ('false', 'true'):
+                value = value.lower() == 'true'
+            else:
+                self._errors[key] = self.error_class(
+                    [_("Invalid value '{}' must be numeric or true or false."
+                       ).format(value)])
 
         return value
 

@@ -15,6 +15,7 @@ from dateutil import parser
 
 from django import template
 from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext, ugettext_lazy as _
 
 from dcolumn.dcolumns.models import DynamicColumn, KeyValue
 from dcolumn.dcolumns.manager import dcolumn_manager
@@ -45,36 +46,26 @@ def auto_display(parser, token):
 
     Assume data structures below for examples::
 
-      {
-        'dynamicColumns': {
-          'book': [
-            [0, 'Choose a value'],
-            [2, 'HTML5 Pocket Reference'],
-            [1, 'SQL Pocket Guide'],
-            [3, 'Raspberry Pi Hacks']
+      {'dynamicColumns': {
+        'book': [
+          [0, 'Choose a value'],
+          [2, 'HTML5 Pocket Reference'],
+          [1, 'SQL Pocket Guide'],
+          [3, 'Raspberry Pi Hacks']
           ]
-        },
-        'relations': {
-          '1': {
-            'name': 'Project ID',
-            'required': false,
-            'relation': null,
-            'location': 'top-container',
-            'value_type': 0,
-            'order': 3,
-            'value': '12345'
-          },
-          '12': {
-            'name': 'Book',
-            'required': false,
-            'relation': 1,
-            'location': 'bottom-container',
-            'key': 'book',
-            'value_type': 6,
-            'order': 1,
-            'value': 2
-          }
         }
+      }
+
+      {'relations': {
+        '1': {
+          'name': 'Project ID',
+          'required': false,
+          'relation': null,
+          'location': 'top-container',
+          'value_type': 0,
+          'order': 3,
+          'value': '12345'
+        },
       }
 
     Usage Examples::
@@ -125,9 +116,8 @@ class AutoDisplayNode(template.Node):
     """
     Node class for the `auto_display` tag.
     """
-    ERROR_MSG = ("Invalid relation object--please note steps that "
-                 "led to this error and file a bug report.")
-    YES_NO = ((1, 'Unknown'), (2, 'Yes'), (3, 'No'),)
+    ERROR_MSG = _("Invalid relation object: ")
+    YES_NO = ((0, _('No')), (1, _('Yes')),)
     DISPLAY_TAG = '<span id="{}">{}</span>'
     STORE_WRAPPER = '<div class="storage-wrapper">{}{}</div>'
     ELEMENT_TYPES = {
@@ -170,7 +160,7 @@ class AutoDisplayNode(template.Node):
         except template.VariableDoesNotExist:
             relation = {}
 
-        log.debug("relation: %s, display: %s", relation, self.display)
+        log.debug(ugettext("relation: %s, display: %s"), relation, self.display)
 
         if relation:
             value_type = relation.get('value_type')
@@ -208,13 +198,12 @@ class AutoDisplayNode(template.Node):
                 else:
                     elem = self._add_options(elem, attr, self.YES_NO, relation)
             elif self.display:
-                elem = elem.format("id-" + attr,
-                                   relation.get('value', ''))
+                elem = elem.format("id-" + attr, relation.get('value', ''))
             else:
                 elem = elem.format("id-" + attr, attr,
                                    relation.get('value', ''))
         else:
-            elem = "<span>{}</span>".format(self.ERROR_MSG)
+            elem = "<span>{}{}</span>".format(self.ERROR_MSG, relation)
 
         return mark_safe(elem)
 
@@ -241,10 +230,10 @@ class AutoDisplayNode(template.Node):
                 options = fk_options.get(slug, {})
             else:
                 msg = 'Invalid key for relation, {}'.format(relation)
-                log.error(msg)
+                log.error(ugettext(msg))
                 raise template.TemplateSyntaxError(msg)
 
-        log.debug("relation: %s, fk_options: %s, options: %s",
+        log.debug(ugettext("relation: %s, fk_options: %s, options: %s"),
                   relation, fk_options, options)
         return options
 
@@ -289,8 +278,8 @@ class AutoDisplayNode(template.Node):
         buff.write('</select>\n')
         elem = buff.getvalue()
         buff.close()
-        log.debug("elem: %s, attr: %s, options: %s, relation: %s, value: %s",
-                  elem, attr, options, relation, value)
+        log.debug(ugettext("elem: %s, attr: %s, options: %s, relation: %s, "
+                           "value: %s"), elem, attr, options, relation, value)
         return elem
 
     def _find_value(self, elem, attr, options, relation):
@@ -309,16 +298,24 @@ class AutoDisplayNode(template.Node):
         :type relation: dict
         :rtype: The populated HTML element.
         """
-        log.debug("elem: %s, attr: %s, options: %s, relation: %s",
+        log.debug(ugettext("elem: %s, attr: %s, options: %s, relation: %s"),
                   elem, attr, options, relation)
+        value_type = relation.get('value_type')
         value = relation.get('value', '')
 
-        # Get the value is the ID then get the value.
+        # Get the key (PK or slug) then with the key get the value.
         if relation.get('store_relation', False):
             if value == '0':
                 value = ''
+        elif value_type == DynamicColumn.BOOLEAN:
+            if value.isdigit():
+                key = int(value)
+            else:
+                key = 0 if value.lower() == 'false' else 1
+
+            value = dict(options).get(key, '')
         else:
-            key = value.isdigit() and int(value) or value
+            key = int(value) if value.isdigit() else value
             value = dict(options).get(key, '')
 
         elem = elem.format("id-" + attr, value)
@@ -377,7 +374,7 @@ class SingleDisplayNode(template.Node):
         self.name = name
 
     def _fix_boolean(self, dc, value):
-        return {0: 'Unknown', 1: 'Yes', 2: 'No'}.get(value, '')
+        return {0: _('No'), 1: _('Yes')}.get(value, '')
 
     def _fix_choice(self, dc, value):
         choice_name = dcolumn_manager.choice_relation_map[dc.relation]
@@ -457,7 +454,8 @@ class SingleDisplayNode(template.Node):
 
                 value = self.METHOD_MAP[value_type](self, dc, key_value.value)
         except KeyValue.DoesNotExist:
-            log.warn("A KeyValue object does not exist for slug %s", self.slug)
+            log.warn(ugettext("A KeyValue object does not exist for "
+                              "slug %s"), self.slug)
 
         context[self.name] = value
         return ''
@@ -486,7 +484,7 @@ def combine_contexts(parser, token):
     try:
         tag_name, obj, variable = token.split_contents()
     except ValueError:
-        msg = "{} tag requires two arguments."
+        msg = _("{} tag requires two arguments.")
         raise template.TemplateSyntaxError(
             msg.format(token.contents.split()[0]))
 
