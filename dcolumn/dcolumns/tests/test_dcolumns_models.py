@@ -85,10 +85,16 @@ class BaseDcolumns(TestCase):
 
     def _create_key_value_record(self, collection, dynamic_column, value):
         kwargs = {}
-        kwargs['collection'] = collection
-        kwargs['dynamic_column'] = dynamic_column
         kwargs['value'] = value
-        return KeyValue.objects.create(**kwargs)
+        obj, created = KeyValue.objects.get_or_create(
+            collection=collection, dynamic_column=dynamic_column,
+            defaults=kwargs)
+
+        if not created:
+            obj.value = value
+            obj.save()
+
+        return obj
 
     def _create_author_objects(self, extra_dcs=[], required=DynamicColumn.NO):
         """

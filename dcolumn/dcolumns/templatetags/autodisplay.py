@@ -309,8 +309,8 @@ class AutoDisplayNode(template.Node):
                 value = ''
         elif value_type == DynamicColumn.BOOLEAN:
             if value.isdigit():
-                key = int(value)
-            else:
+                key = 0 if int(value) == 0 else 1
+            elif value.lower() in ('true', 'false'):
                 key = 0 if value.lower() == 'false' else 1
 
             value = dict(options).get(key, '')
