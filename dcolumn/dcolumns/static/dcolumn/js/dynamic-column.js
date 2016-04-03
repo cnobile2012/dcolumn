@@ -44,7 +44,7 @@ String.prototype.trim = function(charlist) {
       this._selectCount = 0;
       this._changeClass = this.ADMIN_KEYVALUE_CLASS;
       this._setupAdmin();
-      this._checkId = setInterval(this._checkForResponse.bind(this), 1000);
+      this._checkId = setInterval(this._checkForResponse.bind(this), 200);
     },
 
     _checkForResponse: function() {
@@ -57,7 +57,7 @@ String.prototype.trim = function(charlist) {
     },
 
     _setupAdmin: function() {
-      setInterval(this._setBindings.bind(this), 1000);
+      setInterval(this._setBindings.bind(this), 100);
     },
 
     _setBindings: function() {
