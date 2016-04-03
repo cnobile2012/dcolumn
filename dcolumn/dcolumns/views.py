@@ -59,7 +59,7 @@ class ContextDataMixin(object):
         """
         context = {}
         fk_slugs = DynamicColumn.objects.get_fk_slugs()
-        name = kwargs.pop('class_name') # Use in AJAX call only.
+        name = kwargs.pop('class_name', None) # Use in AJAX call only.
 
         if not name:
             name = dcolumn_manager.get_collection_name(self.model.__name__)
@@ -120,7 +120,7 @@ class ContextDataMixin(object):
         if form:
             relations = form.display_data
         else:
-            name = kwargs.pop('class_name') # Use in AJAX call only.
+            name = kwargs.pop('class_name', None) # Use in AJAX call only.
 
             if not name:
                 name = dcolumn_manager.get_collection_name(self.model.__name__)
