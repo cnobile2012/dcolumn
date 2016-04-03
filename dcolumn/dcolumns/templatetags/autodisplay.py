@@ -211,8 +211,9 @@ class AutoDisplayNode(template.Node):
         """
         Find the options for this relation.
 
-        The fk_option argument can either be the options we need in a list or
-        tuple or a dict of all options for all choice type objects.
+        The fk_option argument can either be a list or tuple of a single set of
+        ``CHOICE`` options or a complete set in a dict of all ``CHOICE``
+        options.
 
         :param relation: The meta data for a dynamic column.
         :type relation: dict

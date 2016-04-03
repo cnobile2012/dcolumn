@@ -175,7 +175,7 @@ class BaseDcolumns(TestCase):
         # Create a book entry.
         promotion = self._create_dcolumn_record(
             Promotion, cc, name="50% off everything forever.")
-        value = "Everything sale.."
+        value = "Everything sale."
         dc0_slug = 'description'
         promotion.set_key_value(dc0_slug, value)
         value = datetime.date.today()

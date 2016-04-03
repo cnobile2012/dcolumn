@@ -78,6 +78,9 @@ class TestAutoDisplay(BaseDcolumns):
         with self.assertRaises(TemplateSyntaxError) as cm:
             context, result = self._setup_template(
                 Book, invalid_kwargs=" option")
+        # Test invalid key for relation.
+        # TODO -- This exception would be very rare and consiquently very
+        # difficult to imitate in a test.
 
         # Test for invalid relation object.
         #context, result = self._setup_template(
@@ -156,7 +159,7 @@ class TestAutoDisplay(BaseDcolumns):
         #self.skipTest("Temporarily skipped")
         # Create database objects.
         author, a_cc, a_values = self._create_author_objects()
-        book, b_cc, b_values = self._create_book_objects(author_pk=author.pk)
+        book, b_cc, b_values = self._create_book_objects(author=author)
         # Execute the template tag and test.
         context, result = self._setup_template(
             Book, object=book, options='dynamicColumns', display=True)
@@ -173,7 +176,7 @@ class TestAutoDisplay(BaseDcolumns):
         #self.skipTest("Temporarily skipped")
         # Create database objects.
         author, a_cc, a_values = self._create_author_objects()
-        book, b_cc, b_values = self._create_book_objects(author_pk=author.pk)
+        book, b_cc, b_values = self._create_book_objects(author=author)
         # Execute the template tag and test.
         context, result = self._setup_template(
             Book, options='dynamicColumns')
@@ -182,6 +185,43 @@ class TestAutoDisplay(BaseDcolumns):
         self.assertEqual(result.count('option'), 4, msg)
         self.assertTrue("Choose a value" in result, msg)
         value = book.get_key_value('author')
+        self.assertTrue(value in result, msg)
+
+    def test_CHOICE_store_realtion_display(self):
+        """
+        Test that the CHOICE type with store_relation set True display HTML is
+        corrent.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create database objects.
+        promotion, p_cc, p_values = self._create_promotion_objects()
+        book, b_cc, b_values = self._create_book_objects(promotion=promotion)
+        # Execute the template tag and test.
+        context, result = self._setup_template(
+            Book, object=book, options='dynamicColumns', display=True)
+        msg = "Result: {}, context: {}, b_values: {}".format(
+            result, context, b_values)
+        self.assertEqual(result.count('span'), 4, msg)
+        value = book.get_key_value('promotion')
+        self.assertTrue(value in result, msg)
+
+    def test_CHOICE_store_relation_entry(self):
+        """
+        Test that the CHOICE type with store_relation set True entry HTML is
+        corrent.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create database objects.
+        promotion, p_cc, p_values = self._create_promotion_objects()
+        book, b_cc, b_values = self._create_book_objects(promotion=promotion)
+        # Execute the template tag and test.
+        context, result = self._setup_template(
+            Book, object=book, options='dynamicColumns')
+        msg = "Result: {}, context: {}, b_values: {}".format(
+            result, context, b_values)
+        self.assertEqual(result.count('option'), 4, msg)
+        self.assertTrue("Choose a value" in result, msg)
+        value = book.get_key_value('promotion')
         self.assertTrue(value in result, msg)
 
     def test_DATE_display(self):
