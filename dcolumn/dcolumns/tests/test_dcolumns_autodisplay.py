@@ -25,7 +25,7 @@ class ViewMixinTest(ContextDataMixin):
     object = None
 
     def get_context_data(self, **kwargs):
-        context = {}
+        context = {'object': self.object}
         context.update(self.get_dynamic_column_context_data(**kwargs))
         context.update(self.get_relation_context_data(
             obj=self.object, **kwargs))
@@ -56,7 +56,7 @@ class TestAutoDisplay(BaseDcolumns):
         o = " options={}".format(options) if options is not None else ''
         d = " display={}".format(display) if display is not None else ''
         i = invalid_kwargs if invalid_kwargs else ''
-        cmd = ("{{% auto_display{}{}{}{}{} %}}").format(r, p, o, d, i)
+        cmd = "{{% auto_display{}{}{}{}{} %}}".format(r, p, o, d, i)
         buff.write(cmd)
         buff.write("{% endfor %}")
         template = buff.getvalue()
@@ -66,7 +66,7 @@ class TestAutoDisplay(BaseDcolumns):
 
     def test_exceptions(self):
         """
-        Test that exceptions happen when they are suposed to happen.
+        Test that exceptions happen when they are supposed to happen.
         """
         #self.skipTest("Temporarily skipped")
         # Create database objects.
@@ -479,3 +479,124 @@ class TestAutoDisplay(BaseDcolumns):
             result, context, b_values)
         self.assertEqual(result.count('textarea'), 4, msg)
         self.assertTrue(value in result, msg)
+
+
+class TestSingleDisplay(BaseDcolumns):
+
+    def __init__(self, name):
+        super(TestSingleDisplay, self).__init__(name)
+
+    def setUp(self):
+        super(TestSingleDisplay, self).setUp()
+
+    def _setup_template(self, model, object, slug, delimiter='as',
+                        context_name=None):
+        # Setup the context.
+        vmt = ViewMixinTest()
+        vmt.model = model
+        vmt.object = object
+        context = Context(vmt.get_context_data())
+        # Run the test.
+        buff = StringIO()
+        buff.write("{% load autodisplay %}")
+        s = " {}".format(slug)
+        d = " {}".format(delimiter)
+        c = " {}".format(context_name) if context_name else ''
+        cmd = "{{% single_display object{}{}{} %}}".format(s, d, c)
+        buff.write(cmd)
+        template = buff.getvalue()
+        buff.close()
+        tr = Template(template)
+        tr.render(context)
+        return context
+
+    def test_exceptions(self):
+        """
+        Test that exceptions happen when they are supposed to happen.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create database objects.
+        book, b_cc, b_values = self._create_book_objects()
+        # Test for tag requires four arguments.
+        with self.assertRaises(TemplateSyntaxError) as cm:
+            context = self._setup_template(Book, book, 'abstract')
+
+        msg = "b_values: {}, exception: {}".format(b_values, cm.exception)
+        self.assertTrue("requires four arguments" in str(cm.exception), msg)
+        # Test for must be the word 'as'.
+        with self.assertRaises(TemplateSyntaxError) as cm:
+            context = self._setup_template(
+                Book, book, 'abstract', delimiter='of', context_name='abstract')
+
+        msg = "b_values: {}, exception: {}".format(b_values, cm.exception)
+        self.assertTrue("must be the word 'as'" in str(cm.exception), msg)
+        # Test KeyValue object does not exist got given slug.
+        context = self._setup_template(
+            Book, book, 'bad-slug', context_name='bad-slug')
+        msg = "b_values: {}".format(b_values)
+        self.assertEqual('', context.get('bad-slug'), msg)
+
+    def test_BOOLEAN(self):
+        """
+        Test that the correct BOOLEAN type is returned in the context.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create database objects.
+        dc0 = self._create_dynamic_column_record(
+            "Ignore", DynamicColumn.BOOLEAN, 'book_top', 2)
+        book, b_cc, b_values = self._create_book_objects(extra_dcs=[dc0])
+        # Set value to boolean True
+        value = True
+        book.set_key_value('ignore', value)
+        b_values['ignore'] = value
+        # Execute the template tag and test.
+        context = self._setup_template(
+            Book, book, 'ignore', context_name='ignore')
+        msg= "context: {}, b_values: {}".format(context, b_values)
+        self.assertEqual('Yes', context.get('ignore'), msg)
+        # Set value to boolean False
+        value = False
+        book.set_key_value('ignore', value)
+        b_values['ignore'] = value
+        # Execute the template tag and test.
+        context = self._setup_template(
+            Book, book, 'ignore', context_name='ignore')
+        msg= "context: {}, b_values: {}".format(context, b_values)
+        self.assertEqual('No', context.get('ignore'), msg)
+        # Set value to 1 (one)
+        value = 1
+        book.set_key_value('ignore', value)
+        b_values['ignore'] = value
+        # Execute the template tag and test.
+        context = self._setup_template(
+            Book, book, 'ignore', context_name='ignore')
+        msg= "context: {}, b_values: {}".format(context, b_values)
+        self.assertEqual('Yes', context.get('ignore'), msg)
+        # Set value to 0 (zero)
+        value = 0
+        book.set_key_value('ignore', value)
+        b_values['ignore'] = value
+        # Execute the template tag and test.
+        context = self._setup_template(
+            Book, book, 'ignore', context_name='ignore')
+        msg= "context: {}, b_values: {}".format(context, b_values)
+        self.assertEqual('No', context.get('ignore'), msg)
+
+    def test_CHOICE(self):
+        """
+        Test that the correct choice type is returned in the context.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create database objects.
+        author, a_cc, a_values = self._create_author_objects()
+        book, b_cc, b_values = self._create_book_objects(author=author)
+        # Execute the template tag and test.
+        context = self._setup_template(
+            Book, book, 'author', context_name='author')
+        msg = "context: {}, b_values: {}".format(context, b_values)
+        value = book.get_key_value('author')
+        self.assertEqual(value, context.get('author'), msg)
+
+
+
+

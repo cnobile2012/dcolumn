@@ -677,8 +677,9 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         :param slug: The slug associated with a ``KeyValue`` object.
         :type slug: str
-        :param value: Can be a ``KeyValue`` value or a ``KeyValue`` object to
-                      get the value from.
+        :param value: Can be a value from a``KeyValue`` object, a ``KeyValue``
+                      object itself to get the value from, or a ``CHOICE``
+                      object.
         :type value: string or CollectionBase object
         :param field: Only used with ``CHOICE`` objects. Used to get the value
                       on the ``KeyValue`` object. If this keyword argument is

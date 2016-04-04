@@ -8,7 +8,7 @@ Template tags used for displaying dynamic columns.
 """
 __docformat__ = "restructuredtext en"
 
-import os, logging
+import os, logging, types
 import datetime
 from StringIO import StringIO
 from dateutil import parser
@@ -27,7 +27,7 @@ register = template.Library()
 #
 # auto_display
 #
-# NOTE: Formatting of the doc string is to conform with django docs not epydoc.
+# NOTE: Formatting of the doc string is to conform with django docs not sphinx.
 #
 @register.tag(name='auto_display')
 def auto_display(parser, token):
@@ -326,7 +326,7 @@ class AutoDisplayNode(template.Node):
 #
 # single_display
 #
-# NOTE: Formatting of the doc string is to conform with django docs not epydoc.
+# NOTE: Formatting of the doc string is to conform with django docs not Sphinx.
 #
 @register.tag(name='single_display')
 def single_display(parser, token):
@@ -351,14 +351,14 @@ def single_display(parser, token):
     try:
         tag_name, obj, slug, delimiter, name = token.split_contents()
     except ValueError:
-        msg = "{} tag requires four arguments."
-        raise template.TemplateSyntaxError(
-            msg.format(token.contents.split()[0]))
+        msg = _("{} tag requires four arguments.").format(
+            token.contents.split()[0])
+        raise template.TemplateSyntaxError(msg)
 
     if delimiter != 'as':
-        raise template.TemplateSyntaxError(
-            "The second argument must be the word 'as' found '{}'.".format(
-                delimiter))
+        msg = _("The third argument must be the word 'as' found '{}'.").format(
+            delimiter)
+        raise template.TemplateSyntaxError(msg)
 
     return SingleDisplayNode(tag_name, obj, slug, name)
 
@@ -367,6 +367,8 @@ class SingleDisplayNode(template.Node):
     """
     Node class for the ``single_display`` tag.
     """
+    _NO = _('No')
+    _YES = _('Yes')
 
     def __init__(self, tag_name, obj, slug, name):
         self.tag_name = tag_name
@@ -375,7 +377,17 @@ class SingleDisplayNode(template.Node):
         self.name = name
 
     def _fix_boolean(self, dc, value):
-        return {0: _('No'), 1: _('Yes')}.get(value, '')
+        if isinstance(value, types.StringTypes):
+            if value.isdigit():
+                value = int(value)
+                if value: value = 1
+            elif value.lower() in ('false', 'true'):
+                value = eval(value.capitalize())
+
+        if isinstance(value, bool):
+            if value is True: value = 1
+            else: value = 0
+        return {0: self._NO, 1: self._YES}.get(value, '')
 
     def _fix_choice(self, dc, value):
         choice_name = dcolumn_manager.choice_relation_map[dc.relation]
@@ -449,14 +461,15 @@ class SingleDisplayNode(template.Node):
             dc = key_value.dynamic_column
             value_type = dc.value_type
 
-            if key_value.value:
+            if key_value.value != '':
                 if dc.store_relation and not key_value.value.isdigit():
                     value_type = DynamicColumn.TEXT
 
                 value = self.METHOD_MAP[value_type](self, dc, key_value.value)
         except KeyValue.DoesNotExist:
-            log.warn(ugettext("A KeyValue object does not exist for "
-                              "slug %s"), self.slug)
+            msg = _("KeyValue object does not exist for slug '{}'").format(
+                self.slug)
+            log.warn(ugettext(msg))
 
         context[self.name] = value
         return ''
