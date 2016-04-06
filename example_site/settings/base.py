@@ -13,7 +13,7 @@ import os
 from dcolumn.dcolumns.manager import dcolumn_manager
 
 # Where is the 'website' directory with settings dir, apps, urls.py, etc. are.
-SITE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SITE_ID = 1
 
@@ -46,7 +46,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(SITE_ROOT, 'templates'),
+            os.path.join(BASE_DIR, 'templates'),
             ],
 #        'APP_DIRS': True,
         'OPTIONS': {
@@ -103,7 +103,7 @@ SITE_URL = '/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = os.path.abspath(os.path.join(SITE_ROOT, 'static/'))
+STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, 'static/'))
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -114,7 +114,7 @@ STATIC_URL = SITE_URL + 'static/'
 # Always use forward slashes, even on Windows.
 # Don't forget to use absolute paths, not relative paths.
 STATICFILES_DIRS = (
-    os.path.abspath(os.path.join(SITE_ROOT, 'dev')),
+    os.path.abspath(os.path.join(BASE_DIR, 'dev')),
     )
 
 # DCOLUMN config
@@ -145,7 +145,7 @@ LOGIN_URL = "/admin/"
 # configuration is to send an email to the site admins on every HTTP 500 error
 # when DEBUG=False. See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
-LOG_DIR = os.path.abspath(os.path.join(SITE_ROOT, '..', 'logs'))
+LOG_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'logs'))
 not os.path.isdir(LOG_DIR) and os.mkdir(LOG_DIR, 0775)
 
 LOGGING = {
