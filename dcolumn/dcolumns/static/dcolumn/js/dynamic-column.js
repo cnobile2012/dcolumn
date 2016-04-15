@@ -83,7 +83,7 @@ String.prototype.trim = function(charlist) {
         crossDomain: false,
         beforeSend: function(xhr, settings) {
           if (!this._csrfSafeMethod(settings.type)) {
-            xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
+            xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
           }
         }.bind(this)
       });
@@ -94,7 +94,6 @@ String.prototype.trim = function(charlist) {
       var modelName = $('div.breadcrumbs').children().last().attr('href')
           .trim('/').split(/[\/]/);
       modelName = modelName[modelName.length-1];
-      this._setHeader();
       var options = {
         url: this._assembleURI(this.uri + modelName + "/"),
         cache: false,
@@ -105,6 +104,7 @@ String.prototype.trim = function(charlist) {
         success: this._dynamicColumnCB.bind(this),
         statusCode: {400: this._dynamicColumnCB.bind(this)}
       };
+      this._setHeader();
       $.ajax(options);
     },
 
