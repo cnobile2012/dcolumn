@@ -48,7 +48,7 @@ String.prototype.trim = function(charlist) {
     },
 
     _checkForResponse: function() {
-      if(this.data !== undefined) {
+      if(this.data !== null) {
         clearTimeout(this._checkId);
         this._initFlag = true;
         $(this._changeClass).trigger('change');

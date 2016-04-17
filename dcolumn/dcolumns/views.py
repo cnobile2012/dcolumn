@@ -149,19 +149,24 @@ class CollectionAJAXView(JSONResponseMixin, TemplateView, ContextDataMixin):
         """
         return super(CollectionAJAXView, self).dispatch(*args, **kwargs)
 
-    def get_context_data(self, **kwargs):
+    def render_to_response(self, context, **response_kwargs):
+        # Remove the view object--it cannot be serialized and we don't need it.
+        context.pop('view', None)
+        return self.render_to_json_response(context, **response_kwargs)
+
+    def get_data(self, context):
         """
         Get context data for the ``KeyValue`` objects.
 
         Do not call super on get_context_data, it puts self into the context
         which is not valid JSON.
         """
-        log.debug("kwargs: %s", kwargs)
-        context = {'valid': True}
+        log.debug("context: %s", context)
+        context['valid'] = True
 
         try:
-            context.update(self.get_dynamic_column_context_data(**kwargs))
-            context.update(self.get_relation_context_data(**kwargs))
+            context.update(self.get_dynamic_column_context_data(**context))
+            context.update(self.get_relation_context_data(**context))
         except Exception, e:
             context['valid'] = False
             context['message'] = "Error occurred: {}".format(e)
