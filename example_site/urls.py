@@ -6,7 +6,7 @@ from django.contrib import admin
 from .settings import DEBUG, STATIC_URL
 
 admin.autodiscover()
-
+admin.site.site_header = "Books Admin"
 
 urlpatterns = [
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
