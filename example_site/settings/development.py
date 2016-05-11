@@ -25,17 +25,8 @@ MIDDLEWARE_CLASSES.append('debug_toolbar.middleware.DebugToolbarMiddleware')
 # Add to the INSTALLED_APPS here.
 INSTALLED_APPS.append('debug_toolbar')
 INSTALLED_APPS.append('django_extensions')
-INSTALLED_APPS.append('django_nose')
 
 TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
-
-# Use nose to run all tests
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
-NOSE_ARGS = [
-    '--with-coverage',
-    '--cover-package=dcolumn',
-    ]
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
