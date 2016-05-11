@@ -21,7 +21,8 @@ old
 # Packages
 /*.egg
 /*.egg-info
-/dist/
+dist
+htmlcov
 build
 eggs
 parts

@@ -6,7 +6,11 @@ Mixins and Utilities (common)
 
    dcolumn.common
 
-.. automodule::
+
+.. Module contents
+   ---------------
+
+.. automodule:: dcolumn
    :members:
    :undoc-members:
    :show-inheritance:

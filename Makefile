@@ -1,12 +1,16 @@
 #
 # Development by Carl J. Nobile
 #
+include include.mk
 
 PREFIX		= $(shell pwd)
 PACKAGE_DIR	= $(shell echo $${PWD\#\#*/})
-APACHE_DIR	= $(PREFIX)/apache
+APACHE_DIR	= $(PREFIX)/server
 DOCS_DIR	= $(PREFIX)/docs
 TODAY		= $(shell date +"%Y-%m-%d_%H%M")
+RM_REGEX	= '(^.*.pyc$$)|(^.*.wsgic$$)|(^.*~$$)|(.*\#$$)|(^.*,cover$$)'
+RM_CMD		= find $(PREFIX) -regextype posix-egrep -regex $(RM_REGEX) \
+                  -exec rm {} \;
 
 #----------------------------------------------------------------------
 all	: tar
@@ -17,9 +21,16 @@ tar	: clean
 	@(cd ..; tar -czvf $(PACKAGE_DIR).tar.gz --exclude=".git" \
           --exclude="example_site/static" $(PACKAGE_DIR))
 
-.PHONY	: api-docs
-api-docs: clean
-	@(cd $(DOCS_DIR); make)
+.PHONY	: coverage
+coverage: clobber
+	coverage erase
+	coverage run ./manage.py test
+	coverage report
+	coverage html
+
+.PHONY	: sphinx
+sphinx	: clean
+	(cd $(DOCS_DIR); make html)
 
 .PHONY	: build
 build	: clean
@@ -37,9 +48,10 @@ upload-test: clobber
 
 .PHONY	: clean
 clean	:
-	$(shell cleanDirs.sh clean)
+	$(shell $(RM_CMD))
 
 .PHONY	: clobber
 clobber	: clean
 	@rm -rf dist build *.egg-info
-#	@(cd $(DOCS_DIR); make clobber)
+	@rm -rf $(DOCS_DIR)/htmlcov
+	@rm -rf $(DOCS_DIR)/build
