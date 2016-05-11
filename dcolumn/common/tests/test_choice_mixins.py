@@ -126,8 +126,8 @@ class TestChoiceMixins(TestCase):
         msg = "Should be '{}', found {}".format(value, found_value)
         self.assertEqual(value, found_value, msg)
         # Test invalid pk.
-        with self.assertRaises(AttributeError) as cm:
-            found_value = tmfc.objects.get_value_by_pk(3, 'name')
+        with self.assertRaises(KeyError) as cm:
+            found_value = tmfc.objects.get_value_by_pk(99999, 'name')
         # Test invalid field.
         with self.assertRaises(AttributeError) as cm:
             found_value = tmfc.objects.get_value_by_pk(1, 'bad_field')

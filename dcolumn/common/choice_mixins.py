@@ -108,8 +108,8 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
 
         if pk != 0:
             try:
-                obj = self.container_map.get(pk)
-            except AttributeError as e:
+                obj = self.container_map[pk]
+            except KeyError as e:
                 msg = _("Access to PK %s failed, %s")
                 log.error(ugettext(msg), pk, e)
                 raise e
