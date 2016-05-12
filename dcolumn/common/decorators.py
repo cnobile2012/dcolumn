@@ -21,7 +21,9 @@ def dcolumn_login_required(function=None,
                            login_url=None):
     """
     Decorator for views that checks that the user is logged in, redirecting
-    to the log-in page if necessary.
+    to the log-in page if necessary. Authentication on the API can be turned
+    on or off depending on the ``settings.DYNAMIC_COLUMNS[
+    'INACTIVATE_API_AUTH' ]`` state.
 
     :param function: The function or method to decorate.
     :type function: Function or method
@@ -82,9 +84,9 @@ class InspectChoice(object):
 
         # detect classname
         if 'self' in parentframe.f_locals:
-            # I don't know any way to detect call from the object method
-            # XXX: there seems to be no way to detect static method call--it
-            # will be just a function call
+            # I don't know any way to detect a call from the object method
+            # XXX: there seems to be no way to detect a static method call--it
+            # will be just a function call.
             name_list.append(parentframe.f_locals['self'].__class__.__name__)
 
         codename = parentframe.f_code.co_name
