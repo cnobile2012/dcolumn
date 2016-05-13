@@ -123,7 +123,7 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
 
     objects = DynamicColumnManager()
 
-    def _relation_producer(self):
+    def relation_producer(self):
         """
         Produces a ``CHOICE`` relation that is used in the Django admin.
 
@@ -135,9 +135,9 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
             result = dcolumn_manager.choice_relation_map.get(self.relation, '')
 
         return result
-    _relation_producer.short_description = _("Relation")
+    relation_producer.short_description = _("Relation")
 
-    def _collection_producer(self):
+    def collection_producer(self):
         """
         Produces a ``Collection`` name that is used in the Django admin.
 
@@ -149,8 +149,8 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
             result.append('<span>{}</span>'.format(collection.name))
 
         return ", ".join(result)
-    _collection_producer.short_description = _("Collections")
-    _collection_producer.allow_tags = True
+    collection_producer.short_description = _("Collections")
+    collection_producer.allow_tags = True
 
     def clean(self):
         """

@@ -288,7 +288,7 @@ class TestDynamicColumn(BaseDcolumns):
         msg = "slugs: {}".format(slugs)
         self.assertEqual(len(slugs), 1, msg)
 
-    def test__relation_producer(self):
+    def test_relation_producer(self):
         """
         Test that this method returns the correct relation type for the
         database int value. Used in the Django admin.
@@ -303,11 +303,11 @@ class TestDynamicColumn(BaseDcolumns):
         require = {dc0: '', dc1: "Language"}
 
         for dc, value in require.items():
-            result = dc._relation_producer()
+            result = dc.relation_producer()
             msg = "value: {}, result: {}".format(value, result)
             self.assertEqual(value, result, msg)
 
-    def test__collection_producer(self):
+    def test_collection_producer(self):
         """
         Test that the correct ``Collection`` name is returned for this
         ``DynamicColumn``.
@@ -319,8 +319,56 @@ class TestDynamicColumn(BaseDcolumns):
         cc_name = "Publisher"
         cc = self._create_column_collection_record(
             cc_name, 'publisher', dynamic_columns=[dc0])
-        result = dc0._collection_producer()
+        result = dc0.collection_producer()
         value = '<span>{}</span>'.format(cc_name)
+        msg = "value {}, result".format(value, result)
+        self.assertEqual(value, result, msg)
+
+    def test_updater_producer(self):
+        """
+        Test that the updater_producer returns the proper values.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create a DynamicColumn object.
+        dc0 = self._create_dynamic_column_record(
+            "Postal Code", DynamicColumn.TEXT, 'publisher_top', 1)
+        cc_name = "Publisher"
+        cc = self._create_column_collection_record(
+            cc_name, 'publisher', dynamic_columns=[dc0])
+        # Test that the full name is returned
+        result = dc0.updater_producer()
+        value = "{} {}".format(self.user.first_name, self.user.last_name)
+        msg = "value {}, result".format(value, result)
+        self.assertEqual(value, result, msg)
+        # Test that the username is returned.
+        self.user.last_name = ''
+        self.user.first_name = ''
+        result = dc0.updater_producer()
+        value = "{}".format(self.user.username)
+        msg = "value {}, result".format(value, result)
+        self.assertEqual(value, result, msg)
+
+    def test_creator_producer(self):
+        """
+        Test that the creator_producer returns the proper values.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create a DynamicColumn object.
+        dc0 = self._create_dynamic_column_record(
+            "Postal Code", DynamicColumn.TEXT, 'publisher_top', 1)
+        cc_name = "Publisher"
+        cc = self._create_column_collection_record(
+            cc_name, 'publisher', dynamic_columns=[dc0])
+        # Test that the full name is returned
+        result = dc0.creator_producer()
+        value = "{} {}".format(self.user.first_name, self.user.last_name)
+        msg = "value {}, result".format(value, result)
+        self.assertEqual(value, result, msg)
+        # Test that the username is returned.
+        self.user.last_name = ''
+        self.user.first_name = ''
+        result = dc0.creator_producer()
+        value = "{}".format(self.user.username)
         msg = "value {}, result".format(value, result)
         self.assertEqual(value, result, msg)
 
