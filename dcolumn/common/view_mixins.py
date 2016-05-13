@@ -12,7 +12,7 @@ import logging
 
 from django.http import JsonResponse
 
-log = logging.getLogger('dcolumns.common.views')
+log = logging.getLogger('dcolumn.common.views')
 
 
 class JSONResponseMixin(object):
@@ -29,11 +29,15 @@ class JSONResponseMixin(object):
         :param response_kwargs: Response keywords arguments.
         :rtype: See `Django response_class <https://docs.djangoproject.com/en/dev/ref/class-based-views/mixins-simple/#django.views.generic.base.TemplateResponseMixin.response_class>`_.
         """
-        return JsonResponse(self.get_data(context), **response_kwargs)
+        return JsonResponse(self.get_data(**context), **response_kwargs)
 
-    def get_data(self, context):
+    def get_data(self, **context):
         """
         Returns an object that will be serialized as JSON by json.dumps().
+
+        :param context: Context added to the JSON response.
+        :type context: dict
+        :rtype: dict -- Updated context
         """
         # Note: This is *EXTREMELY* naive; in reality, you'll need
         # to do much more complex handling to ensure that arbitrary
@@ -60,7 +64,7 @@ class AjaxableResponseMixin(object):
         response = super(AjaxableResponseMixin, self).form_invalid(form)
 
         if self.request.is_ajax():
-            return JsonResponse(form.errors, status=400)
+            return JsonResponse(form.errors, status=422)
         else:
             return response
 
@@ -79,11 +83,17 @@ class AjaxableResponseMixin(object):
         response = super(AjaxableResponseMixin, self).form_valid(form)
 
         if self.request.is_ajax():
-            kwargs = {}
-            return JsonResponse(self.get_ajax_context_data(**kwargs))
+            return JsonResponse(self.get_data(**{}))
         else:
             return response
 
-    def get_ajax_context_data(self, **kwargs):
-        kwargs.update({'pk': self.object.pk})
-        return kwargs
+    def get_data(self, **context):
+        """
+        Returns an object that will be serialized as JSON by json.dumps().
+
+        :param context: Context added to the JSON response.
+        :type context: dict
+        :rtype: dict -- Updated context
+        """
+        context.update({'pk': self.object.pk})
+        return context

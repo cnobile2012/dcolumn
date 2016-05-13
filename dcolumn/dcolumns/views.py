@@ -154,7 +154,7 @@ class CollectionAJAXView(JSONResponseMixin, TemplateView, ContextDataMixin):
         context.pop('view', None)
         return self.render_to_json_response(context, **response_kwargs)
 
-    def get_data(self, context):
+    def get_data(self, **context):
         """
         Get context data for the ``KeyValue`` objects.
 
