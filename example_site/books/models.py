@@ -47,10 +47,10 @@ class Promotion(CollectionBase, ValidateOnSaveMixin):
     def get_absolute_url(self):
         return reverse('promotion-detail', kwargs={'pk': self.pk})
 
-    def _detail_producer(self):
+    def detail_producer(self):
         return '<a href="{}">View Page</a>'.format(self.get_absolute_url())
-    _detail_producer.short_description = _("View Detail")
-    _detail_producer.allow_tags = True
+    detail_producer.short_description = _("View Detail")
+    detail_producer.allow_tags = True
 
 
 #
@@ -81,10 +81,10 @@ class Author(CollectionBase, ValidateOnSaveMixin):
     def get_absolute_url(self):
         return reverse('author-detail', kwargs={'pk': self.pk})
 
-    def _detail_producer(self):
+    def detail_producer(self):
         return '<a href="{}">View Page</a>'.format(self.get_absolute_url())
-    _detail_producer.short_description = _("View Detail")
-    _detail_producer.allow_tags = True
+    detail_producer.short_description = _("View Detail")
+    detail_producer.allow_tags = True
 
 
 #
@@ -115,10 +115,10 @@ class Publisher(CollectionBase, ValidateOnSaveMixin):
     def get_absolute_url(self):
         return reverse('publisher-detail', kwargs={'pk': self.pk})
 
-    def _detail_producer(self):
+    def detail_producer(self):
         return '<a href="{}">View Page</a>'.format(self.get_absolute_url())
-    _detail_producer.short_description = _("View Detail")
-    _detail_producer.allow_tags = True
+    detail_producer.short_description = _("View Detail")
+    detail_producer.allow_tags = True
 
 #
 # Book
@@ -148,7 +148,7 @@ class Book(CollectionBase, ValidateOnSaveMixin):
     def get_absolute_url(self):
         return reverse('book-detail', kwargs={'pk': self.pk})
 
-    def _detail_producer(self):
+    def detail_producer(self):
         return '<a href="{}">View Page</a>'.format(self.get_absolute_url())
-    _detail_producer.short_description = _("View Detail")
-    _detail_producer.allow_tags = True
+    detail_producer.short_description = _("View Detail")
+    detail_producer.allow_tags = True

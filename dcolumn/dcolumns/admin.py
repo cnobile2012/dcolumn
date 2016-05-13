@@ -52,7 +52,7 @@ class ColumnCollectionAdmin(UserAdminMixin):
                                   'updated',)}),
         )
     readonly_fields = ('creator', 'created', 'updater', 'updated',)
-    list_display = ('name', 'related_model', 'updater', 'updated',)
+    list_display = ('name', 'related_model', 'updater_producer', 'updated',)
     filter_horizontal = ('dynamic_column',)
     form = ColumnCollectionForm
 

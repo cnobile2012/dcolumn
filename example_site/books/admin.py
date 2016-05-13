@@ -23,8 +23,8 @@ class PromotionAdmin(UserAdminMixin):
                                   'created', 'updater', 'updated',)}),
         )
     readonly_fields = ('creator', 'created', 'updater', 'updated',)
-    list_display = ('name', 'column_collection', 'active', 'updater', 'updated',
-                    '_detail_producer',)
+    list_display = ('name', 'column_collection', 'active', 'updater_producer',
+                    'updated', 'detail_producer',)
     list_editable = ('active',)
     inlines = (KeyValueInline,)
     form = PromotionForm
@@ -41,8 +41,8 @@ class AuthorAdmin(UserAdminMixin):
                                   'created', 'updater', 'updated',)}),
         )
     readonly_fields = ('creator', 'created', 'updater', 'updated',)
-    list_display = ('name', 'column_collection', 'updater', 'updated',
-                    '_detail_producer',)
+    list_display = ('name', 'column_collection', 'updater_producer',
+                    'updated', 'detail_producer',)
     inlines = (KeyValueInline,)
     form = AuthorForm
 
@@ -58,8 +58,8 @@ class PublisherAdmin(UserAdminMixin):
                                   'created', 'updater', 'updated',)}),
         )
     readonly_fields = ('creator', 'created', 'updater', 'updated',)
-    list_display = ('name', 'column_collection', 'updater', 'updated',
-                    '_detail_producer',)
+    list_display = ('name', 'column_collection', 'updater_producer',
+                    'updated', 'detail_producer',)
     inlines = (KeyValueInline,)
     form = PublisherForm
 
@@ -75,9 +75,9 @@ class BookAdmin(UserAdminMixin):
                                   'created', 'updater', 'updated',)}),
         )
     list_editable = ('active',)
-    readonly_fields = ('creator', 'created', 'updater', 'updated',)
+    readonly_fields = ('creator', 'created', 'updater_producer', 'updated',)
     list_display = ('title', 'column_collection', 'active', 'updater',
-                    'updated', '_detail_producer',)
+                    'updated', 'detail_producer',)
     inlines = (KeyValueInline,)
     form = BookForm
 

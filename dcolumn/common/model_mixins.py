@@ -52,23 +52,35 @@ class UserModelMixin(models.Model):
         """
         super(UserModelMixin, self).save(*args, **kwargs)
 
-    def _updater_producer(self):
+    def updater_producer(self):
         """
-        Primary use is in the admin class to supply the user's full name.
+        Primary use is in an admin class to supply the updater's full name if
+        available else the username.
 
         :rtype: String of updater's full name.
         """
-        return self.updater.get_full_name()
-    _updater_producer.short_description = _("Updater")
+        result = self.updater.get_full_name()
 
-    def _creator_producer(self):
+        if not result:
+            result = self.updater.username
+
+        return result
+    updater_producer.short_description = _("Updater")
+
+    def creator_producer(self):
         """
-        Primary use is in the admin class to supply the creator's full name.
+        Primary use is in an admin class to supply the creator's full name if
+        available else the username.
 
         :rtype: String of creator's full name.
         """
-        return self.creator.get_full_name()
-    _creator_producer.short_description = _("Creator")
+        result = self.creator.get_full_name()
+
+        if not result:
+            result = self.creator.username
+
+        return result
+    creator_producer.short_description = _("Creator")
 
 
 #
