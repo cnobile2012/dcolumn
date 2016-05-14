@@ -22,7 +22,7 @@ tar	: clean
           --exclude="example_site/static" $(PACKAGE_DIR))
 
 .PHONY	: coverage
-coverage: clobber
+coverage: clean
 	coverage erase
 	coverage run ./manage.py test
 	coverage report
