@@ -50,7 +50,7 @@ class TestCollectionFormMixin(BaseDcolumns):
     def _test_errors(self, response, tests={}):
         if hasattr(response, 'context_data'):
             errors = dict(response.context_data.get('form').errors)
-            print errors
+            #print errors
 
             for key, value in tests.items():
                 err_msg = errors.pop(key, None)
