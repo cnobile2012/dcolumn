@@ -11,7 +11,8 @@ import pytz
 from StringIO import StringIO
 
 from django.test import TestCase
-from django.template import Template, Context, TemplateSyntaxError
+from django.template import (
+    Template, Context, TemplateSyntaxError, VariableDoesNotExist)
 
 from example_site.books.models import Author, Book, Promotion, Publisher
 from dcolumn.dcolumns.models import DynamicColumn
@@ -41,7 +42,8 @@ class TestAutoDisplay(BaseDcolumns):
         super(TestAutoDisplay, self).setUp()
 
     def _setup_template(self, model, object=None, prefix=None, options=None,
-                        display=None, except_test=False, invalid_kwargs=None):
+                        display=None, except_test=False, invalid_kwargs=None,
+                        relation_name='relation'):
         # Setup the context.
         vmt = ViewMixinTest()
         vmt.model = model
@@ -51,7 +53,7 @@ class TestAutoDisplay(BaseDcolumns):
         buff = StringIO()
         buff.write("{% load autodisplay %}")
         buff.write("{% for relation in relations.values %}")
-        r = " relation" if not except_test else ''
+        r = " {}".format(relation_name) if not except_test else ''
         p = " prefix={}".format(prefix) if prefix is not None else ''
         o = " options={}".format(options) if options is not None else ''
         d = " display={}".format(display) if display is not None else ''
@@ -63,6 +65,22 @@ class TestAutoDisplay(BaseDcolumns):
         buff.close()
         tr = Template(template)
         return context, tr.render(context)
+
+    def test_arguments(self):
+        """
+        Test that all the arguments function properly.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create database objects.
+        book, b_cc, b_values = self._create_book_objects()
+        # Execute the template tag and test.
+        context, result = self._setup_template(
+            Book, object=book, options='dynamicColumns', display=True,
+            prefix='test-')
+        msg = "Result: {}, context: {}, values: {}".format(
+            result, context, b_values)
+        self.assertEqual(result.count('id-test-abstract'), 1, msg)
+        # All other arguments combinations are tested elsewhere.
 
     def test_exceptions(self):
         """
@@ -77,17 +95,14 @@ class TestAutoDisplay(BaseDcolumns):
         # Test for invalid keyword.
         with self.assertRaises(TemplateSyntaxError) as cm:
             context, result = self._setup_template(
-                Book, invalid_kwargs=" option")
-        # Test invalid key for relation.
-        # TODO -- This exception would be very rare and consiquently very
-        # difficult to imitate in a test.
-
-        # Test for invalid relation object.
-        #context, result = self._setup_template(
-        #    Book, object=book, options='dynamicColumns', display=True)
-        #msg = "Result: {}, context: {}, values: {}".format(
-        #    result, context, b_values)
-        #self.assertTrue(False, msg)
+                Book, invalid_kwargs=" optionX")
+        # Test that template.VariableDoesNotExist is raised and relation is
+        # set to None.
+        context, result = self._setup_template(
+            Book, object=book, relation_name='relationX')
+        msg = "Result: {}, context: {}, values: {}".format(
+            result, context, b_values)
+        self.assertTrue('Invalid relation object: None' in result, msg)
 
     def test_BOOLEAN_display(self):
         """
@@ -584,7 +599,7 @@ class TestSingleDisplay(BaseDcolumns):
 
     def test_CHOICE(self):
         """
-        Test that the correct choice type is returned in the context.
+        Test that the correct CHOICE type is returned in the context.
         """
         #self.skipTest("Temporarily skipped")
         # Create database objects.
@@ -597,6 +612,22 @@ class TestSingleDisplay(BaseDcolumns):
         value = book.get_key_value('author')
         self.assertEqual(value, context.get('author'), msg)
 
+    def test_CHOICE_store_relation(self):
+        """
+        Test that the correct CHOICE type with store_relation set is returned
+        in the context.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create database objects.
+        promotion, p_cc, p_values = self._create_promotion_objects()
+        book, b_cc, b_values = self._create_book_objects(promotion=promotion)
+        # Execute the template tag and test.
+        context = self._setup_template(
+            Book, book, 'promotion', context_name='promotion')
+        msg = "context: {}, b_values: {}".format(context, b_values)
+        value = book.get_key_value('promotion')
+        self.assertTrue(value in context.get('promotion'), msg)
 
+#    def test_
 
 

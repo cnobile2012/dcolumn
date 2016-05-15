@@ -82,8 +82,9 @@ def auto_display(parser, token):
     """
     tokens = token.split_contents()
     size = len(tokens)
-    keywords = ('prefix', 'options', 'display')
     kwargs = {'prefix': '', 'options': None, 'display': 'False'}
+    keywords = kwargs.keys()
+    keywords.sort()
 
     if size == 2:
         tag_name, relation = tokens
@@ -144,7 +145,7 @@ class AutoDisplayNode(template.Node):
         self.tag_name = tag_name
         self.relation = template.Variable(relation)
         self.prefix = prefix
-        self.fk_options = options and template.Variable(options) or None
+        self.fk_options = template.Variable(options) if options else None
         self.display = eval(display)
 
     def render(self, context):
@@ -158,7 +159,7 @@ class AutoDisplayNode(template.Node):
         try:
             relation = self.relation.resolve(context)
         except template.VariableDoesNotExist:
-            relation = {}
+            relation = None
 
         log.debug(ugettext("relation: %s, display: %s"), relation, self.display)
 
@@ -175,11 +176,9 @@ class AutoDisplayNode(template.Node):
             # Choices are a special case since we need to determine
             # what the options will be.
             if value_type == DynamicColumn.CHOICE:
-                try:
-                    fk_options = self.fk_options.resolve(context)
-                except Exception:
-                    fk_options = {}
-
+                # The fk_options variable should always be found since it
+                # is tested for in the tag's function.
+                fk_options = self.fk_options.resolve(context)
                 options = self._find_options(relation, fk_options)
 
                 if self.display:
@@ -213,7 +212,7 @@ class AutoDisplayNode(template.Node):
 
         The fk_option argument can either be a list or tuple of a single set of
         ``CHOICE`` options or a complete set in a dict of all ``CHOICE``
-        options.
+        options. In the latter case the options will be found in the full list.
 
         :param relation: The meta data for a dynamic column.
         :type relation: dict
