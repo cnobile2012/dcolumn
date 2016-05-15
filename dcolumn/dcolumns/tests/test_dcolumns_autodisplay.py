@@ -26,10 +26,66 @@ class ViewMixinTest(ContextDataMixin):
     object = None
 
     def get_context_data(self, **kwargs):
+        """
+        This method dummys up the view. Example outputs are listed below.
+
+        ``get_dynamic_column_context_data``::
+
+          {'dynamicColumns': {
+           u'author': [(0, 'Choose a value'),
+                       (17, u'Jeremy Blum'),
+                       (5, u'John Iovine'),
+                       (23, u'Lauren Darcey & Shane Conder'),
+                       (25, u'Peter Gasston'),
+                       (6, u'Rajaram Regupathy'),
+                       (7, u'Richard Stones'),
+                       (15, u'Ruth Suehle & Tom Callaway'),
+                       (8, u'Toby Segaran')],
+           u'language': [(0, 'Choose a value'),
+                         (1, 'Chinese'),
+                         (2, 'English'),
+                         (3, 'Portuguese'),
+                         (4, 'Russian'),
+                         (5, 'Japanese')],
+           ...}
+          }
+
+        ``get_relation_context_data``::
+
+          OrderedDict([
+            (19,
+              {'location': 'book-bottom',
+               'name': u'Promotion',
+               'order': 1,
+               'pk': 19,
+               'relation': 2,
+               'required': False,
+               'slug': u'promotion',
+               'store_relation': True,
+               'value_type': 2}),
+            (20,
+              {'location': 'book-center',
+               'name': u'Language',
+               'order': 6,
+               'pk': 20,
+               'relation': 1,
+               'required': False,
+               'slug': u'language',
+               'store_relation': False,
+               'value_type': 2}),
+            ...])
+        """
         context = {'object': self.object}
         context.update(self.get_dynamic_column_context_data(**kwargs))
-        context.update(self.get_relation_context_data(
-            obj=self.object, **kwargs))
+        relation = self.get_relation_context_data(obj=self.object, **kwargs)
+        pk, slug = kwargs.pop('munge_slug', (None, None))
+
+        if pk and slug:
+            # Munge the slug to cause a falure.
+            item = relation.get('relations').get(pk)
+            item['slug'] = slug
+
+        context.update(relation)
         return context
 
 
@@ -43,12 +99,12 @@ class TestAutoDisplay(BaseDcolumns):
 
     def _setup_template(self, model, object=None, prefix=None, options=None,
                         display=None, except_test=False, invalid_kwargs=None,
-                        relation_name='relation'):
+                        relation_name='relation', munge_slug=(None, None)):
         # Setup the context.
         vmt = ViewMixinTest()
         vmt.model = model
         vmt.object = object
-        context = Context(vmt.get_context_data())
+        context = Context(vmt.get_context_data(munge_slug=munge_slug))
         # Run the test.
         buff = StringIO()
         buff.write("{% load autodisplay %}")
@@ -82,13 +138,14 @@ class TestAutoDisplay(BaseDcolumns):
         self.assertEqual(result.count('id-test-abstract'), 1, msg)
         # All other arguments combinations are tested elsewhere.
 
-    def test_exceptions(self):
+    def test_exceptions_and_errors(self):
         """
         Test that exceptions happen when they are supposed to happen.
         """
         #self.skipTest("Temporarily skipped")
         # Create database objects.
-        book, b_cc, b_values = self._create_book_objects()
+        author, a_cc, a_values = self._create_author_objects()
+        book, b_cc, b_values = self._create_book_objects(author=author)
         # Test for invalid number of args.
         with self.assertRaises(TemplateSyntaxError) as cm:
             context, result = self._setup_template(Book, except_test=True)
@@ -103,6 +160,21 @@ class TestAutoDisplay(BaseDcolumns):
         msg = "Result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertTrue('Invalid relation object: None' in result, msg)
+        # Test 'Invalid option object'.
+        author_dc = b_cc.dynamic_column.get(slug='author')
+        context, result = self._setup_template(
+            Book, object=book, munge_slug=(author_dc.pk, 'authorX'))
+        msg = "Result: {}, context: {}, values: {}".format(
+            result, context, a_values)
+        self.assertTrue('Invalid option object: None' in result, msg)
+        # Test 'Invalid key for relation'.
+        ## author_dc = b_cc.dynamic_column.get(slug='author')
+        ## context, result = self._setup_template(
+        ##     Book, object=book, options='dynamicColumns',
+        ##     munge_slug=(author_dc.pk, 'authorX'))
+        ## msg = "Result: {}, context: {}, values: {}".format(
+        ##     result, context, a_values)
+        ## self.assertTrue('Invalid key for relation: None' in result, msg)
 
     def test_BOOLEAN_display(self):
         """
@@ -178,6 +250,14 @@ class TestAutoDisplay(BaseDcolumns):
         # Execute the template tag and test.
         context, result = self._setup_template(
             Book, object=book, options='dynamicColumns', display=True)
+        msg = "Result: {}, context: {}, values: {}".format(
+            result, context, b_values)
+        self.assertEqual(result.count('span'), 4, msg)
+        value = book.get_key_value('author')
+        self.assertTrue(value in result, msg)
+        # Test that partial dynamicColumns work properly.
+        context, result = self._setup_template(
+            Book, object=book, options='dynamicColumns.author', display=True)
         msg = "Result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('span'), 4, msg)

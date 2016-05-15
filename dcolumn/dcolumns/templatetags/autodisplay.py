@@ -117,7 +117,8 @@ class AutoDisplayNode(template.Node):
     """
     Node class for the `auto_display` tag.
     """
-    ERROR_MSG = _("Invalid relation object: ")
+    RELATION_ERROR_MSG = _("Invalid relation object: ")
+    OPTION_ERROR_MSG = _("Invalid option object: ")
     YES_NO = ((0, _('No')), (1, _('Yes')),)
     DISPLAY_TAG = '<span id="{}">{}</span>'
     STORE_WRAPPER = '<div class="storage-wrapper">{}{}</div>'
@@ -176,21 +177,25 @@ class AutoDisplayNode(template.Node):
             # Choices are a special case since we need to determine
             # what the options will be.
             if value_type == DynamicColumn.CHOICE:
-                # The fk_options variable should always be found since it
-                # is tested for in the tag's function.
-                fk_options = self.fk_options.resolve(context)
-                options = self._find_options(relation, fk_options)
+                if self.fk_options:
+                    # The fk_options variable should always be found since it
+                    # is tested for in the tag's function.
+                    fk_options = self.fk_options.resolve(context)
+                    options = self._find_options(relation, fk_options)
 
-                if self.display:
-                    elem = self._find_value(elem, attr, options, relation)
+                    if self.display:
+                        elem = self._find_value(elem, attr, options, relation)
+                    else:
+                        elem = self._add_options(elem, attr, options, relation)
+
+                        if (relation.get('store_relation', False) and
+                            'selected' not in elem):
+                            tmp_elem = self._find_value(
+                                self.DISPLAY_TAG, 'store-' + attr, {}, relation)
+                            elem = self.STORE_WRAPPER.format(elem, tmp_elem)
                 else:
-                    elem = self._add_options(elem, attr, options, relation)
-
-                    if (relation.get('store_relation', False) and
-                        'selected' not in elem):
-                        tmp_elem = self._find_value(
-                            self.DISPLAY_TAG, 'store-' + attr, {}, relation)
-                        elem = self.STORE_WRAPPER.format(elem, tmp_elem)
+                    elem = "<span>{}{}</span>".format(self.OPTION_ERROR_MSG,
+                                                      self.fk_options)
             elif value_type == DynamicColumn.BOOLEAN:
                 if self.display:
                     elem = self._find_value(elem, attr, self.YES_NO, relation)
@@ -202,7 +207,7 @@ class AutoDisplayNode(template.Node):
                 elem = elem.format("id-" + attr, attr,
                                    relation.get('value', ''))
         else:
-            elem = "<span>{}{}</span>".format(self.ERROR_MSG, relation)
+            elem = "<span>{}{}</span>".format(self.RELATION_ERROR_MSG, relation)
 
         return mark_safe(elem)
 
@@ -229,7 +234,7 @@ class AutoDisplayNode(template.Node):
             if slug:
                 options = fk_options.get(slug, {})
             else:
-                msg = 'Invalid key for relation, {}'.format(relation)
+                msg = _('Invalid key for relation, {}').format(relation)
                 log.error(ugettext(msg))
                 raise template.TemplateSyntaxError(msg)
 

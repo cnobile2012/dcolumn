@@ -91,22 +91,22 @@ class ContextDataMixin(object):
           OrderedDict([
             (19,
               {'location': 'book-bottom',
-               'name': u'Promotion',
+               'name': 'Promotion',
                'order': 1,
                'pk': 19,
                'relation': 2,
                'required': False,
-               'slug': u'promotion',
+               'slug': 'promotion',
                'store_relation': True,
                'value_type': 2}),
             (20,
               {'location': 'book-center',
-               'name': u'Language',
+               'name': 'Language',
                'order': 6,
                'pk': 20,
                'relation': 1,
                'required': False,
-               'slug': u'language',
+               'slug': 'language',
                'store_relation': False,
                'value_type': 2}),
             ...])
@@ -120,7 +120,7 @@ class ContextDataMixin(object):
         if form:
             relations = form.display_data
         else:
-            name = kwargs.pop('class_name', None) # Use in AJAX call only.
+            name = kwargs.pop('class_name', None) # Used in AJAX call only.
 
             if not name:
                 name = dcolumn_manager.get_collection_name(self.model.__name__)
