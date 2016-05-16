@@ -230,10 +230,9 @@ class AutoDisplayNode(template.Node):
             options = fk_options
         else:
             slug = relation.get('slug')
+            options = fk_options.get(slug, {})
 
-            if slug:
-                options = fk_options.get(slug, {})
-            else:
+            if not slug or not options:
                 msg = _('Invalid key for relation, {}').format(relation)
                 log.error(ugettext(msg))
                 raise template.TemplateSyntaxError(msg)

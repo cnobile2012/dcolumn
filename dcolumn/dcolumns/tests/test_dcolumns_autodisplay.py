@@ -168,13 +168,11 @@ class TestAutoDisplay(BaseDcolumns):
             result, context, a_values)
         self.assertTrue('Invalid option object: None' in result, msg)
         # Test 'Invalid key for relation'.
-        ## author_dc = b_cc.dynamic_column.get(slug='author')
-        ## context, result = self._setup_template(
-        ##     Book, object=book, options='dynamicColumns',
-        ##     munge_slug=(author_dc.pk, 'authorX'))
-        ## msg = "Result: {}, context: {}, values: {}".format(
-        ##     result, context, a_values)
-        ## self.assertTrue('Invalid key for relation: None' in result, msg)
+        author_dc = b_cc.dynamic_column.get(slug='author')
+        with self.assertRaises(TemplateSyntaxError) as cm:
+            context, result = self._setup_template(
+                Book, object=book, options='dynamicColumns',
+                munge_slug=(author_dc.pk, 'authorX'))
 
     def test_BOOLEAN_display(self):
         """
@@ -299,6 +297,27 @@ class TestAutoDisplay(BaseDcolumns):
         self.assertEqual(result.count('span'), 4, msg)
         value = book.get_key_value('promotion')
         self.assertTrue(value in result, msg)
+
+    def test_CHOICE_store_relation_display_value_zero(self):
+        """
+        Test that the CHOICE type with store_relation set True fails when
+        the value is zero.
+        """
+        dc0 = self._create_dynamic_column_record(
+            "Promotion", DynamicColumn.CHOICE, 'book_top', 4,
+            relation=self.choice2index.get("Promotion"),
+            store_relation=DynamicColumn.YES, required=DynamicColumn.YES)
+        book, b_cc, b_values = self._create_book_objects(extra_dcs=[dc0])
+        value = 0
+        kv0 = self._create_key_value_record(book, dc0, value)
+        b_values[dc0.slug] = kv0.value
+        # Execute the template tag and test.
+        context, result = self._setup_template(
+            Book, object=book, options='dynamicColumns', display=True)
+        msg = "Result: {}, context: {}, b_values: {}".format(
+            result, context, b_values)
+        self.assertEqual(result.count('span'), 4, msg)
+        self.assertFalse('0' in result, msg)
 
     def test_CHOICE_store_relation_entry(self):
         """
@@ -708,6 +727,59 @@ class TestSingleDisplay(BaseDcolumns):
         value = book.get_key_value('promotion')
         self.assertTrue(value in context.get('promotion'), msg)
 
-#    def test_
+    def test_DATE(self):
+        """
+        Test that DATE is returned in the context.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create database objects.
+        promotion, p_cc, p_values = self._create_promotion_objects()
+        # Execute the template tag and test.
+        context = self._setup_template(
+            Promotion, promotion, 'start-date', context_name='start_date')
+        msg = "context: {}, p_values: {}".format(context, p_values)
+        value = promotion.get_key_value('start-date')
+        self.assertEqual(value, context.get('start_date'), msg)
+
+    def test_DATETIME(self):
+        """
+        Test that DATETIME is returned in the context.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create database objects.
+        dc0 = self._create_dynamic_column_record(
+            "Date & Time", DynamicColumn.DATETIME, 'promotion_top', 6)
+        promotion, p_cc, p_values = self._create_promotion_objects(
+            extra_dcs=[dc0])
+        value = datetime.datetime.now(pytz.utc).isoformat()
+        kv0 = self._create_key_value_record(promotion, dc0, value)
+        p_values[dc0.slug] = kv0.value
+        # Execute the template tag and test.
+        context = self._setup_template(
+            Promotion, promotion, 'date-time', context_name='date_time')
+        msg = "context: {}, p_values: {}".format(context, p_values)
+        value = promotion.get_key_value('date-time')
+        self.assertEqual(value, context.get('date_time'), msg)
+
+    def test_FLOAT(self):
+        """
+        Test that FLOAT is returned in the context.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create database objects.
+        dc0 = self._create_dynamic_column_record(
+            "Percent", DynamicColumn.FLOAT, 'book_top', 2)
+        book, b_cc, b_values = self._create_book_objects(extra_dcs=[dc0])
+        # Set value to boolean True
+        value = 5.0
+        book.set_key_value('percent', value)
+        b_values['percent'] = value
+        # Execute the template tag and test.
+        context = self._setup_template(
+            Book, book, 'percent', context_name='percent')
+        msg= "context: {}, b_values: {}".format(context, b_values)
+        value = book.get_key_value('percent')
+        self.assertEqual(value, context.get('percent'), msg)
+
 
 

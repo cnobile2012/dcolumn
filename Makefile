@@ -23,6 +23,7 @@ tar	: clean
 
 .PHONY	: coverage
 coverage: clean
+	@rm -rf $(DOCS_DIR)/htmlcov
 	coverage erase
 	coverage run ./manage.py test
 	coverage report
