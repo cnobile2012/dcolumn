@@ -707,8 +707,9 @@ class TestSingleDisplay(BaseDcolumns):
         # Execute the template tag and test.
         context = self._setup_template(
             Book, book, 'author', context_name='author')
-        msg = "context: {}, b_values: {}".format(context, b_values)
         value = book.get_key_value('author')
+        msg = "context: {}, b_values: {}, value: {}".format(
+            context, b_values, value)
         self.assertEqual(value, context.get('author'), msg)
 
     def test_CHOICE_store_relation(self):
@@ -723,8 +724,9 @@ class TestSingleDisplay(BaseDcolumns):
         # Execute the template tag and test.
         context = self._setup_template(
             Book, book, 'promotion', context_name='promotion')
-        msg = "context: {}, b_values: {}".format(context, b_values)
         value = book.get_key_value('promotion')
+        msg = "context: {}, b_values: {}, value: {}".format(
+            context, b_values, value)
         self.assertTrue(value in context.get('promotion'), msg)
 
     def test_DATE(self):
@@ -737,8 +739,9 @@ class TestSingleDisplay(BaseDcolumns):
         # Execute the template tag and test.
         context = self._setup_template(
             Promotion, promotion, 'start-date', context_name='start_date')
-        msg = "context: {}, p_values: {}".format(context, p_values)
         value = promotion.get_key_value('start-date')
+        msg = "context: {}, p_values: {}, value: {}".format(
+            context, p_values, value)
         self.assertEqual(value, context.get('start_date'), msg)
 
     def test_DATETIME(self):
@@ -757,8 +760,9 @@ class TestSingleDisplay(BaseDcolumns):
         # Execute the template tag and test.
         context = self._setup_template(
             Promotion, promotion, 'date-time', context_name='date_time')
-        msg = "context: {}, p_values: {}".format(context, p_values)
         value = promotion.get_key_value('date-time')
+        msg = "context: {}, p_values: {}, value: {}".format(
+            context, p_values, value)
         self.assertEqual(value, context.get('date_time'), msg)
 
     def test_FLOAT(self):
@@ -770,16 +774,38 @@ class TestSingleDisplay(BaseDcolumns):
         dc0 = self._create_dynamic_column_record(
             "Percent", DynamicColumn.FLOAT, 'book_top', 2)
         book, b_cc, b_values = self._create_book_objects(extra_dcs=[dc0])
-        # Set value to boolean True
+        # Set value
         value = 5.0
         book.set_key_value('percent', value)
         b_values['percent'] = value
         # Execute the template tag and test.
         context = self._setup_template(
             Book, book, 'percent', context_name='percent')
-        msg= "context: {}, b_values: {}".format(context, b_values)
         value = book.get_key_value('percent')
+        msg= "context: {}, b_values: {}, value: {}".format(
+            context, b_values, value)
         self.assertEqual(value, context.get('percent'), msg)
+
+    def test_NUMBER(self):
+        """
+        Test that NUMBER is returned in the context.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create database objects.
+        dc0 = self._create_dynamic_column_record(
+            "Quanty", DynamicColumn.NUMBER, 'book_top', 2)
+        book, b_cc, b_values = self._create_book_objects(extra_dcs=[dc0])
+        # Set value
+        value = 100
+        book.set_key_value('quanty', value)
+        b_values['quanty'] = value
+        # Execute the template tag and test.
+        context = self._setup_template(
+            Book, book, 'quanty', context_name='quanty')
+        value = book.get_key_value('quanty')
+        msg= "context: {}, b_values: {}, value: {}".format(
+            context, b_values, value)
+        self.assertEqual(value, context.get('quanty'), msg)
 
 
 

@@ -416,7 +416,7 @@ class SingleDisplayNode(template.Node):
         return float(value)
 
     def _fix_number(self, dc, value):
-        return value
+        return int(value)
 
     def _fix_text(self, dc, value):
         return value
