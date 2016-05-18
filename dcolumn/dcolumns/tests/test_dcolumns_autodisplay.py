@@ -637,14 +637,14 @@ class TestSingleDisplay(BaseDcolumns):
 
         msg = "b_values: {}, exception: {}".format(b_values, cm.exception)
         self.assertTrue("requires four arguments" in str(cm.exception), msg)
-        # Test for must be the word 'as'.
+        # Test for the word 'as'.
         with self.assertRaises(TemplateSyntaxError) as cm:
             context = self._setup_template(
                 Book, book, 'abstract', delimiter='of', context_name='abstract')
 
         msg = "b_values: {}, exception: {}".format(b_values, cm.exception)
         self.assertTrue("must be the word 'as'" in str(cm.exception), msg)
-        # Test KeyValue object does not exist got given slug.
+        # Test KeyValue object does not exist with given slug.
         context = self._setup_template(
             Book, book, 'bad-slug', context_name='bad-slug')
         msg = "b_values: {}".format(b_values)
@@ -806,6 +806,50 @@ class TestSingleDisplay(BaseDcolumns):
         msg= "context: {}, b_values: {}, value: {}".format(
             context, b_values, value)
         self.assertEqual(value, context.get('quanty'), msg)
+
+    def test_TEXT_BLOCK(self):
+        """
+        Test that TEXT_BLOCK is returned in the context.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create database objects.
+        dc0 = self._create_dynamic_column_record(
+            "Description", DynamicColumn.TEXT_BLOCK, 'book_top', 2)
+        book, b_cc, b_values = self._create_book_objects(extra_dcs=[dc0])
+        # Set value
+        value = "This is a long description."
+        book.set_key_value('description', value)
+        b_values['description'] = value
+        # Execute the template tag and test.
+        context = self._setup_template(
+            Book, book, 'description', context_name='description')
+        value = book.get_key_value('description')
+        msg= "context: {}, b_values: {}, value: {}".format(
+            context, b_values, value)
+        self.assertEqual(value, context.get('description'), msg)
+
+    def test_TIME(self):
+        """
+        Test that TIME is returned in the context.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create database objects.
+        dc0 = self._create_dynamic_column_record(
+            "Now", DynamicColumn.TIME, 'book_top', 2)
+        book, b_cc, b_values = self._create_book_objects(extra_dcs=[dc0])
+        # Set value
+        dt = datetime.datetime.now(tz=pytz.utc)
+        value = datetime.time(hour=dt.hour, minute=dt.minute, second=dt.second,
+                              microsecond=dt.microsecond, tzinfo=dt.tzinfo)
+        book.set_key_value('now', value)
+        b_values['now'] = value
+        # Execute the template tag and test.
+        context = self._setup_template(
+            Book, book, 'now', context_name='now')
+        value = book.get_key_value('now')
+        msg= "context: {}, b_values: {}, value: {}".format(
+            context, b_values, value)
+        self.assertEqual(value, context.get('now'), msg)
 
 
 
