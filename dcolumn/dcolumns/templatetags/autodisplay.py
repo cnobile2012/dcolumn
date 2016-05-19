@@ -454,7 +454,10 @@ class SingleDisplayNode(template.Node):
         try:
             obj = self.obj.resolve(context)
         except template.VariableDoesNotExist:
-            obj = None
+            msg = _("The model object does not exist in the context, "
+                    "found '{}'").format(self.obj)
+            log.warn(ugettext(msg))
+            raise template.VariableDoesNotExist(msg)
 
         value = ''
 
@@ -528,50 +531,3 @@ class CombineContextsNode(template.Node):
         """
         result = self.obj.resolve(context).get(self.variable.resolve(context))
         return result and result or ''
-
-
-if __name__ == '__main__':
-    import sys, traceback
-    from django.template import Template, Context
-
-    context = {}
-    context.update({'relation': {'name': "Project Name"}})
-
-    fk_options = {
-        "dynamicColumns": {
-            "book": [
-                [0, "Choose a value"],
-                [2, "HTML5 Pocket Reference"],
-                [1, "SQL Pocket Guide"],
-                [3, "Raspberry Pi Hacks"]
-                ]
-            },
-        }
-
-    for i in range(len(DynamicColumn.VALUE_TYPES)):
-        relation = context.get('relation')
-        relation['value_type'] = i
-
-        if i == DynamicColumn.CHOICE:
-            rel = context.get('relation')
-            rel['key'] = 'book'
-            cmd = ("{% auto_display relation prefix=test- "
-                   "options=dynamicColumns %}")
-            context.update(fk_options)
-        else:
-            cmd = "{% auto_display relation %}"
-            rel = context.get('relation')
-            rel.pop('key', None)
-            context.pop('dynamicColumns', None)
-
-        try:
-            print 'Test {}--{}'.format(i+1, cmd)
-            c = Context(context)
-            command = "Element: {}".format(cmd)
-            t = Template("{% load autodisplay %}" + command)
-            print 'Context Data:', c
-            print t.render(c)
-            print
-        except Exception, e:
-            print "{}: {}\n".format(sys.exc_info()[0], sys.exc_info()[1])
-            traceback.print_tb(sys.exc_info()[2])

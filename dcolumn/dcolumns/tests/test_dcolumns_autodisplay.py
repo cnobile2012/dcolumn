@@ -604,7 +604,7 @@ class TestSingleDisplay(BaseDcolumns):
         super(TestSingleDisplay, self).setUp()
 
     def _setup_template(self, model, object, slug, delimiter='as',
-                        context_name=None):
+                        context_name=None, object_name='object'):
         # Setup the context.
         vmt = ViewMixinTest()
         vmt.model = model
@@ -613,10 +613,11 @@ class TestSingleDisplay(BaseDcolumns):
         # Run the test.
         buff = StringIO()
         buff.write("{% load autodisplay %}")
+        o = " {}".format(object_name)
         s = " {}".format(slug)
         d = " {}".format(delimiter)
         c = " {}".format(context_name) if context_name else ''
-        cmd = "{{% single_display object{}{}{} %}}".format(s, d, c)
+        cmd = "{{% single_display{}{}{}{} %}}".format(o, s, d, c)
         buff.write(cmd)
         template = buff.getvalue()
         buff.close()
@@ -649,6 +650,12 @@ class TestSingleDisplay(BaseDcolumns):
             Book, book, 'bad-slug', context_name='bad-slug')
         msg = "b_values: {}".format(b_values)
         self.assertEqual('', context.get('bad-slug'), msg)
+        # Test that template.VariableDoesNotExist is raised and relation is
+        # set to None.
+        with self.assertRaises(VariableDoesNotExist) as cm:
+            context = self._setup_template(
+                Book, book, 'abstract', context_name='abstract',
+                object_name='objectX')
 
     def test_BOOLEAN(self):
         """
