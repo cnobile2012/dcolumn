@@ -15,4 +15,3 @@ Sphinx
 
 # Test coverage
 coverage
-django_nose
