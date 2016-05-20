@@ -859,4 +859,32 @@ class TestSingleDisplay(BaseDcolumns):
         self.assertEqual(value, context.get('now'), msg)
 
 
+class TestCombineContexts(BaseDcolumns):
+
+    def __init__(self, name):
+        super(TestCombineContexts, self).__init__(name)
+
+    def setUp(self):
+        super(TestCombineContexts, self).setUp()
+
+    def _setup_template(self, object, obj, variable):
+        # Setup the context.
+        vmt = ViewMixinTest()
+        vmt.model = model
+        vmt.object = object
+        context = Context(vmt.get_context_data())
+        # Run the test.
+        buff = StringIO()
+        buff.write("{% load autodisplay %}")
+        o = " {}".format(object_name)
+        v = " {}".format(variable)
+        cmd = "{{% combine_contexts{}{} %}}".format(o, v)
+        buff.write(cmd)
+        template = buff.getvalue()
+        buff.close()
+        tr = Template(template)
+        tr.render(context)
+        return context
+
+
 
