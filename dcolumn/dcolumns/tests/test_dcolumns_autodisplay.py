@@ -867,7 +867,7 @@ class TestCombineContexts(BaseDcolumns):
     def setUp(self):
         super(TestCombineContexts, self).setUp()
 
-    def _setup_template(self, object, obj, variable):
+    def _setup_template(self, model, object, obj, variable, extra_arg=''):
         # Setup the context.
         vmt = ViewMixinTest()
         vmt.model = model
@@ -876,9 +876,10 @@ class TestCombineContexts(BaseDcolumns):
         # Run the test.
         buff = StringIO()
         buff.write("{% load autodisplay %}")
-        o = " {}".format(object_name)
+        o = " {}".format(obj)
         v = " {}".format(variable)
-        cmd = "{{% combine_contexts{}{} %}}".format(o, v)
+        i = " {}".format(extra_arg)
+        cmd = "{{% combine_contexts{}{}{} %}}".format(o, v, i)
         buff.write(cmd)
         template = buff.getvalue()
         buff.close()
@@ -886,5 +887,14 @@ class TestCombineContexts(BaseDcolumns):
         tr.render(context)
         return context
 
+    def test_exceptions(self):
+        """
+        Test that any exceptions are raised in the proper conditions.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create database objects.
+        book, b_cc, b_values = self._create_book_objects()
 
-
+        with self.assertRaises(TemplateSyntaxError) as cm:
+            self._setup_template(Book, book, 'form.errors', 'relation.slug',
+                                 extra_arg='junk')
