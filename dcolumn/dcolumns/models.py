@@ -605,6 +605,8 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
             elif dc.value_type in (dc.TEXT, dc.TEXT_BLOCK) and obj.value:
                 value = obj.value.encode('utf-8')
             else:
+                # This should never happen as an invalid value_type will
+                # raise a ValidationError when the DynamicColumn is created.
                 value = obj.value
 
         return value
@@ -618,7 +620,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
             if not field:
                 field = m_field
 
-            if model and field:
+            if model and field: # value should be a pk--str(pk)
                 result = model.objects.get_value_by_pk(value, field)
             else:
                 self._raise_exception(dc, value, field=field)
@@ -667,7 +669,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return result
 
-    def set_key_value(self, slug, value, field=None, force=False):
+    def set_key_value(self, slug, value, force=False):
         """
         This method sets an arbitrary key/value object, it will log an error
         if the key/value object could not be found.
@@ -681,12 +683,6 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                       object itself to get the value from, or a ``CHOICE``
                       object.
         :type value: string or CollectionBase object
-        :param field: Only used with ``CHOICE`` objects. Used to get the value
-                      on the ``KeyValue`` object. If this keyword argument is
-                      not set the default field will be used when the
-                      ``dcolumn_manager.register_choice(choice, relation_num,
-                      field)`` was set.
-        :type field: str or None
         :param force: Default is ``False``, do not save empty strings or
                       ``None`` objects else ``True`` save empty strings only.
         :type force: bool
@@ -697,7 +693,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
             if dc:
                 if dc.value_type == dc.CHOICE:
-                    value = self._is_set_choice(dc, value, field)
+                    value = self._is_set_choice(dc, value)
                 elif dc.value_type in (dc.TIME, dc.DATE, dc.DATETIME):
                     value = self._is_set_datetime(dc, value)
                 elif (dc.value_type == dc.NUMBER and
@@ -709,6 +705,8 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                       isinstance(value, types.StringTypes)):
                     pass
                 else:
+                    # This should never happen as an invalid value_type will
+                    # raise a ValidationError when the DynamicColumn is created.
                     self._raise_exception(dc, value)
 
                 value = value.encode('utf-8')
@@ -729,29 +727,21 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                 raise ValueError(msg)
         else:
             msg = ("Could not process the data as passed into {}, "
-                   "slug: {}, value: {}, field: {}, force: {}").format(
-                self.set_key_value.__name__, slug, value, field, force)
+                   "slug: {}, value: {}, force: {}").format(
+                self.set_key_value.__name__, slug, value, force)
             log.error(msg)
             raise ValueError(msg)
 
-    def _is_set_choice(self, dc, value, field):
+    def _is_set_choice(self, dc, value):
         model, m_field = dc.get_choice_relation_object_and_field()
 
-        if not field:
-            new_field = m_field
-        else:
-            new_field = None
-
-        if dc.store_relation and new_field:
-            result = str(getattr(value, new_field))
-        elif model and not field:
+        if dc.store_relation:
+            result = str(getattr(value, m_field))
+        elif model:
             # Normal mode
             result = str(getattr(value, 'pk'))
-        elif model and new_field and hasattr(value, new_field):
-            # Non-default field
-            result = str(getattr(value, new_field))
         else:
-            self._raise_exception(dc, value, field=new_field)
+            self._raise_exception(dc, value, field=m_field)
 
         return result
 

@@ -403,6 +403,10 @@ class TestDynamicColumn(BaseDcolumns):
             dc3 = self._create_dynamic_column_record(
                 "Author", DynamicColumn.TEXT, 'book_top', 1,
                 relation=self.choice2index.get("Author"))
+        # Test invalid dynamic column type raises a ValidationError.
+        with self.assertRaises(ValidationError) as cm:
+            dc4 = self._create_dynamic_column_record(
+                "Bad Type", 100, 'book_top', 14)
 
     def test_get_choice_relation_object_and_field(self):
         """
@@ -488,6 +492,10 @@ class TestColumnCollection(BaseDcolumns):
         msg = "cc_set2: {}".format(cc_set2)
         self.assertEqual(cc_set2.count(), 1, msg)
         self.assertTrue(cc_set2[0] == dc1, msg)
+        # Test that the DoesNotExist gets raised when an invalid column
+        # collection name is provided.
+        with self.assertRaises(ColumnCollection.DoesNotExist) as cm:
+            ColumnCollection.objects.get_column_collection('BadModelName')
 
     def test_serialize_columns(self):
         """
@@ -756,7 +764,7 @@ class TestCollectionBase(BaseDcolumns):
         # Create a book object and lots of dynamic columns.
         author, a_cc, a_values = self._create_author_objects()
         promotion, p_cc, p_values = self._create_promotion_objects()
-        language = Language()
+        language = Language.objects.model_objects()[3] # Russian
         dc0 = self._create_dynamic_column_record(
             "Date & Time", DynamicColumn.DATETIME, 'book_top', 6)
         dc1 = self._create_dynamic_column_record(
@@ -769,9 +777,13 @@ class TestCollectionBase(BaseDcolumns):
             "Bad Bool", DynamicColumn.BOOLEAN, 'book_top', 10)
         dc5 = self._create_dynamic_column_record(
             "Bad Date", DynamicColumn.DATE, 'book_top', 11)
+        dc6 = self._create_dynamic_column_record(
+            "Bad Number", DynamicColumn.NUMBER, 'book_top', 12)
+        dc7 = self._create_dynamic_column_record(
+            "Bad Float", DynamicColumn.FLOAT, 'book_top', 13)
         book, b_cc, b_values = self._create_book_objects(
             author=author, promotion=promotion, language=language,
-            extra_dcs=[dc0, dc1, dc2, dc3, dc4, dc5])
+            extra_dcs=[dc0, dc1, dc2, dc3, dc4, dc5, dc6, dc7])
         value = datetime.datetime.now(pytz.utc).isoformat()
         kv0 = self._create_key_value_record(book, dc0, value)
         b_values[dc0.slug] = dateutil.parser.parse(kv0.value)
@@ -790,6 +802,12 @@ class TestCollectionBase(BaseDcolumns):
         value = 'junk'
         kv5 = self._create_key_value_record(book, dc5, value)
         b_values[dc5.slug] = kv5.value
+        value = 'junk'
+        kv6 = self._create_key_value_record(book, dc6, value)
+        b_values[dc6.slug] = kv6.value
+        value = 'junk'
+        kv7 = self._create_key_value_record(book, dc7, value)
+        b_values[dc7.slug] = kv7.value
         # Test Choice mode with store_relation set to True.
         slug = 'promotion'
         value = book.get_key_value(slug)
@@ -841,11 +859,19 @@ class TestCollectionBase(BaseDcolumns):
         value = book.get_key_value(slug)
         msg = "value: {}, b_values: {}".format(value, b_values)
         self.assertEqual(value, int(b_values.get(slug)), msg)
+        # Test invalid NUMBER.
+        slug = 'bad-number'
+        with self.assertRaises(ValueError) as cm:
+            book.get_key_value(slug)
         # Test FLOAT
         slug = 'percentage'
         value = book.get_key_value(slug)
         msg = "value: {}, b_values: {}".format(value, b_values)
         self.assertEqual(value, float(b_values.get(slug)), msg)
+        # Test invalid FLOAT.
+        slug = 'bad-float'
+        with self.assertRaises(ValueError) as cm:
+            book.get_key_value(slug)
         # Test TEXT
         slug = 'description'
         value = promotion.get_key_value(slug)
@@ -863,7 +889,6 @@ class TestCollectionBase(BaseDcolumns):
         self.assertEqual(value, '', msg)
         # Test invalid value other that a bad bolean.
         slug = 'bad-date'
-
         with self.assertRaises(ValueError) as cm:
             value = book.get_key_value(slug)
 
@@ -874,6 +899,7 @@ class TestCollectionBase(BaseDcolumns):
         """
         #self.skipTest("Temporarily skipped")
         # Add a few columns to author, promotion, and book.
+        language = Language.objects.model_objects()[3] # Russian
         author, a_cc, a_values = self._create_author_objects()
         new_author = self._create_dcolumn_record(
             Author, a_cc, name="Sr. Walter Raleigh")
@@ -892,7 +918,7 @@ class TestCollectionBase(BaseDcolumns):
         dc4 = self._create_dynamic_column_record(
             "Web Site", DynamicColumn.TEXT, 'book_top', 8)
         book, b_cc, b_values = self._create_book_objects(
-            author=author, promotion=promotion,
+            author=author, promotion=promotion, language=language,
             extra_dcs=[dc0, dc1, dc2, dc3, dc4])
         value = 0
         kv0 = self._create_key_value_record(book, dc0, value)
@@ -920,12 +946,14 @@ class TestCollectionBase(BaseDcolumns):
         msg = "Initial value: {}, found_value: {}, new_pk: {}".format(
             promotion.name, found_value, new_promotion.name)
         self.assertEqual(found_value, new_promotion.name, msg)
-        # Test CHOICE mode returns an exception in the proper situation only.
-        slug = 'author'
-
-        with self.assertRaises(ValueError) as cm:
-            value = book.set_key_value(slug, new_author, field='junk')
-
+        # Test that an alternate field can be set.
+        slug = 'language'
+        value = 'Russian'
+        book.set_key_value(slug, language)
+        found_value = book.get_key_value(slug, field='name')
+        msg = "Initial value: {}, found_value: {}, new_pk: {}".format(
+            language.name, found_value, value)
+        self.assertEqual(found_value, value, msg)
         # Test TIME
         slug = 'start-time'
         dt = datetime.datetime.now(pytz.utc)
@@ -1012,13 +1040,31 @@ class TestCollectionBase(BaseDcolumns):
         # Test general error condition.
         slug = 'bad-slug'
         value = 'Should never get set.'
-
         with self.assertRaises(ValueError) as cm:
             book.set_key_value(slug, value)
-
         # Test for exception when invalid arguments are passed.
         value = None
         force = True
-
         with self.assertRaises(ValueError) as cm:
             book.set_key_value(slug, value, force=force)
+
+
+class TestKeyValue(BaseDcolumns):
+
+    def __init__(self, name):
+        super(TestKeyValue, self).__init__(name)
+
+    def test_str_value(self):
+        """
+        Test that the __str__ method returns the correct value.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create a KeyValue object.
+        dc0 = self._create_dynamic_column_record(
+            "Edition", DynamicColumn.NUMBER, 'book_top', 4)
+        book, b_cc, b_values = self._create_book_objects(extra_dcs=[dc0,])
+        value = 5
+        kv = self._create_key_value_record(book, dc0, value)
+        # Test that the values are the same.
+        msg = "value: {}, instance value: {}".format(kv.value, str(kv))
+        self.assertEqual(kv.value, str(kv), msg)
