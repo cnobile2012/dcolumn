@@ -12,7 +12,7 @@ from django.core.urlresolvers import reverse
 
 from ..models import DynamicColumn, ColumnCollection
 
-from .test_dcolumns_models import BaseDcolumns
+from .base_tests import BaseDcolumns
 
 
 class TestCollectionFormMixin(BaseDcolumns):
@@ -35,36 +35,6 @@ class TestCollectionFormMixin(BaseDcolumns):
             client.login(username=username, password=password)
 
         return client
-
-    def _has_error(self, response):
-        result = False
-
-        if hasattr(response, 'context_data'):
-            errors = response.context_data.get('form').errors
-
-            if errors:
-                result = True
-
-        return result
-
-    def _test_errors(self, response, tests={}):
-        if hasattr(response, 'context_data'):
-            errors = dict(response.context_data.get('form').errors)
-            #print errors
-
-            for key, value in tests.items():
-                err_msg = errors.pop(key, None)
-                self.assertTrue(err_msg, "Could not find key: {}".format(key))
-                err_msg = err_msg.as_text()
-                msg = "For key '{}' value '{}' not found in '{}'".format(
-                    key, value, err_msg)
-                self.assertTrue(value in err_msg, msg)
-
-            msg = "Unaccounted for errors: {}".format(errors)
-            self.assertFalse(len(errors), msg)
-        else:
-            msg = "No context_data"
-            self.assertTrue(False, msg)
 
     def test_proper_configuration(self):
         """

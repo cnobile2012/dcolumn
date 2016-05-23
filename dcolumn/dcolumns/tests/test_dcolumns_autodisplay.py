@@ -18,7 +18,7 @@ from example_site.books.models import Author, Book, Promotion, Publisher
 from dcolumn.dcolumns.models import DynamicColumn
 
 from ..views import ContextDataMixin
-from .test_dcolumns_models import BaseDcolumns
+from .base_tests import BaseDcolumns
 
 
 class ViewMixinTest(ContextDataMixin):

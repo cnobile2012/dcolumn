@@ -15,7 +15,7 @@ from dcolumn.common.choice_mixins import BaseChoiceManager
 
 from ..models import DynamicColumn, ColumnCollection, KeyValue
 
-from .test_dcolumns_models import BaseDcolumns
+from .base_tests import BaseDcolumns
 
 
 #
