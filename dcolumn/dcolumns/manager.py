@@ -284,13 +284,19 @@ class DynamicColumnManager(object):
 
     def get_related_object_names(self, choose=True):
         """
+        This method would provide the models that inherit ``CollectionBase``
+        and would usually be used in a drop down menu.
+
+        :param choose: If ``True`` includes a choice text as first item, else
+                       ``False`` the choice item is not included.
+        :type choose: bool
+        :rtype: A list of tuples.
         """
         from .models import CollectionBase
 
-        related_names = [
-            (ro.name, ro.related_model._meta.object_name)
-            for ro in CollectionBase._meta.related_objects
-            if ro.name != 'keyvalues']
+        related_names = [(ro.name, ro.related_model._meta.object_name)
+                         for ro in CollectionBase._meta.related_objects
+                         if ro.name != 'keyvalues']
         related_names.sort(key=lambda x: x[1])
 
         if choose:

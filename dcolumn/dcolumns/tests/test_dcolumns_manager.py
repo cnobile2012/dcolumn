@@ -309,6 +309,20 @@ class TestManager(BaseDcolumns):
         msg = "state: {}".format(state)
         self.assertEqual(state, False, msg)
 
+    def test_get_related_object_names(self):
+        """
+        Test that the model list is returned.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Test that we have data
+        result = self.manager.get_related_object_names()
+        msg = "result: {}".format(result)
+        self.assertEqual(len(result), 5, msg)
+        # Test without the choose item.
+        result = self.manager.get_related_object_names(choose=False)
+        msg = "result: {}".format(result)
+        self.assertEqual(len(result), 4, msg)
+
     def test_get_relation_model_field(self):
         """
         Test that passing the correct numericvalue returns a tuple of the
