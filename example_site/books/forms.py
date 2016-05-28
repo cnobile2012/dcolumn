@@ -29,7 +29,7 @@ class PromotionForm(CollectionBaseFormMixin):
         log.debug("args: %s, kwargs: %s", args, kwargs)
         self.fields['name'].widget = forms.TextInput(
             attrs={'size': 100, 'maxlength': 250})
-        # Gets rid of the annoying colon afer every label, but only works on
+        # Gets rid of the annoying colon after every label, but only works on
         # Django 1.6 and above.
         self.label_suffix = ''
 
@@ -53,7 +53,7 @@ class AuthorForm(CollectionBaseFormMixin):
         log.debug("args: %s, kwargs: %s", args, kwargs)
         self.fields['name'].widget = forms.TextInput(
             attrs={'size': 50, 'maxlength': 250})
-        # Gets rid of the annoying colon afer every label, but only works on
+        # Gets rid of the annoying colon after every label, but only works on
         # Django 1.6 and above.
         self.label_suffix = ''
 
@@ -72,7 +72,7 @@ class PublisherForm(CollectionBaseFormMixin):
         log.debug("args: %s, kwargs: %s", args, kwargs)
         self.fields['name'].widget = forms.TextInput(
             attrs={'size': 50, 'maxlength': 250})
-        # Gets rid of the annoying colon afer every label, but only works on
+        # Gets rid of the annoying colon after every label, but only works on
         # Django 1.6 and above.
         self.label_suffix = ''
 
@@ -91,7 +91,7 @@ class BookForm(CollectionBaseFormMixin):
         log.debug("args: %s, kwargs: %s", args, kwargs)
         self.fields['title'].widget = forms.TextInput(
             attrs={'size': 80, 'maxlength': 250})
-        # Gets rid of the annoying colon afer every label, but only works on
+        # Gets rid of the annoying colon after every label, but only works on
         # Django 1.6 and above.
         self.label_suffix = ''
 
