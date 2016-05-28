@@ -11,9 +11,9 @@ __docformat__ = "restructuredtext en"
 import logging
 import datetime
 import dateutil
-import types
 from collections import OrderedDict
 
+from django.utils import six
 from django.db import models
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.template.defaultfilters import slugify
@@ -702,7 +702,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                 elif dc.value_type in (dc.BOOLEAN, dc.FLOAT, dc.NUMBER):
                     value = self._is_set_bool_or_numerical(dc, value)
                 elif (dc.value_type in (dc.TEXT, dc.TEXT_BLOCK) and
-                      isinstance(value, types.StringTypes)):
+                      isinstance(value, six.string_types)):
                     pass
                 else:
                     # This should never happen as an invalid value_type will
