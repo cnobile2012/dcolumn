@@ -167,7 +167,7 @@ class CollectionAJAXView(JSONResponseMixin, TemplateView, ContextDataMixin):
         try:
             context.update(self.get_dynamic_column_context_data(**context))
             context.update(self.get_relation_context_data(**context))
-        except Exception, e:
+        except Exception as e:
             context['valid'] = False
             context['message'] = "Error occurred: {}".format(e)
             log.error(context['message'], exc_info=True)
