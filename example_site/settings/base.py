@@ -212,9 +212,9 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
             },
-        'dcolumns.dcolumns.manager': {
-            'handlers': ('dcolumns_file', 'mail_admins',),
-            'level': 'ERROR',
+        'tests': {
+            'handlers': ('dcolumns_file',),
+            'level': 'DEBUG',
             'propagate': True,
             },
         },
