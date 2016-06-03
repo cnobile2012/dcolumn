@@ -460,7 +460,7 @@ class CollectionBaseManager(models.Manager):
             else:
                 try:
                     value = getattr(obj, field)
-                except AttributeError as e:
+                except (AttributeError, TypeError) as e:
                     msg = _("The field value '%s' is not on object '%s'")
                     log.error(ugettext(msg), field, obj)
                     raise e
@@ -579,6 +579,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         :rtype: String value from a ``KeyValue`` object.
         :raises ValueError: Invalid combination of parameters.
         :raises AttributeError: If a bad field is passed in.
+        :raises TypeError: If wrong type is passed in.
         """
         dc = self.get_dynamic_column(slug)
 
@@ -699,8 +700,12 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                 elif (dc.value_type == dc.NUMBER and
                       value in ('increment', 'decrement')):
                     pass
-                elif dc.value_type in (dc.BOOLEAN, dc.FLOAT, dc.NUMBER):
-                    value = self._is_set_bool_or_numerical(dc, value)
+                elif dc.value_type == dc.BOOLEAN:
+                    value = self._is_set_bool(dc, value)
+                elif dc.value_type == dc.FLOAT:
+                    value = self._is_set_float(dc, value)
+                elif dc.value_type == dc.NUMBER:
+                    value = self._is_set_number(dc, value)
                 elif (dc.value_type in (dc.TEXT, dc.TEXT_BLOCK) and
                       isinstance(value, six.string_types)):
                     pass
@@ -735,9 +740,9 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
     def _is_set_choice(self, dc, value):
         model, m_field = dc.get_choice_relation_object_and_field()
 
-        if dc.store_relation:
+        if dc.store_relation and value:
             result = str(getattr(value, m_field))
-        elif model:
+        elif model and value:
             # Normal mode
             result = str(getattr(value, 'pk'))
         else:
@@ -754,9 +759,39 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return result
 
-    def _is_set_bool_or_numerical(self, dc, value):
-        if isinstance(value, (int, long, bool, float)):
+    def _is_set_bool(self, dc, value):
+        if isinstance(value, bool):
             result = str(value)
+        elif isinstance(value, six.integer_types):
+            result = str(0 if value == 0 else 1)
+        elif isinstance(value, six.string_types):
+            if value.lower() in ('false', 'true'):
+                result = value
+            elif value.isdigit():
+                result = str(0 if int(value) == 0 else 1)
+            else:
+                self._raise_exception(dc, value)
+        else:
+            self._raise_exception(dc, value)
+
+        return result
+
+    def _is_set_float(self, dc, value):
+        if isinstance(value, float):
+            result = str(value)
+        elif (isinstance(value, six.string_types) and
+              value.replace('.', '').isdigit()):
+            result = value
+        else:
+            self._raise_exception(dc, value)
+
+        return result
+
+    def _is_set_number(self, dc, value):
+        if isinstance(value, six.integer_types):
+            result = str(value)
+        elif isinstance(value, six.string_types) and value.isdigit():
+            result = value
         else:
             self._raise_exception(dc, value)
 

@@ -574,9 +574,12 @@ class TestCollectionBase(BaseDcolumns):
         msg = "value: {}, b_values: {}, a_values: {}, author.name: {}".format(
             value, b_values, a_values, author.name)
         self.assertEqual(value, author.name, msg)
-        # Test Choice exception.
+        # Test Choice AttributeError exception.
         with self.assertRaises(AttributeError) as cm:
             value = book.get_key_value(slug, 'bad_field')
+        # Test Choice ValueError exception.
+        with self.assertRaises(TypeError) as cm:
+            book.get_key_value(slug, book)
         # Test TIME
         slug = 'start-time'
         value = promotion.get_key_value(slug)
@@ -605,7 +608,6 @@ class TestCollectionBase(BaseDcolumns):
         self.assertEqual(value, bool_value, msg)
         # Test BAD BOOLEAN
         slug = 'bad-bool'
-
         with self.assertRaises(ValueError) as cm:
             value = book.get_key_value(slug)
         # Test NUMBER
@@ -700,6 +702,9 @@ class TestCollectionBase(BaseDcolumns):
         msg = "Initial value: {}, found_value: {}, new_pk: {}".format(
             promotion.name, found_value, new_promotion.name)
         self.assertEqual(found_value, new_promotion.name, msg)
+        # Test Choice ValueError exception. Cannot be tested.
+        #with self.assertRaises(ValueError) as cm:
+        #    book.set_key_value(slug, None)
         # Test that an alternate field can be set.
         slug = 'language'
         value = 'Russian'
@@ -742,6 +747,34 @@ class TestCollectionBase(BaseDcolumns):
         msg = "Initial value: {}, found_value: {}, new_bool: {}".format(
             b_values.get(slug), found_value, value)
         self.assertEqual(found_value, True, msg)
+        # Test BOOLEAN text True or False
+        value = 'TRUE'
+        book.set_key_value(slug, value)
+        found_value = book.get_key_value(slug)
+        msg = "Initial value: {}, found_value: {}, new_bool: {}".format(
+            b_values.get(slug), found_value, value)
+        self.assertEqual(found_value, True, msg)
+        # Test BOOLEAN text numeric 0
+        value = '0'
+        book.set_key_value(slug, value)
+        found_value = book.get_key_value(slug)
+        msg = "Initial value: {}, found_value: {}, new_bool: {}".format(
+            b_values.get(slug), found_value, value)
+        self.assertEqual(found_value, False, msg)
+        # Test BOOLEAN text numeric 2000
+        value = '2000'
+        book.set_key_value(slug, value)
+        found_value = book.get_key_value(slug)
+        msg = "Initial value: {}, found_value: {}, new_bool: {}".format(
+            b_values.get(slug), found_value, value)
+        self.assertEqual(found_value, True, msg)
+        # Test BOOLEAN ValueError exception with a string that cannot be
+        # converted to a boolead.
+        with self.assertRaises(ValueError) as cm:
+            book.set_key_value(slug, 'bad-data')
+        # Test BOOLEAN ValueError exception with an object.
+        with self.assertRaises(ValueError) as cm:
+            book.set_key_value(slug, book)
         # Test FLOAT
         slug = 'percentage'
         value = 30.0
