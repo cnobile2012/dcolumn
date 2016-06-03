@@ -118,7 +118,7 @@ class ContextDataMixin(object):
         :rtype: OrderedDict
         """
         if form:
-            relations = form.display_data
+            relations = form.relations
         else:
             name = kwargs.pop('class_name', None) # Used in AJAX call only.
 
