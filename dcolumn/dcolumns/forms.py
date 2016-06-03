@@ -18,7 +18,7 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from .manager import dcolumn_manager
 from .models import DynamicColumn, ColumnCollection, KeyValue
 
-log = logging.getLogger('dcolumns.dcolumns.views')
+log = logging.getLogger('dcolumns.dcolumns.forms')
 
 
 #
@@ -119,30 +119,6 @@ class CollectionBaseFormMixin(forms.ModelForm):
 
         log.debug("args: %s, kwargs: %s", args, kwargs)
         log.debug("fields: %s, data: %s", self.fields, self.data)
-
-    @property
-    def display_data(self):
-        """
-        Update objects derived from
-        ``ColumnCollection.objects.serialize_columns()`` which are now in
-        ``self.relations``. Populate the ``KeyValue`` values except where the
-        value was set on an update so as not to overwrite it.
-
-        :rtype: A ``dict`` derived from the
-                ``ColumnCollection.objects.serialize_columns()`` dict.
-        """
-        # Be sure we have an instance and it is an update on the instance
-        # not a new instance.
-        if self.instance and self.instance.pk is not None:
-            for pk, value in self.instance.serialize_key_values().items():
-                log.debug("pk: %s, value: %s", pk, value)
-                relation = self.relations.setdefault(pk, {})
-                # We only want to add new data not overwrite data that is
-                # already there.
-                if 'value' not in relation:
-                    relation['value'] = value.encode('utf-8')
-
-        return self.relations
 
     def clean_column_collection(self):
         """
@@ -355,25 +331,13 @@ class CollectionBaseFormMixin(forms.ModelForm):
         """
         Save all the ``KeyValue`` objects.
         """
-        for pk, relation in self.display_data.items():
-            required = relation.get('required', False)
+        for pk, relation in self.relations.items():
             value = relation.get('value', '')
-            log.debug("pk: %s, slug: %s, value: %s",
-                      pk, relation.get('slug'), relation.get('value'))
+            slug = relation.get('slug', '')
+            log.debug("pk: %s, slug: %s, value: %s", pk, slug, value)
 
-            try:
-                obj, created = self.instance.keyvalues.get_or_create(
-                    collection=self.instance, dynamic_column_id=int(pk),
-                    defaults={'value': value})
-            except self.instance.MultipleObjectsReturned as e:
-                log.error("Multiple records found for parent: %s, "
-                          "dynamic_column_id: %s", self.instance,
-                          dynamic_column_id=cc_id)
-                raise e
-
-            if not created:
-                obj.value = value
-                obj.save()
+            if slug and value:
+                self.instance.set_key_value(slug, value)
 
 
 #
