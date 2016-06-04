@@ -19,6 +19,7 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.template.defaultfilters import slugify
 from django.core.exceptions import ValidationError
 
+from dcolumn.common.choice_mixins import BaseChoice
 from dcolumn.common.model_mixins import (
     UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin,
     ValidateOnSaveMixin)
@@ -199,7 +200,7 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
         Gets the model class object and the field passed in when
         ``dcolumn_manager.register_choice`` was configured. If this
         ``DynamicColumn`` was not used for a choice model then a tuple of
-        two Nones is returned.
+        two Nones are returned.
 
         Example of Output::
 
@@ -680,9 +681,8 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         :param slug: The slug associated with a ``KeyValue`` object.
         :type slug: str
-        :param value: Can be a value from a``KeyValue`` object, a ``KeyValue``
-                      object itself to get the value from, or a ``CHOICE``
-                      object.
+        :param value: Can be a value to set in a ``KeyValue`` object, or a
+                      model that inherits ``CollectionBase`` or ``BaseChoice``.
         :type value: string or CollectionBase object
         :param force: Default is ``False``, do not save empty strings or
                       ``None`` objects else ``True`` save empty strings only.
@@ -740,20 +740,31 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
     def _is_set_choice(self, dc, value):
         model, m_field = dc.get_choice_relation_object_and_field()
 
-        if dc.store_relation and value:
+        if (dc.store_relation and
+            isinstance(value, (CollectionBase, BaseChoice))):
             result = str(getattr(value, m_field))
-        elif model and value:
-            # Normal mode
+        elif isinstance(value, (CollectionBase, BaseChoice)): # Normal mode
             result = str(getattr(value, 'pk'))
+        elif isinstance(value, six.string_types) and value.isdigit():
+            result = value
+        elif isinstance(value, six.integer_types):
+            result = str(value)
         else:
             self._raise_exception(dc, value, field=m_field)
 
         return result
 
     def _is_set_datetime(self, dc, value):
-        if isinstance(
-            value, (datetime.time, datetime.date, datetime.datetime)):
+        if isinstance(value, (datetime.time, datetime.date,
+                              datetime.datetime)):
             result = value.isoformat()
+        elif isinstance(value, six.string_types):
+            try:
+                dt = dateutil.parser.parse(value)
+            except ValueError as e:
+                self._raise_exception(dc, value, except_msg=e)
+            else:
+                result = value
         else:
             self._raise_exception(dc, value)
 
@@ -779,9 +790,11 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
     def _is_set_float(self, dc, value):
         if isinstance(value, float):
             result = str(value)
+        elif isinstance(value, six.integer_types):
+            result = str(float(value))
         elif (isinstance(value, six.string_types) and
               value.replace('.', '').isdigit()):
-            result = value
+            result = str(float(value))
         else:
             self._raise_exception(dc, value)
 
@@ -797,11 +810,12 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return result
 
-    def _raise_exception(self, dc, value,
-                         field='(Does not apply to this type)'):
-        msg = "Invalid value {}, should be of type {}, with field: {}.".format(
-            value, DynamicColumn.VALUE_TYPES_MAP.get(dc.value_type), field)
-        log.error(msg)
+    def _raise_exception(self, dc, value, field='(Not applicable)',
+                         except_msg=''):
+        msg = _("Invalid value {}, should be of type {}, with field: {}, "
+                "{}.").format(value, DynamicColumn.VALUE_TYPES_MAP.get(
+            dc.value_type), field, except_msg)
+        log.error(ugettext(msg))
         raise ValueError(msg)
 
 

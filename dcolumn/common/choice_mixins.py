@@ -145,3 +145,10 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
                 0, (0, _("Please choose a {}").format(self.model.__name__)))
 
         return choices
+
+
+class BaseChoice(object):
+    """
+    We need a base class for all Choice types so we can dynamically find them.
+    """
+    pass

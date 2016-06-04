@@ -222,7 +222,7 @@ class CollectionBaseFormMixin(forms.ModelForm):
     def validate_boolean_type(self, relation, key, value):
         if relation.get('value_type') == DynamicColumn.BOOLEAN:
             if value.isdigit():
-                value = int(value) != 0
+                value = 0 if int(value) == 0 else 1
             elif value.lower() in ('false', 'true'):
                 value = value.lower() == 'true'
             else:

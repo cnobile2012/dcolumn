@@ -606,7 +606,7 @@ class TestCollectionBase(BaseDcolumns):
         msg = "value: {}, b_values: {}".format(value, b_values)
         bool_value = True if b_values.get(slug).lower() == 'true' else False
         self.assertEqual(value, bool_value, msg)
-        # Test BAD BOOLEAN
+        # Test bad BOOLEAN
         slug = 'bad-bool'
         with self.assertRaises(ValueError) as cm:
             value = book.get_key_value(slug)
@@ -648,12 +648,7 @@ class TestCollectionBase(BaseDcolumns):
         with self.assertRaises(ValueError) as cm:
             value = book.get_key_value(slug)
 
-    def test_set_key_value(self):
-        """
-        Check that all the ppossible combinations of this method work
-        correctly.
-        """
-        #self.skipTest("Temporarily skipped")
+    def _create_test_objects(self):
         # Add a few columns to author, promotion, and book.
         language = Language.objects.model_objects()[3] # Russian
         author, a_cc, a_values = self._create_author_objects()
@@ -688,12 +683,58 @@ class TestCollectionBase(BaseDcolumns):
         value = 20.5
         kv3 = self._create_key_value_record(book, dc3, value)
         b_values[dc3.slug] = kv3.value
+        return (book, b_values, author, a_values, new_author, promotion,
+                p_values, new_promotion, language)
+
+    def test_set_key_value_exceptions(self):
+        """
+        Check that exceptions are raised correctly.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Get the test objects
+        (book, b_values, author, a_values, new_author, promotion, p_values,
+         new_promotion, language) = self._create_test_objects()
+        # Test general error condition.
+        slug = 'bad-slug'
+        value = 'Should never get set.'
+        with self.assertRaises(ValueError) as cm:
+            book.set_key_value(slug, value)
+        # Test for exception when invalid arguments are passed.
+        value = None
+        force = True
+        with self.assertRaises(ValueError) as cm:
+            book.set_key_value(slug, value, force=force)
+
+    def test_set_key_value_CHOICE(self):
+        """
+        Check that the CHOICE type works correctly.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Get the test objects
+        (book, b_values, author, a_values, new_author, promotion, p_values,
+         new_promotion, language) = self._create_test_objects()
+        # Test Choice ValueError exception.
+        slug = 'author'
+        with self.assertRaises(ValueError) as cm:
+            book.set_key_value(slug, 'bad-data')
         # Test CHOICE ForeignKey mode with store_relation set to False.
         slug = 'author'
         book.set_key_value(slug, new_author)
         found_value = book.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_pk: {}".format(
             author.pk, found_value, new_author.pk)
+        self.assertEqual(found_value, new_author.name, msg)
+        # Test CHOICE mode with an integer pk value from a KeyValue record.
+        book.set_key_value(slug, author.pk)
+        found_value = book.get_key_value(slug)
+        msg = ("Initial value: {}, found_value: {}, new_pk: {}, values: {}"
+               ).format(new_author.name, found_value, author.name, b_values)
+        self.assertEqual(found_value, author.name, msg)
+        # Test CHOICE mode with a string pk value from a KeyValue record.
+        book.set_key_value(slug, str(new_author.pk))
+        found_value = book.get_key_value(slug)
+        msg = ("Initial value: {}, found_value: {}, new_pk: {}, values: {}"
+               ).format(author.name, found_value, new_author.name, b_values)
         self.assertEqual(found_value, new_author.name, msg)
         # Test CHOICE mode with store_relation set to True.
         slug = 'promotion'
@@ -702,9 +743,6 @@ class TestCollectionBase(BaseDcolumns):
         msg = "Initial value: {}, found_value: {}, new_pk: {}".format(
             promotion.name, found_value, new_promotion.name)
         self.assertEqual(found_value, new_promotion.name, msg)
-        # Test Choice ValueError exception. Cannot be tested.
-        #with self.assertRaises(ValueError) as cm:
-        #    book.set_key_value(slug, None)
         # Test that an alternate field can be set.
         slug = 'language'
         value = 'Russian'
@@ -713,6 +751,15 @@ class TestCollectionBase(BaseDcolumns):
         msg = "Initial value: {}, found_value: {}, new_pk: {}".format(
             language.name, found_value, value)
         self.assertEqual(found_value, value, msg)
+
+    def test_set_key_value_TIME(self):
+        """
+        Check that the TIME type works correctly.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Get the test objects
+        (book, b_values, author, a_values, new_author, promotion, p_values,
+         new_promotion, language) = self._create_test_objects()
         # Test TIME
         slug = 'start-time'
         dt = datetime.datetime.now(pytz.utc)
@@ -723,7 +770,16 @@ class TestCollectionBase(BaseDcolumns):
         msg = "Initial value: {}, found_value: {}, new_time: {}".format(
             p_values.get(slug), found_value, time)
         self.assertEqual(found_value, time, msg)
-        # Test DATE
+
+    def test_set_key_value_DATE(self):
+        """
+        Check that the DATE type works correctly.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Get the test objects
+        (book, b_values, author, a_values, new_author, promotion, p_values,
+         new_promotion, language) = self._create_test_objects()
+        # Test DATE with object
         slug = 'start-date'
         date = datetime.date.today() + datetime.timedelta(days=1)
         promotion.set_key_value(slug, date)
@@ -731,14 +787,55 @@ class TestCollectionBase(BaseDcolumns):
         msg = "Initial value: {}, found_value: {}, new_date: {}".format(
             p_values.get(slug), found_value, date)
         self.assertEqual(found_value, date, msg)
-        # Test DATETIME
+        # Test DATE with string
+        slug = 'start-date'
+        date = '2015-01-01'
+        dt = dateutil.parser.parse(date)
+        parsed_date = datetime.date(year=dt.year, month=dt.month, day=dt.day)
+        promotion.set_key_value(slug, date)
+        found_value = promotion.get_key_value(slug)
+        msg = "Initial value: {}, found_value: {}, new_date: {}".format(
+            p_values.get(slug), found_value, parsed_date)
+        self.assertEqual(found_value, parsed_date, msg)
+        # Test DATE with bad date string
+        slug = 'start-date'
+        date = '2015-13-01'
+        with self.assertRaises(ValueError) as cm:
+            promotion.set_key_value(slug, date)
+        # Test DATE with garbage text string.
+        slug = 'start-date'
+        date = 'garbage string'
+        with self.assertRaises(ValueError) as cm:
+            promotion.set_key_value(slug, date)
+
+    def test_set_key_value_DATETIME(self):
+        """
+        Check that the DATETIME type works correctly.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Get the test objects
+        (book, b_values, author, a_values, new_author, promotion, p_values,
+         new_promotion, language) = self._create_test_objects()
+        # Test Choice ValueError exception.
         slug = 'date-time'
+        with self.assertRaises(ValueError) as cm:
+            book.set_key_value(slug, 2000)
+        # Test DATETIME
         dt = datetime.datetime.now(pytz.utc)
         book.set_key_value(slug, dt)
         found_value = book.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_datetime: {}".format(
             b_values.get(slug), found_value, dt)
         self.assertEqual(found_value, dt, msg)
+
+    def test_set_key_value_BOOLEAN(self):
+        """
+        Check that the BOOLEAN type works correctly.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Get the test objects
+        (book, b_values, author, a_values, new_author, promotion, p_values,
+         new_promotion, language) = self._create_test_objects()
         # Test BOOLEAN
         slug = 'ignore'
         value = 1
@@ -775,36 +872,90 @@ class TestCollectionBase(BaseDcolumns):
         # Test BOOLEAN ValueError exception with an object.
         with self.assertRaises(ValueError) as cm:
             book.set_key_value(slug, book)
-        # Test FLOAT
+
+    def test_set_key_value_FLOAT(self):
+        """
+        Check that the FLOAT type works correctly.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Get the test objects
+        (book, b_values, author, a_values, new_author, promotion, p_values,
+         new_promotion, language) = self._create_test_objects()
+        # Test FLOAT ValueError exception with an integer.
         slug = 'percentage'
+        value = book
+        with self.assertRaises(ValueError) as cm:
+            book.set_key_value(slug, value)
+        # Test FLOAT with a real float
         value = 30.0
         book.set_key_value(slug, value)
         found_value = book.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_float: {}".format(
             b_values.get(slug), found_value, value)
         self.assertEqual(found_value, value, msg)
-        # Test NUMBER (normal numeric case).
+        # Test FLOAT with string value.
+        value = '20.5'
+        book.set_key_value(slug, value)
+        found_value = book.get_key_value(slug)
+        msg = "Initial value: {}, found_value: {}, float: {}".format(
+            b_values.get(slug), found_value, value)
+        self.assertEqual(found_value, float(value), msg)
+        # Test FLOAT with string value.
+        value = 30
+        book.set_key_value(slug, value)
+        found_value = book.get_key_value(slug)
+        msg = "Initial value: {}, found_value: {}, float: {}".format(
+            b_values.get(slug), found_value, value)
+        self.assertEqual(found_value, float(value), msg)
+
+    def test_set_key_value_NUMBER(self):
+        """
+        Check that the NUMBER type works correctly.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Get the test objects
+        (book, b_values, author, a_values, new_author, promotion, p_values,
+         new_promotion, language) = self._create_test_objects()
+        # Test FLOAT ValueError exception with an integer.
         slug = 'edition'
+        value = book
+        with self.assertRaises(ValueError) as cm:
+            book.set_key_value(slug, value)
+        # Test NUMBER (normal integer numeric case).
         value = 1
         book.set_key_value(slug, value)
         found_value = book.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_int: {}".format(
             b_values.get(slug), found_value, value)
         self.assertEqual(found_value, value, msg)
+        # Test NUMBER (normal string numeric case).
+        value = '1'
+        book.set_key_value(slug, value)
+        found_value = book.get_key_value(slug)
+        msg = "Initial value: {}, found_value: {}, new_int: {}".format(
+            b_values.get(slug), found_value, value)
+        self.assertEqual(found_value, int(value), msg)
         # Test NUMBER by `increment` on a number.
-        slug = 'edition'
         book.set_key_value(slug, 'increment')
         found_value = book.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_int: {}".format(
             b_values.get(slug), found_value, 2)
         self.assertEqual(found_value, 2, msg)
         # Test NUMBER by `decrement` on a number.
-        slug = 'edition'
         book.set_key_value(slug, 'decrement')
         found_value = book.get_key_value(slug)
         msg = "Initial value: {}, found_value: {}, new_int: {}".format(
             b_values.get(slug), found_value, 1)
         self.assertEqual(found_value, 1, msg)
+
+    def test_set_key_value_TEXT(self):
+        """
+        Check that the TEXT type works correctly.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Get the test objects
+        (book, b_values, author, a_values, new_author, promotion, p_values,
+         new_promotion, language) = self._create_test_objects()
         # Test TEXT (normal text case).
         slug = 'abstract'
         value = "A new abstract"
@@ -824,16 +975,15 @@ class TestCollectionBase(BaseDcolumns):
         result = book.serialize_key_values(by_slug=True)
         msg = "result: {}, b_values: ()".format(result, b_values)
         self.assertEqual(len(result), len(b_values), msg)
-        # Test general error condition.
-        slug = 'bad-slug'
-        value = 'Should never get set.'
-        with self.assertRaises(ValueError) as cm:
-            book.set_key_value(slug, value)
-        # Test for exception when invalid arguments are passed.
-        value = None
-        force = True
-        with self.assertRaises(ValueError) as cm:
-            book.set_key_value(slug, value, force=force)
+
+    def test_set_key_value_TEXT_BLOCK(self):
+        """
+        Check that the TEXT_BLOCK type works correctly.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Get the test objects
+        (book, b_values, author, a_values, new_author, promotion, p_values,
+         new_promotion, language) = self._create_test_objects()
 
 
 class TestKeyValue(BaseDcolumns):

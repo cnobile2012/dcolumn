@@ -7,7 +7,7 @@ The objects in this module mimic database models, so they will work properly
 in the ChoiceManager class.
 """
 
-from dcolumn.common.choice_mixins import BaseChoiceManager
+from dcolumn.common.choice_mixins import BaseChoice, BaseChoiceManager
 from dcolumn.dcolumns.manager import dcolumn_manager
 
 
@@ -22,7 +22,7 @@ class LanguageManager(BaseChoiceManager):
         super(LanguageManager, self).__init__()
 
 
-class Language(object):
+class Language(BaseChoice):
     pk = 0
     name = ''
 
