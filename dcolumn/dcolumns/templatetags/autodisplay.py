@@ -379,70 +379,6 @@ class SingleDisplayNode(template.Node):
         self.slug = slug
         self.name = name
 
-    def _fix_boolean(self, dc, value):
-        if isinstance(value, types.StringTypes):
-            if value.isdigit():
-                value = int(value)
-                if value: value = 1
-            elif value.lower() in ('false', 'true'):
-                value = eval(value.capitalize())
-
-        if isinstance(value, bool):
-            if value is True: value = 1
-            else: value = 0
-        return {0: self._NO, 1: self._YES}.get(value, '')
-
-    def _fix_choice(self, dc, value):
-        choice_name = dcolumn_manager.choice_relation_map[dc.relation]
-        obj, field = dcolumn_manager.choice_map[choice_name]
-        value = int(value)
-
-        for choice in obj.objects.model_objects():
-            if getattr(choice, 'pk') == value:
-                value = getattr(choice, field)
-                break
-
-        return (value != 0) and value or ''
-
-    def _fix_date(self, dc, value):
-        # 1985-04-12 RFC-3339
-        return datetime.date(*self._split_date(value))
-
-    def _fix_datetime(self, dc, value):
-        # 1985-04-12T23:20:50.52<+/-00:00>/Z RFC-3339
-        return parser.parse(value)
-
-    def _fix_float(self, dc, value):
-        return float(value)
-
-    def _fix_number(self, dc, value):
-        return int(value)
-
-    def _fix_text(self, dc, value):
-        return value
-
-    def _fix_text_block(self, dc, value):
-        return value
-
-    def _fix_time(self, dc, value):
-        # 23:20:50.52<+/-00:00>/Z RFC-3339
-        return parser.parse(value).timetz()
-
-    def _split_date(self, value):
-        return [int(v) for v in value.split('-') if v.isdigit()]
-
-    METHOD_MAP = {
-        DynamicColumn.BOOLEAN: _fix_boolean,
-        DynamicColumn.CHOICE: _fix_choice,
-        DynamicColumn.DATE: _fix_date,
-        DynamicColumn.DATETIME: _fix_datetime,
-        DynamicColumn.FLOAT: _fix_float,
-        DynamicColumn.NUMBER: _fix_number,
-        DynamicColumn.TEXT: _fix_text,
-        DynamicColumn.TEXT_BLOCK: _fix_text_block,
-        DynamicColumn.TIME: _fix_time,
-        }
-
     def render(self, context):
         """
         Render the results into the context.
@@ -459,25 +395,7 @@ class SingleDisplayNode(template.Node):
             log.warn(ugettext(msg))
             raise template.VariableDoesNotExist(msg)
 
-        value = ''
-
-        try:
-            key_value = obj.keyvalues.select_related(
-                'dynamic_column__slug').get(dynamic_column__slug=self.slug)
-            dc = key_value.dynamic_column
-            value_type = dc.value_type
-
-            if key_value.value != '':
-                if dc.store_relation and not key_value.value.isdigit():
-                    value_type = DynamicColumn.TEXT
-
-                value = self.METHOD_MAP[value_type](self, dc, key_value.value)
-        except KeyValue.DoesNotExist:
-            msg = _("KeyValue object does not exist for slug '{}'").format(
-                self.slug)
-            log.warn(ugettext(msg))
-
-        context[self.name] = value
+        context[self.name] = obj.get_key_value(self.slug)
         return ''
 
 

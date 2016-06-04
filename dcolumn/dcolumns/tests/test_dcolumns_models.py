@@ -836,8 +836,22 @@ class TestCollectionBase(BaseDcolumns):
         # Get the test objects
         (book, b_values, author, a_values, new_author, promotion, p_values,
          new_promotion, language) = self._create_test_objects()
-        # Test BOOLEAN
         slug = 'ignore'
+        # Test BOOLEAN ValueError exception with a string that cannot be
+        # converted to a boolead.
+        with self.assertRaises(ValueError) as cm:
+            book.set_key_value(slug, 'bad-data')
+        # Test BOOLEAN ValueError exception with an object.
+        with self.assertRaises(ValueError) as cm:
+            book.set_key_value(slug, book)
+        # Test BOOLEAN with a boolean.
+        value = False
+        book.set_key_value(slug, value)
+        found_value = book.get_key_value(slug)
+        msg = "Initial value: {}, found_value: {}, new_bool: {}".format(
+            b_values.get(slug), found_value, value)
+        self.assertEqual(found_value, False, msg)
+        # Test BOOLEAN numeric
         value = 1
         book.set_key_value(slug, value)
         found_value = book.get_key_value(slug)
@@ -865,13 +879,6 @@ class TestCollectionBase(BaseDcolumns):
         msg = "Initial value: {}, found_value: {}, new_bool: {}".format(
             b_values.get(slug), found_value, value)
         self.assertEqual(found_value, True, msg)
-        # Test BOOLEAN ValueError exception with a string that cannot be
-        # converted to a boolead.
-        with self.assertRaises(ValueError) as cm:
-            book.set_key_value(slug, 'bad-data')
-        # Test BOOLEAN ValueError exception with an object.
-        with self.assertRaises(ValueError) as cm:
-            book.set_key_value(slug, book)
 
     def test_set_key_value_FLOAT(self):
         """
@@ -948,9 +955,9 @@ class TestCollectionBase(BaseDcolumns):
             b_values.get(slug), found_value, 1)
         self.assertEqual(found_value, 1, msg)
 
-    def test_set_key_value_TEXT(self):
+    def test_set_key_value_TEXT_and_TEXT_BLOCK(self):
         """
-        Check that the TEXT type works correctly.
+        Check that the TEXT and TEXT_BLOCK type works correctly.
         """
         #self.skipTest("Temporarily skipped")
         # Get the test objects
@@ -975,15 +982,6 @@ class TestCollectionBase(BaseDcolumns):
         result = book.serialize_key_values(by_slug=True)
         msg = "result: {}, b_values: ()".format(result, b_values)
         self.assertEqual(len(result), len(b_values), msg)
-
-    def test_set_key_value_TEXT_BLOCK(self):
-        """
-        Check that the TEXT_BLOCK type works correctly.
-        """
-        #self.skipTest("Temporarily skipped")
-        # Get the test objects
-        (book, b_values, author, a_values, new_author, promotion, p_values,
-         new_promotion, language) = self._create_test_objects()
 
 
 class TestKeyValue(BaseDcolumns):

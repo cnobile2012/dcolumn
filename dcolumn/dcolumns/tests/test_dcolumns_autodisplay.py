@@ -666,42 +666,38 @@ class TestSingleDisplay(BaseDcolumns):
         dc0 = self._create_dynamic_column_record(
             "Ignore", DynamicColumn.BOOLEAN, 'book_top', 2)
         book, b_cc, b_values = self._create_book_objects(extra_dcs=[dc0])
-        # Set value to boolean True
-        value = True
+        # Test BOOLEAN with Yes
+        value = "Yes"
         book.set_key_value('ignore', value)
         b_values['ignore'] = value
-        # Execute the template tag and test.
         context = self._setup_template(
             Book, book, 'ignore', context_name='ignore')
         msg= "context: {}, b_values: {}".format(context, b_values)
-        self.assertEqual('Yes', context.get('ignore'), msg)
-        # Set value to boolean False
-        value = False
+        self.assertEqual(True, context.get('ignore'), msg)
+        # Test BOOLEAN with No
+        value = "No"
         book.set_key_value('ignore', value)
         b_values['ignore'] = value
-        # Execute the template tag and test.
         context = self._setup_template(
             Book, book, 'ignore', context_name='ignore')
         msg= "context: {}, b_values: {}".format(context, b_values)
-        self.assertEqual('No', context.get('ignore'), msg)
-        # Set value to 1 (one)
+        self.assertEqual(False, context.get('ignore'), msg)
+        # Test BOOLEAN with 1 (one)
         value = 1
         book.set_key_value('ignore', value)
         b_values['ignore'] = value
-        # Execute the template tag and test.
         context = self._setup_template(
             Book, book, 'ignore', context_name='ignore')
         msg= "context: {}, b_values: {}".format(context, b_values)
-        self.assertEqual('Yes', context.get('ignore'), msg)
-        # Set value to 0 (zero)
+        self.assertEqual(True, context.get('ignore'), msg)
+        # Test BOOLEAN with 0 (zero)
         value = 0
         book.set_key_value('ignore', value)
         b_values['ignore'] = value
-        # Execute the template tag and test.
         context = self._setup_template(
             Book, book, 'ignore', context_name='ignore')
         msg= "context: {}, b_values: {}".format(context, b_values)
-        self.assertEqual('No', context.get('ignore'), msg)
+        self.assertEqual(False, context.get('ignore'), msg)
 
     def test_CHOICE(self):
         """

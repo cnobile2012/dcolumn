@@ -514,6 +514,13 @@ class CollectionBaseManager(models.Manager):
 
 
 class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
+    YES = _("yes")
+    NO = _("no")
+    YES_NO = (YES, NO, "yes", "no")
+    TRUE = _("true")
+    FALSE = _("false")
+    TRUE_FALSE = (TRUE, FALSE, "true", "false")
+
     column_collection = models.ForeignKey(
         ColumnCollection, verbose_name=_("Column Collection"),
         help_text=_("Choose the version of the dynamic columns you want "
@@ -582,14 +589,15 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         :raises AttributeError: If a bad field is passed in.
         :raises TypeError: If wrong type is passed in.
         """
-        dc = self.get_dynamic_column(slug)
-
         try:
-            obj = self.keyvalues.get(dynamic_column=dc)
+            obj = self.keyvalues.select_related(
+                'dynamic_column').get(dynamic_column__slug=slug)
         except self.keyvalues.model.DoesNotExist:
             log.error("Could not find value for slug '%s'.", slug)
             value = ''
         else:
+            dc = obj.dynamic_column
+
             if dc.value_type == dc.CHOICE and obj.value:
                 value = self._is_get_choice(dc, obj.value, field)
             elif dc.value_type == dc.TIME and obj.value:
@@ -647,9 +655,11 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
     def _is_get_boolean(self, dc, value):
         if value.isdigit():
-            result = int(value) != 0
-        elif value.lower() in ('false', 'true'):
-            result = value.lower() == 'true'
+            result = 0 if int(value) == 0 else 1
+        elif value.lower() in self.TRUE_FALSE:
+            result = value.lower() == self.TRUE
+        elif value.lower() in self.YES_NO:
+            result = value.lower() == self.YES
         else:
             self._raise_exception(dc, value)
 
@@ -776,7 +786,9 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         elif isinstance(value, six.integer_types):
             result = str(0 if value == 0 else 1)
         elif isinstance(value, six.string_types):
-            if value.lower() in ('false', 'true'):
+            if value.lower() in self.TRUE_FALSE:
+                result = value
+            elif value.lower() in self.YES_NO:
                 result = value
             elif value.isdigit():
                 result = str(0 if int(value) == 0 else 1)
