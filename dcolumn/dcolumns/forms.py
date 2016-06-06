@@ -13,10 +13,11 @@ import datetime
 import dateutil
 
 from django import forms
+from django.utils import six
 from django.utils.translation import ugettext, ugettext_lazy as _
 
 from .manager import dcolumn_manager
-from .models import DynamicColumn, ColumnCollection, KeyValue
+from .models import CollectionBase, DynamicColumn, ColumnCollection, KeyValue
 
 log = logging.getLogger('dcolumns.dcolumns.forms')
 
@@ -88,7 +89,7 @@ class CollectionBaseFormMixin(forms.ModelForm):
     ``CollectionBase``.
     """
     MAX_FIELD_LENGTH_MAP = {
-        DynamicColumn.BOOLEAN: 1,
+        DynamicColumn.BOOLEAN: 20,
         DynamicColumn.CHOICE: 12,
         DynamicColumn.DATE: 20,
         DynamicColumn.DATETIME: 20,
@@ -128,21 +129,23 @@ class CollectionBaseFormMixin(forms.ModelForm):
         :raises DoesNotExist: If the record does not exist.
         :raises MultipleObjectsReturned: If multiple objects were returned.
         """
+        obj = None
+
         try:
             self.coll_name = dcolumn_manager.get_collection_name(
                 self.Meta.model.__name__)
         except ValueError as e:
             self._errors['collection_name'] = self.error_class([str(e)])
-
-        try:
-            obj = ColumnCollection.objects.active().get(
-                related_model=self.coll_name)
-        except ColumnCollection.DoesNotExist as e:
-            msg = _("A ColumnCollection needs to exist before creating this "
-                    "object, found collection name {}.").format(self.coll_name)
-            log.critical("%s, %s", ugettext(msg), e)
-            self._errors['missing_collection'] = self.error_class([msg])
-            obj = None
+        else:
+            try:
+                obj = ColumnCollection.objects.active().get(
+                    related_model=self.coll_name)
+            except ColumnCollection.DoesNotExist as e:
+                msg = _("A ColumnCollection needs to exist before creating "
+                        "this object, found collection name {}.").format(
+                    self.coll_name)
+                log.critical("%s, %s", ugettext(msg), e)
+                self._errors['missing_collection'] = self.error_class([msg])
 
         return obj
 
@@ -219,16 +222,23 @@ class CollectionBaseFormMixin(forms.ModelForm):
 
         return value
 
+    _boolean_error = _("Invalid value '{}' must be an integer, numeric "
+                       "string, true/false, or yes/no.")
+
     def validate_boolean_type(self, relation, key, value):
         if relation.get('value_type') == DynamicColumn.BOOLEAN:
-            if value.isdigit():
-                value = 0 if int(value) == 0 else 1
-            elif value.lower() in ('false', 'true'):
-                value = value.lower() == 'true'
+            if isinstance(value, six.string_types):
+                if value.isdigit():
+                    result = str(0 if int(value) == 0 else 1)
+                elif (value.lower() in CollectionBase.TRUE_FALSE or
+                      value.lower() in CollectionBase.YES_NO):
+                    pass
+                else:
+                    self._errors[key] = self.error_class(
+                        [self._boolean_error.format(value)])
             else:
                 self._errors[key] = self.error_class(
-                    [_("Invalid value '{}' must be numeric or true or false."
-                       ).format(value)])
+                    [self._boolean_error.format(value)])
 
         return value
 

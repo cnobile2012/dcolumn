@@ -169,7 +169,7 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         self.assertTrue(self._has_error(response), msg)
         self._test_errors(response, tests={
             'author': "Author field is required."})
-        # Try to create a record with an invalid PK.
+        # Try to create a record with an invalid promotion PK.
         data['author'] = author.pk
         data['promotion'] = 999999 # Should be invalid
         response = self.client.post(url, data)
@@ -180,6 +180,99 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         self.assertTrue(self._has_error(response), msg)
         self._test_errors(response, tests={
             'promotion': "Could not find record "})
+        # Try to create a record with an empty promotion PK.
+        data['author'] = author.pk
+        data['promotion'] = 'junk'
+        response = self.client.post(url, data)
+        msg = "response status: {}, should be 200, values: {}".format(
+            response.status_code, p_values)
+        self.assertEquals(response.status_code, 200, msg)
+        msg = "Should have errors: {}".format(response.context_data.get(
+            'form').errors)
+        self.assertTrue(self._has_error(response), msg)
+        self._test_errors(response, tests={
+            'promotion': ", must be a number."})
+        # Try to create a record with a promotion PK set to 0 (zero).
+        data['author'] = author.pk
+        data['promotion'] = '0'
+        response = self.client.post(url, data)
+        msg = "response status: {}, should be 302, values: {}".format(
+            response.status_code, p_values)
+        self.assertEquals(response.status_code, 302, msg)
+        response = self.client.get(response.url)
+        relations = response.context_data.get('relations')
+        value = relations.get(dc2.pk).get('value')
+        msg = "response status: {}, should be 200, relations: {}".format(
+            response.status_code, relations)
+        self.assertEquals(response.status_code, 200, msg)
+        self.assertTrue(value == '', msg)
+
+    def test_validate_boolean_type(self):
+        """
+        Test that boolean types are validated properly.
+        """
+        #self.skipTest("Temporarily skipped")
+        author, a_cc, a_values = self._create_author_objects()
+        dc0 = self._create_dynamic_column_record(
+            "Author", DynamicColumn.CHOICE, 'book_top', 2,
+            relation=self.choice2index.get("Author"),
+            required=DynamicColumn.YES)
+        dc1 = self._create_dynamic_column_record(
+            "Ignore", DynamicColumn.BOOLEAN, 'book_top', 1)
+        # Create the collection.
+        cc = self._create_column_collection_record(
+            "Book Current", 'book', dynamic_columns=[dc0, dc1,])
+        # Setup default required fields and uri.
+        url = reverse('book-create')
+        data = {'title': "Test Book Title", 'author': author.pk}
+        # Test the BOOLEAN type with a numeric value.
+        data['ignore'] = 1
+        response = self.client.post(url, data)
+        msg = "response status: {}, should be 302".format(response.status_code)
+        self.assertEquals(response.status_code, 302, msg)
+        # Get the page
+        response = self.client.get(response.url)
+        msg = "response status: {}, should be 200".format(response.status_code)
+        self.assertEquals(response.status_code, 200, msg)
+        relations = response.context_data.get('relations')
+        value = relations.get(dc1.pk).get('value')
+        msg = "response status: {}, should be 200, relations: {}".format(
+            response.status_code, relations)
+        self.assertTrue(value == '1', msg)
+        # Test the BOOLEAN type with a true/false string value.
+        data['ignore'] = 'False'
+        response = self.client.post(url, data)
+        msg = "response status: {}, should be 302".format(response.status_code)
+        self.assertEquals(response.status_code, 302, msg)
+        # Get the page
+        response = self.client.get(response.url)
+        relations = response.context_data.get('relations')
+        value = relations.get(dc1.pk).get('value')
+        msg = "response status: {}, should be 200, relations: {}".format(
+            response.status_code, relations)
+        self.assertEquals(response.status_code, 200, msg)
+        self.assertTrue(value == 'False', msg)
+        # Test the BOOLEAN type with a yes/no string value.
+        data['ignore'] = 'YES'
+        response = self.client.post(url, data)
+        msg = "response status: {}, should be 302".format(response.status_code)
+        self.assertEquals(response.status_code, 302, msg)
+        # Get the page
+        response = self.client.get(response.url)
+        relations = response.context_data.get('relations')
+        value = relations.get(dc1.pk).get('value')
+        msg = "response status: {}, should be 200, relations: {}".format(
+            response.status_code, relations)
+        self.assertEquals(response.status_code, 200, msg)
+        self.assertTrue(value == 'YES', msg)
+        # Test the BOOLEAN type with bad data
+        data['ignore'] = 'bad data'
+        response = self.client.post(url, data)
+        msg = "response status: {}, should be 200".format(response.status_code)
+        self.assertEquals(response.status_code, 200, msg)
+        self.assertTrue(self._has_error(response), msg)
+        self._test_errors(response, tests={
+            'ignore': "be an integer, numeric string, true/false, or yes/no."})
 
     def test_validate_date_types(self):
         """
@@ -214,3 +307,47 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
             'start-date': "Invalid date and/or time object ",
             'start-time': 'Invalid date and/or time object ',
             'date-and-time': 'Invalid date and/or time object '})
+
+    def test_validate_numeric_type(self):
+        """
+        Test that numeric objects are validated properly.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create the collection
+        author, a_cc, a_values = self._create_author_objects()
+        dc0 = self._create_dynamic_column_record(
+            "Author", DynamicColumn.CHOICE, 'book_top', 2,
+            relation=self.choice2index.get("Author"),
+            required=DynamicColumn.YES)
+        dc1 = self._create_dynamic_column_record(
+            "Edition", DynamicColumn.NUMBER, 'book_top', 3,
+            required=DynamicColumn.NO)
+        # Create the collection.
+        cc = self._create_column_collection_record(
+            "Book Current", 'book', dynamic_columns=[dc0, dc1,])
+        # Setup default required fields and uri.
+        url = reverse('book-create')
+        data = {'title': "Test Book Title", 'author': author.pk}
+        # Test the NUMBER type.
+        data['edition'] = 1
+        response = self.client.post(url, data)
+        msg = "response status: {}, should be 302".format(response.status_code)
+        self.assertEquals(response.status_code, 302, msg)
+        # Get the page
+        response = self.client.get(response.url)
+        msg = "response status: {}, should be 200".format(response.status_code)
+        self.assertEquals(response.status_code, 200, msg)
+        relations = response.context_data.get('relations')
+        value = relations.get(dc1.pk).get('value')
+        msg = "response status: {}, should be 200, relations: {}".format(
+            response.status_code, relations)
+        self.assertTrue(value == '1', msg)
+        # Test the NUMBER type with a non-number.
+        data['edition'] = 'bad number'
+        response = self.client.post(url, data)
+        msg = "response status: {}, should be 200".format(response.status_code)
+        self.assertEquals(response.status_code, 200, msg)
+        self.assertTrue(self._has_error(response), msg)
+        self._test_errors(response, tests={
+            'edition': 'Edition field is not a number.'})
+
