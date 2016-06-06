@@ -306,6 +306,7 @@ class AutoDisplayNode(template.Node):
                   elem, attr, options, relation)
         value_type = relation.get('value_type')
         value = relation.get('value', '')
+        key = None
 
         # Get the key (PK or slug) then with the key get the value.
         if relation.get('store_relation', False):

@@ -258,7 +258,7 @@ class ColumnCollectionManager(StatusModelManagerMixin):
         Serialize the ``DynamicColumn`` for the ``name`` of this collection in
         an OrderedDict. When a model that inherits ``CollectionBase`` is
         passed in as ``obj`` its set of ``KeyValue`` objects value are also
-        included. OrderedDict items can be keys by either a `pk` or `slug`.
+        included. OrderedDict items can be keyed by either a `pk` or `slug`.
 
         :param name: Name of the collection.
         :type name: str
@@ -657,9 +657,9 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         if value.isdigit():
             result = 0 if int(value) == 0 else 1
         elif value.lower() in self.TRUE_FALSE:
-            result = value.lower() == self.TRUE
+            result = value.lower() in (self.TRUE, 'true')
         elif value.lower() in self.YES_NO:
-            result = value.lower() == self.YES
+            result = value.lower() in (self.YES, 'yes')
         else:
             self._raise_exception(dc, value)
 
@@ -711,7 +711,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                       value in ('increment', 'decrement')):
                     pass
                 elif dc.value_type == dc.BOOLEAN:
-                    value = self._is_set_bool(dc, value)
+                    value = self._is_set_boolean(dc, value)
                 elif dc.value_type == dc.FLOAT:
                     value = self._is_set_float(dc, value)
                 elif dc.value_type == dc.NUMBER:
@@ -780,15 +780,14 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return result
 
-    def _is_set_bool(self, dc, value):
+    def _is_set_boolean(self, dc, value):
         if isinstance(value, bool):
             result = str(value)
         elif isinstance(value, six.integer_types):
             result = str(0 if value == 0 else 1)
         elif isinstance(value, six.string_types):
-            if value.lower() in self.TRUE_FALSE:
-                result = value
-            elif value.lower() in self.YES_NO:
+            if (value.lower() in self.TRUE_FALSE or
+                value.lower() in self.YES_NO):
                 result = value
             elif value.isdigit():
                 result = str(0 if int(value) == 0 else 1)
