@@ -154,7 +154,6 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
             store_relation=DynamicColumn.YES)
         log.debug("Created Promotion: %s, ColumnCollection: %s, values: %s",
                   promotion, p_cc, p_values)
-        # Create the collection.
         cc = self._create_column_collection_record(
             "Book Current", 'book', dynamic_columns=[dc1, dc2])
         # Try to create a book entry with errors.
@@ -322,7 +321,6 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         dc1 = self._create_dynamic_column_record(
             "Edition", DynamicColumn.NUMBER, 'book_top', 3,
             required=DynamicColumn.NO)
-        # Create the collection.
         cc = self._create_column_collection_record(
             "Book Current", 'book', dynamic_columns=[dc0, dc1,])
         # Setup default required fields and uri.
@@ -351,3 +349,33 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         self._test_errors(response, tests={
             'edition': 'Edition field is not a number.'})
 
+    def test_validate_value_length(self):
+        """
+        Test that value lengths are validated properly.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create the collection.
+        author, a_cc, a_values = self._create_author_objects()
+        dc0 = self._create_dynamic_column_record(
+            "Author", DynamicColumn.CHOICE, 'book_top', 2,
+            relation=self.choice2index.get("Author"),
+            required=DynamicColumn.YES)
+        dc1 = self._create_dynamic_column_record(
+            "Extra Field", DynamicColumn.TEXT, 'book_top', 3,
+            required=DynamicColumn.NO)
+        cc = self._create_column_collection_record(
+            "Book Current", 'book', dynamic_columns=[dc0, dc1,])
+        # Setup default required fields and uri.
+        url = reverse('book-create')
+        data = {'title': "Test Book Title", 'author': author.pk}
+        # Test length of extra-field
+        data['extra-field'] = "Xo"*150
+        response = self.client.post(url, data)
+        msg = "response status: {}, should be 200".format(response.status_code)
+        self.assertEquals(response.status_code, 200, msg)
+        msg = "Should have errors: {}".format(response.context_data.get(
+            'form').errors)
+        self.assertTrue(self._has_error(response), msg)
+        self._test_errors(response, tests={
+            'extra-field': "Extra Field field is too long."
+            })

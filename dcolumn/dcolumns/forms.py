@@ -306,7 +306,7 @@ class CollectionBaseFormMixin(forms.ModelForm):
         else:
             value_type = relation.get('value_type')
 
-        log.debug("key: %s, value: %s", key, value)
+        log.debug("key: %s, value: %s, value_type: %s", key, value, value_type)
 
         if len(value) > self.MAX_FIELD_LENGTH_MAP.get(value_type):
                 self._errors[key] = self.error_class(
