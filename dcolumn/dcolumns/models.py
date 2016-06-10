@@ -694,8 +694,8 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         :param value: Can be a value to set in a ``KeyValue`` object, or a
                       model that inherits ``CollectionBase`` or ``BaseChoice``.
         :type value: string or CollectionBase object
-        :param force: Default is ``False``, do not save empty strings or
-                      ``None`` objects else ``True`` save empty strings only.
+        :param force: Default is ``False``, do not save empty strings else
+                      ``True`` save empty strings only.
         :type force: bool
         :raises ValueError: Invalid combination of parameters.
         """
@@ -755,8 +755,11 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
             result = str(getattr(value, m_field))
         elif isinstance(value, (CollectionBase, BaseChoice)): # Normal mode
             result = str(getattr(value, 'pk'))
-        elif isinstance(value, six.string_types) and value.isdigit():
-            result = value
+        elif isinstance(value, six.string_types):
+            if value.isdigit() or value == '':
+                result = value
+            else:
+                self._raise_exception(dc, value, field=m_field)
         elif isinstance(value, six.integer_types):
             result = str(value)
         else:
