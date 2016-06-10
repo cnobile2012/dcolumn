@@ -155,11 +155,11 @@ String.prototype.trim = function(charlist) {
           break;
         case 2: // Choice
           if(relation.store_relation) {
-            if(value === undefined) {
-              value = "";
+            if(value === undefined || value === "") {
+              value = 0;
             }
 
-            if(value === "" || self._isInOptions(relation.slug, value)) {
+            if(value === 0 || self._isInOptions(relation.slug, value)) {
               $obj = self._choiceSelect(id, name, relation.slug);
               value = self._getOptionId(relation.slug, value);
             } else {
