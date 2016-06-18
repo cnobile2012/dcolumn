@@ -187,8 +187,7 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
             location = self.location
 
         return "{} ({})".format(
-            self.name, dcolumn_manager.css_container_map.get(location, '')
-            ).encode('utf-8')
+            self.name, dcolumn_manager.css_container_map.get(location, ''))
 
     class Meta:
         ordering = ('location', 'order', 'name',)
@@ -367,7 +366,7 @@ class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin,
         super(ColumnCollection, self).save(*args, **kwargs)
 
     def __str__(self):
-        return "{}-{}".format(self.name, self.related_model).encode('utf-8')
+        return "{}-{}".format(self.name, self.related_model)
 
     class Meta:
         ordering = ('name',)
@@ -485,7 +484,7 @@ class CollectionBaseManager(models.Manager):
             if cc_obj:
                 cc_obj = cc_obj[0]
                 result[:] = [
-                    r.slug.encode('utf-8')
+                    r.slug
                     for r in cc_obj.dynamic_column.all().order_by('slug')]
 
         return result
@@ -496,8 +495,7 @@ class CollectionBaseManager(models.Manager):
 
         :rtype: List of fields.
         """
-        return [field.name.encode('utf-8')
-                for field in self.model._meta.get_fields()
+        return [field.name for field in self.model._meta.get_fields()
                 if 'collection' not in field.name and
                 field.name != 'keyvalues']
 
@@ -550,7 +548,8 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
             field = 'pk'
 
         for kv in self.keyvalues.select_related('dynamic_column').all():
-            result[getattr(kv.dynamic_column, field)] = kv.value.encode('utf-8')
+            value = int(kv.value) if kv.value.isdigit() else kv.value
+            result[getattr(kv.dynamic_column, field)] = value
 
         return result
 
@@ -613,7 +612,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
             elif dc.value_type == dc.FLOAT and obj.value:
                 value = self._is_get_float(dc, obj.value)
             elif dc.value_type in (dc.TEXT, dc.TEXT_BLOCK) and obj.value:
-                value = obj.value.encode('utf-8')
+                value = obj.value
             else:
                 # This should never happen as an invalid value_type will
                 # raise a ValidationError when the DynamicColumn is created.
@@ -623,7 +622,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
     def _is_get_choice(self, dc, value, field):
         if dc.store_relation:
-            result = value.encode('utf-8')
+            result = value
         else:
             model, m_field = dc.get_choice_relation_object_and_field()
 
@@ -724,7 +723,6 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                     # raise a ValidationError when the DynamicColumn is created.
                     self._raise_exception(dc, value)
 
-                value = value.encode('utf-8')
                 kv, created = self.keyvalues.get_or_create(
                     dynamic_column=dc, defaults={'value': value})
 
@@ -858,7 +856,7 @@ class KeyValue(ValidateOnSaveMixin):
         super(KeyValue, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.value.encode('utf-8')
+        return self.value
 
     class Meta:
         ordering = ('dynamic_column__location', 'dynamic_column__order',)

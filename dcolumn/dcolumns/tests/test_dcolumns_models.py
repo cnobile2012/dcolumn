@@ -198,19 +198,19 @@ class TestColumnCollection(BaseDcolumns):
             "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
         # Test that there are no dynamic columns.
         cc = self._create_column_collection_record("Books", 'book')
-        msg = "dynamic columns: {}".format(cc.dynamic_column.all())
+        msg = "dynamic columns: {!s}".format(cc.dynamic_column.all())
         self.assertEqual(cc.dynamic_column.count(), 0, msg)
         # Test that there is one dynamic column.
         cc.process_dynamic_columns([dc0])
-        msg = "dynamic columns: {}".format(cc.dynamic_column.all())
+        msg = "dynamic columns: {!s}".format(cc.dynamic_column.all())
         self.assertEqual(cc.dynamic_column.count(), 1, msg)
         # Test that there are two dynamic columns.
         cc.process_dynamic_columns([dc0, dc1])
-        msg = "dynamic columns: {}".format(cc.dynamic_column.all())
+        msg = "dynamic columns: {!s}".format(cc.dynamic_column.all())
         self.assertEqual(cc.dynamic_column.count(), 2, msg)
         # Test that replacing one dynamic column the results are two.
         cc.process_dynamic_columns([dc1, dc2])
-        msg = "dynamic columns: {}".format(cc.dynamic_column.all())
+        msg = "dynamic columns: {!s}".format(cc.dynamic_column.all())
         self.assertEqual(cc.dynamic_column.count(), 2, msg)
 
     def test_get_column_collection(self):
@@ -370,7 +370,7 @@ class TestCollectionBase(BaseDcolumns):
 
         for slug, dc_value in b_values.items():
             value = result.get(slug).get('value')
-            self.assertEqual(value, str(dc_value), msg)
+            self.assertEqual(value, dc_value, msg)
 
     def test_model_objects(self):
         """
@@ -491,7 +491,7 @@ class TestCollectionBase(BaseDcolumns):
         msg = "result: {}, b_values: {}".format(result, b_values)
 
         for key, value in result.items():
-            self.assertEqual(value, str(b_values.get(key)), msg)
+            self.assertEqual(value, b_values.get(key), msg)
 
         self.assertEqual(len(result), len(b_values), msg)
 
@@ -1001,5 +1001,5 @@ class TestKeyValue(BaseDcolumns):
         value = 5
         kv = self._create_key_value_record(book, dc0, value)
         # Test that the values are the same.
-        msg = "value: {}, instance value: {}".format(kv.value, str(kv))
+        msg = "value: {}, instance value: {!s}".format(kv.value, kv)
         self.assertEqual(kv.value, str(kv), msg)
