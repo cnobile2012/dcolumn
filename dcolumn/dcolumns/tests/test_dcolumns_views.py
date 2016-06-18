@@ -100,7 +100,7 @@ class TestCollectionAJAXView(BaseDcolumns):
         response = self.client.get(url)
         msg = "response status: {}, should be 200".format(response.status_code)
         self.assertEquals(response.status_code, 200, msg)
-        content = json.loads(response.content)
+        content = json.loads(response.content.decode(encoding='utf-8'))
         msg = "content: {}".format(content)
         self.assertEqual(content.get('class_name'), class_name, msg)
         self.assertTrue('dynamicColumns' in content, msg)
