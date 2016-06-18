@@ -8,11 +8,11 @@
 
 import datetime
 import pytz
-from StringIO import StringIO
 
 from django.test import TestCase
 from django.template import (
     Template, Context, TemplateSyntaxError, VariableDoesNotExist)
+from django.utils import six
 
 from example_site.books.models import Author, Book, Promotion, Publisher
 from dcolumn.dcolumns.models import DynamicColumn
@@ -106,7 +106,7 @@ class TestAutoDisplay(BaseDcolumns):
         vmt.object = object
         context = Context(vmt.get_context_data(munge_slug=munge_slug))
         # Run the test.
-        buff = StringIO()
+        buff = six.StringIO()
         buff.write("{% load autodisplay %}")
         buff.write("{% for relation in relations.values %}")
         r = " {}".format(relation_name) if not except_test else ''
@@ -133,7 +133,7 @@ class TestAutoDisplay(BaseDcolumns):
         context, result = self._setup_template(
             Book, object=book, options='dynamicColumns', display=True,
             prefix='test-')
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('id-test-abstract'), 1, msg)
         # All other arguments combinations are tested elsewhere.
@@ -157,14 +157,14 @@ class TestAutoDisplay(BaseDcolumns):
         # set to None.
         context, result = self._setup_template(
             Book, object=book, relation_name='relationX')
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertTrue('Invalid relation object: None' in result, msg)
         # Test 'Invalid option object'.
         author_dc = b_cc.dynamic_column.get(slug='author')
         context, result = self._setup_template(
             Book, object=book, munge_slug=(author_dc.pk, 'authorX'))
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, a_values)
         self.assertTrue('Invalid option object: None' in result, msg)
         # Test 'Invalid key for relation'.
@@ -188,7 +188,7 @@ class TestAutoDisplay(BaseDcolumns):
         b_values[dc0.slug] = kv0.value
         # Execute the template tag and test.
         context, result = self._setup_template(Book, object=book, display=True)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('span'), 4, msg)
         self.assertTrue("No" in result, msg)
@@ -197,7 +197,7 @@ class TestAutoDisplay(BaseDcolumns):
         kv0 = self._create_key_value_record(book, dc0, value)
         b_values[dc0.slug] = kv0.value
         context, result = self._setup_template(Book, object=book, display=True)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('span'), 4, msg)
         self.assertTrue("No" in result, msg)
@@ -206,7 +206,7 @@ class TestAutoDisplay(BaseDcolumns):
         kv0 = self._create_key_value_record(book, dc0, value)
         b_values[dc0.slug] = kv0.value
         context, result = self._setup_template(Book, object=book, display=True)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('span'), 4, msg)
         self.assertTrue("Yes" in result, msg)
@@ -215,7 +215,7 @@ class TestAutoDisplay(BaseDcolumns):
         kv0 = self._create_key_value_record(book, dc0, value)
         b_values[dc0.slug] = kv0.value
         context, result = self._setup_template(Book, object=book, display=True)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('span'), 4, msg)
         self.assertTrue("Yes" in result, msg)
@@ -231,7 +231,7 @@ class TestAutoDisplay(BaseDcolumns):
         book, b_cc, b_values = self._create_book_objects(extra_dcs=[dc0])
         # Execute the template tag and test.
         context, result = self._setup_template(Book)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('option'), 4, msg)
         self.assertTrue("No" in result, msg)
@@ -248,7 +248,7 @@ class TestAutoDisplay(BaseDcolumns):
         # Execute the template tag and test.
         context, result = self._setup_template(
             Book, object=book, options='dynamicColumns', display=True)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('span'), 4, msg)
         value = book.get_key_value('author')
@@ -256,7 +256,7 @@ class TestAutoDisplay(BaseDcolumns):
         # Test that partial dynamicColumns work properly.
         context, result = self._setup_template(
             Book, object=book, options='dynamicColumns.author', display=True)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('span'), 4, msg)
         value = book.get_key_value('author')
@@ -273,7 +273,7 @@ class TestAutoDisplay(BaseDcolumns):
         # Execute the template tag and test.
         context, result = self._setup_template(
             Book, options='dynamicColumns')
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('option'), 4, msg)
         self.assertTrue("Choose a value" in result, msg)
@@ -292,7 +292,7 @@ class TestAutoDisplay(BaseDcolumns):
         # Execute the template tag and test.
         context, result = self._setup_template(
             Book, object=book, options='dynamicColumns', display=True)
-        msg = "Result: {}, context: {}, b_values: {}".format(
+        msg = "result: {}, context: {}, b_values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('span'), 4, msg)
         value = book.get_key_value('promotion')
@@ -314,10 +314,10 @@ class TestAutoDisplay(BaseDcolumns):
         # Execute the template tag and test.
         context, result = self._setup_template(
             Book, object=book, options='dynamicColumns', display=True)
-        msg = "Result: {}, context: {}, b_values: {}".format(
+        msg = "result: {}, context: {}, b_values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('span'), 4, msg)
-        self.assertFalse('0' in result, msg)
+        self.assertFalse(">0<" in result, msg)
 
     def test_CHOICE_store_relation_entry(self):
         """
@@ -331,7 +331,7 @@ class TestAutoDisplay(BaseDcolumns):
         # Execute the template tag and test.
         context, result = self._setup_template(
             Book, object=book, options='dynamicColumns')
-        msg = "Result: {}, context: {}, b_values: {}".format(
+        msg = "result: {}, context: {}, b_values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('option'), 4, msg)
         self.assertTrue("Choose a value" in result, msg)
@@ -348,7 +348,7 @@ class TestAutoDisplay(BaseDcolumns):
         # Execute the template tag and test.
         context, result = self._setup_template(
             Promotion, object=promotion, display=True)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, p_values)
         self.assertEqual(result.count('span'), 6, msg)
         value = promotion.get_key_value('start-date').isoformat()
@@ -363,7 +363,7 @@ class TestAutoDisplay(BaseDcolumns):
         promotion, p_cc, p_values = self._create_promotion_objects()
         # Execute the template tag and test.
         context, result = self._setup_template(Promotion, object=promotion)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, p_values)
         self.assertEqual(result.count('input'), 3, msg)
         value = promotion.get_key_value('start-date').isoformat()
@@ -385,7 +385,7 @@ class TestAutoDisplay(BaseDcolumns):
         # Execute the template tag and test.
         context, result = self._setup_template(
             Promotion, object=promotion, display=True)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, p_values)
         self.assertEqual(result.count('span'), 8, msg)
         self.assertTrue(value in result, msg)
@@ -405,7 +405,7 @@ class TestAutoDisplay(BaseDcolumns):
         p_values[dc0.slug] = kv0.value
         # Execute the template tag and test.
         context, result = self._setup_template(Promotion, object=promotion)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, p_values)
         self.assertEqual(result.count('input'), 4, msg)
         self.assertTrue(value in result, msg)
@@ -420,7 +420,7 @@ class TestAutoDisplay(BaseDcolumns):
         # Execute the template tag and test.
         context, result = self._setup_template(
             Promotion, object=promotion, display=True)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, p_values)
         self.assertEqual(result.count('span'), 6, msg)
         value = promotion.get_key_value('start-time').isoformat()
@@ -435,7 +435,7 @@ class TestAutoDisplay(BaseDcolumns):
         promotion, p_cc, p_values = self._create_promotion_objects()
         # Execute the template tag and test.
         context, result = self._setup_template(Promotion, object=promotion)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, p_values)
         self.assertEqual(result.count('input'), 3, msg)
         value = promotion.get_key_value('start-time').isoformat()
@@ -455,7 +455,7 @@ class TestAutoDisplay(BaseDcolumns):
         b_values[dc0.slug] = kv0.value
         # Execute the template tag and test.
         context, result = self._setup_template(Book, object=book, display=True)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('span'), 4, msg)
         self.assertTrue(value in result, msg)
@@ -474,7 +474,7 @@ class TestAutoDisplay(BaseDcolumns):
         b_values[dc0.slug] = kv0.value
         # Execute the template tag and test.
         context, result = self._setup_template(Book, object=book)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('input'), 1, msg)
         self.assertTrue(value in result, msg)
@@ -494,7 +494,7 @@ class TestAutoDisplay(BaseDcolumns):
         b_values[dc0.slug] = kv0.value
         # Execute the template tag and test.
         context, result = self._setup_template(Book, object=book, display=True)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('span'), 4, msg)
         self.assertTrue(value in result, msg)
@@ -513,7 +513,7 @@ class TestAutoDisplay(BaseDcolumns):
         b_values[dc0.slug] = kv0.value
         # Execute the template tag and test.
         context, result = self._setup_template(Book, object=book)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('input'), 1, msg)
         self.assertTrue(value in result, msg)
@@ -532,7 +532,7 @@ class TestAutoDisplay(BaseDcolumns):
         b_values[dc0.slug] = kv0.value
         # Execute the template tag and test.
         context, result = self._setup_template(Book, object=book, display=True)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('span'), 4, msg)
         self.assertTrue(value in result, msg)
@@ -551,7 +551,7 @@ class TestAutoDisplay(BaseDcolumns):
         b_values[dc0.slug] = kv0.value
         # Execute the template tag and test.
         context, result = self._setup_template(Book, object=book)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('input'), 1, msg)
         self.assertTrue(value in result, msg)
@@ -570,7 +570,7 @@ class TestAutoDisplay(BaseDcolumns):
         b_values[dc0.slug] = kv0.value
         # Execute the template tag and test.
         context, result = self._setup_template(Book, object=book, display=True)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('span'), 4, msg)
         self.assertTrue(value in result, msg)
@@ -589,7 +589,7 @@ class TestAutoDisplay(BaseDcolumns):
         b_values[dc0.slug] = kv0.value
         # Execute the template tag and test.
         context, result = self._setup_template(Book, object=book)
-        msg = "Result: {}, context: {}, values: {}".format(
+        msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
         self.assertEqual(result.count('textarea'), 4, msg)
         self.assertTrue(value in result, msg)
@@ -611,7 +611,7 @@ class TestSingleDisplay(BaseDcolumns):
         vmt.object = object
         context = Context(vmt.get_context_data())
         # Run the test.
-        buff = StringIO()
+        buff = six.StringIO()
         buff.write("{% load autodisplay %}")
         o = " {}".format(object_name)
         s = " {}".format(slug)
@@ -870,7 +870,7 @@ class TestCombineContexts(BaseDcolumns):
         vmt.object = object
         context = Context(vmt.get_context_data())
         # Run the test.
-        buff = StringIO()
+        buff = six.StringIO()
         buff.write("{% load autodisplay %}")
         o = " {}".format(obj)
         v = " {}".format(variable)

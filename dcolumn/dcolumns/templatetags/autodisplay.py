@@ -10,12 +10,12 @@ __docformat__ = "restructuredtext en"
 
 import os, logging, types
 import datetime
-from StringIO import StringIO
 from dateutil import parser
 
 from django import template
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils import six
 
 from dcolumn.dcolumns.models import DynamicColumn, KeyValue
 from dcolumn.dcolumns.manager import dcolumn_manager
@@ -83,7 +83,7 @@ def auto_display(parser, token):
     tokens = token.split_contents()
     size = len(tokens)
     kwargs = {'prefix': '', 'options': None, 'display': 'False'}
-    keywords = kwargs.keys()
+    keywords = list(six.viewkeys(kwargs))
     keywords.sort()
 
     if size == 2:
@@ -260,7 +260,7 @@ class AutoDisplayNode(template.Node):
         :rtype: The populated HTML element.
         """
         elem = elem.format("id-" + attr, attr)
-        buff = StringIO(elem)
+        buff = six.StringIO(elem)
         buff.seek(0, os.SEEK_END)
         value = relation.get('value', '')
 
@@ -269,12 +269,13 @@ class AutoDisplayNode(template.Node):
             value = [k for k, v in options if v == value]
             value = len(value) >= 1 and value[0] or 0
 
-        value = unicode(value).isdigit() and int(value) or value
+        if isinstance(value, six.string_types) and value.isdigit():
+            value = int(value)
 
         for k, v in options:
             s = ""
 
-            if k == value and unicode(value).isdigit() and int(value) != 0:
+            if k == value and value != 0:
                 s = " selected"
 
             buff.write('<option value="{}"{}>{}</option>\n'.format(k, s, v))
@@ -310,17 +311,22 @@ class AutoDisplayNode(template.Node):
 
         # Get the key (PK or slug) then with the key get the value.
         if relation.get('store_relation', False):
-            if value == '0':
+            if value == '0' or value == 0:
                 value = ''
-        elif value_type == DynamicColumn.BOOLEAN:
-            if value.isdigit():
-                key = 0 if int(value) == 0 else 1
-            elif value.lower() in ('true', 'false'):
-                key = 0 if value.lower() == 'false' else 1
-
-            value = dict(options).get(key, '')
         else:
-            key = int(value) if value.isdigit() else value
+            if value_type == DynamicColumn.BOOLEAN:
+                if isinstance(value, six.string_types):
+                    if value.isdigit():
+                        key = 0 if int(value) == 0 else 1
+                    elif value.lower() in ('true', 'false'):
+                        key = 0 if value.lower() == 'false' else 1
+                else:
+                    key = 0 if value == 0 else 1
+            elif isinstance(value, six.string_types) and value.isdigit():
+                key = int(value)
+            else:
+                key = value
+
             value = dict(options).get(key, '')
 
         elem = elem.format("id-" + attr, value)
