@@ -101,7 +101,7 @@ class CollectionBaseFormMixin(forms.ModelForm):
         }
 
     class Meta:
-        exclude = ['creator', 'updater', 'created', 'updated']
+        exclude = ['creator', 'updater', 'created', 'updated',]
 
     def __init__(self, *args, **kwargs):
         """
@@ -111,13 +111,6 @@ class CollectionBaseFormMixin(forms.ModelForm):
         self.coll_name = ''
         self.relations = {}
         self.fields['column_collection'].required = False
-
-        if 'created' in self.fields:
-            self.fields['created'].required = False
-
-        if 'updated' in self.fields:
-            self.fields['updated'].required = False
-
         log.debug("args: %s, kwargs: %s", args, kwargs)
         log.debug("fields: %s, data: %s", self.fields, self.data)
 
@@ -135,7 +128,7 @@ class CollectionBaseFormMixin(forms.ModelForm):
             self.coll_name = dcolumn_manager.get_collection_name(
                 self.Meta.model.__name__)
         except ValueError as e:
-            self._errors['collection_name'] = self.error_class([str(e)])
+            self.add_error(None, str(e))
         else:
             try:
                 obj = ColumnCollection.objects.active().get(
@@ -145,7 +138,7 @@ class CollectionBaseFormMixin(forms.ModelForm):
                         "this object, found collection name {}.").format(
                     self.coll_name)
                 log.critical("%s, %s", ugettext(msg), e)
-                self._errors['missing_collection'] = self.error_class([msg])
+                self.add_error(None, msg)
 
         return obj
 
@@ -156,12 +149,17 @@ class CollectionBaseFormMixin(forms.ModelForm):
         :rtype: The Django ``cleaned_data`` dict.
         """
         cleaned_data = super(CollectionBaseFormMixin, self).clean()
+        request = self.initial.get('request')
+
+        if not request.user.is_authenticated():
+            msg = _("You must login to use the site.")
+            self.add_error(None, msg)
 
         try:
             self.relations = ColumnCollection.objects.serialize_columns(
                 self.coll_name)
         except Exception as e:
-            self._errors['missing_collection'] = self.error_class([str(e)])
+            self.add_error(None, str(e))
 
         self.validate_dynamic_fields()
         log.debug("Validations errors: %s", self._errors)
@@ -175,7 +173,7 @@ class CollectionBaseFormMixin(forms.ModelForm):
         for relation in self.relations.values():
             log.debug("relation: %s", relation)
             key = relation.get('slug')
-            value = self.data.get(key, '').encode('utf-8')
+            value = self.data.get(key, '').decode(encoding='utf-8')
             value = self.validate_choice_relations(relation, key, value)
             value = self.validate_boolean_type(relation, key, value)
             self.validate_date_types(relation, key, value)
@@ -205,20 +203,20 @@ class CollectionBaseFormMixin(forms.ModelForm):
 
             if relation.get('store_relation', False) and value:
                 if not value.isdigit():
-                    self._errors[key] = self.error_class(
-                        [_("Invalid value '{}', must be a number."
-                           ).format(value)])
+                    msg = _("Invalid value '{}', must be a number."
+                            ).format(value)
+                    self._errors[key] = self.error_class([msg])
                 elif int(value) != 0:
                     try:
                         value = model.objects.get_value_by_pk(value, field)
                     except Exception:
-                        self._errors[key] = self.error_class(
-                            [_("Could not find record with value '{}'."
-                               ).format(value)])
+                        msg = _("Could not find record with value '{}'."
+                                ).format(value)
+                        self._errors[key] = self.error_class([msg])
 
             # A zero would be the "Choose a value" option which we don't want.
             if value.isdigit() and int(value) == 0:
-                value = ''.encode('utf-8')
+                value = ''.decode(encoding='utf-8')
 
         return value
 
@@ -258,9 +256,9 @@ class CollectionBaseFormMixin(forms.ModelForm):
             try:
                 dt = dateutil.parser.parse(value)
             except ValueError as e:
-                self._errors[key] = self.error_class(
-                    [_("Invalid date and/or time object '{}', {}."
-                       ).format(value, e)])
+                msg = _("Invalid date and/or time object '{}', {}."
+                        ).format(value, e)
+                self._errors[key] = self.error_class([msg])
 
     def validate_required(self, relation, key, value):
         """
@@ -273,8 +271,9 @@ class CollectionBaseFormMixin(forms.ModelForm):
         :param value: The possibly prepossessed value from the POST request
         """
         if relation.get('required', False) and len(value) == 0:
-            self._errors[key] = self.error_class(
-                [_("{} field is required.").format(relation.get('name'))])
+            msg = _("{} field is required.").format(relation.get('name'))
+            self._errors[key] = self.error_class([msg])
+
 
     def validate_numeric_type(self, relation, key, value):
         """
@@ -287,9 +286,9 @@ class CollectionBaseFormMixin(forms.ModelForm):
         """
         if relation.get('value_type') == DynamicColumn.NUMBER:
             if value and not value.isdigit():
-                self._errors[key] = self.error_class(
-                    [_("{} field is not a number.").format(
-                        relation.get('name'))])
+                msg = _("{} field is not a number.").format(
+                    relation.get('name'))
+                self._errors[key] = self.error_class([msg])
 
     def validate_value_length(self, relation, key, value):
         """
@@ -309,8 +308,8 @@ class CollectionBaseFormMixin(forms.ModelForm):
         log.debug("key: %s, value: %s, value_type: %s", key, value, value_type)
 
         if len(value) > self.MAX_FIELD_LENGTH_MAP.get(value_type):
-                self._errors[key] = self.error_class(
-                    [_("{} field is too long.").format(relation.get('name'))])
+            msg = _("{} field is too long.").format(relation.get('name'))
+            self._errors[key] = self.error_class([msg])
 
     def save(self, commit=True):
         """
