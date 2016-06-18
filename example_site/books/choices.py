@@ -29,7 +29,7 @@ class Language(BaseChoice):
     objects = LanguageManager()
 
     def __str__(self):
-        return self.name.encode('utf-8')
+        return self.name.decode(encoding='utf-8')
 
 
 dcolumn_manager.register_choice(Language, 1, 'name')

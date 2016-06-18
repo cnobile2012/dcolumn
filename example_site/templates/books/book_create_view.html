@@ -27,11 +27,7 @@
       <div class="container">
         {% csrf_token %}
         <div id="message">
-{% if form.errors %}
-          <ul class="errorlist">
-            <li>Invalid data, please see below for details.</li>
-          </ul>
-{% endif %}
+          {{ form.non_field_errors }}
         </div>
         <div class="dynamic-container {{ css.book_top }}">
           <ul>

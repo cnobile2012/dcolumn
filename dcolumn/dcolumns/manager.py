@@ -24,9 +24,6 @@ class DynamicColumnManager(object):
     """
     This class manages the dynamic columns.
     """
-    __slots__ = ('__shared_state', '_relations', '_relation_map',
-                 '_relation_numbers', '_choice_map', '_css_containers',
-                 '_css_container_map', '__dict__',)
     __shared_state = {}
     _relations = []
     _relation_numbers = set()
@@ -130,8 +127,7 @@ class DynamicColumnManager(object):
         :rtype: A ``list`` of the choices.
         """
         if len(self._relations) and self._relations[0][0] != 0:
-            self._relations.sort(cmp=lambda x,y: cmp(x[1].lower(),
-                                                     y[1].lower()))
+            self._relations.sort(key=lambda x: x[1].lower())
             self._relations.insert(0, (0, _("Choose a Relation")))
 
         return self._relations

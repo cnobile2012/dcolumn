@@ -109,8 +109,9 @@ class InspectChoice(object):
         :rtype: The enclosed function embedded in this method.
         """
         def wrapper(this):
-            modules = __import__(this._path, globals(), locals(),
-                                 (this._caller_name,), -1)
+            modules = __import__(
+                this._path, globals=globals(), locals=locals(),
+                fromlist=(this._caller_name,), level=0)
             this.model = getattr(modules, this._caller_name)
             return method(this)
 
