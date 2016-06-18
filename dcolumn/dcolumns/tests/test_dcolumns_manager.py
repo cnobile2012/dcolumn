@@ -43,7 +43,8 @@ class Country(object):
     objects = CountryManager()
 
     def __str__(self):
-        return "{}--{}".format(self.name, self.language).encode('utf-8')
+        return "{}--{}".format(
+            self.name, self.language).decode(encoding='utf-8')
 
 
 # Invalid choice model.
@@ -295,7 +296,7 @@ class TestManager(BaseDcolumns):
                      }
 
         for model, expected_name in model_map.items():
-            name = self.manager.get_collection_name(model.encode('utf-8'))
+            name = self.manager.get_collection_name(model)
             msg = "name: {}, expected: {}".format(name, expected_name)
             self.assertEqual(name, expected_name, msg)
 
