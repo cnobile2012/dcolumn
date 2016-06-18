@@ -173,7 +173,7 @@ class CollectionBaseFormMixin(forms.ModelForm):
         for relation in self.relations.values():
             log.debug("relation: %s", relation)
             key = relation.get('slug')
-            value = self.data.get(key, '').decode(encoding='utf-8')
+            value = self.data.get(key, '')
             value = self.validate_choice_relations(relation, key, value)
             value = self.validate_boolean_type(relation, key, value)
             self.validate_date_types(relation, key, value)
@@ -216,7 +216,7 @@ class CollectionBaseFormMixin(forms.ModelForm):
 
             # A zero would be the "Choose a value" option which we don't want.
             if value.isdigit() and int(value) == 0:
-                value = ''.decode(encoding='utf-8')
+                value = ''
 
         return value
 

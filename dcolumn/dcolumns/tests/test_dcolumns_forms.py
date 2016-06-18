@@ -235,9 +235,9 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         self.assertEquals(response.status_code, 200, msg)
         relations = response.context_data.get('relations')
         value = relations.get(dc1.pk).get('value')
-        msg = "response status: {}, should be 200, relations: {}".format(
-            response.status_code, relations)
-        self.assertTrue(value == '1', msg)
+        msg = "value: {}, ignore: {}, relations: {}".format(
+            value, data['ignore'], relations)
+        self.assertTrue(value == 1, msg)
         # Test the BOOLEAN type with a true/false string value.
         data['ignore'] = 'False'
         response = self.client.post(url, data)
@@ -337,9 +337,9 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         self.assertEquals(response.status_code, 200, msg)
         relations = response.context_data.get('relations')
         value = relations.get(dc1.pk).get('value')
-        msg = "response status: {}, should be 200, relations: {}".format(
-            response.status_code, relations)
-        self.assertTrue(value == '1', msg)
+        msg = "value: {}, edition: {}, relations: {}".format(
+            value, data['edition'], relations)
+        self.assertTrue(value == 1, msg)
         # Test the NUMBER type with a non-number.
         data['edition'] = 'bad number'
         response = self.client.post(url, data)
