@@ -680,7 +680,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return result
 
-    def set_key_value(self, slug, value, force=False):
+    def set_key_value(self, slug, value, field=None, force=False):
         """
         This method sets an arbitrary key/value object, it will log an error
         if the key/value object could not be found.
@@ -693,6 +693,12 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         :param value: Can be a value to set in a ``KeyValue`` object, or a
                       model that inherits ``CollectionBase`` or ``BaseChoice``.
         :type value: string or CollectionBase object
+        :param field: Only used with ``CHOICE`` objects. Used to set the value
+                      on the ``KeyValue`` object. If this keyword argument is
+                      not set the default field will be used when the
+                      ``dcolumn_manager.register_choice(choice, relation_num,
+                      field)`` was configured.
+        :type field: str or None
         :param force: Default is ``False``, do not save empty strings else
                       ``True`` save empty strings only.
         :type force: bool
@@ -703,7 +709,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
             if dc:
                 if dc.value_type == dc.CHOICE:
-                    value = self._is_set_choice(dc, value)
+                    value = self._is_set_choice(dc, value, field)
                 elif dc.value_type in (dc.TIME, dc.DATE, dc.DATETIME):
                     value = self._is_set_datetime(dc, value)
                 elif (dc.value_type == dc.NUMBER and
@@ -745,23 +751,25 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
             log.error(msg)
             raise ValueError(msg)
 
-    def _is_set_choice(self, dc, value):
+    def _is_set_choice(self, dc, value, field):
         model, m_field = dc.get_choice_relation_object_and_field()
 
-        if (dc.store_relation and
-            isinstance(value, (CollectionBase, BaseChoice))):
-            result = str(getattr(value, m_field))
+        if not field:
+            field = m_field
+
+        if dc.store_relation and field:
+            result = getattr(value, field)
         elif isinstance(value, (CollectionBase, BaseChoice)): # Normal mode
-            result = str(getattr(value, 'pk'))
+            result = getattr(value, 'pk')
         elif isinstance(value, six.string_types):
             if value.isdigit() or value == '':
                 result = value
             else:
-                self._raise_exception(dc, value, field=m_field)
+                self._raise_exception(dc, value, field=field)
         elif isinstance(value, six.integer_types):
             result = str(value)
         else:
-            self._raise_exception(dc, value, field=m_field)
+            self._raise_exception(dc, value, field=field)
 
         return result
 

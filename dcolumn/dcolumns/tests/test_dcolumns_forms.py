@@ -167,7 +167,8 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
             'form').errors)
         self.assertTrue(self._has_error(response), msg)
         self._test_errors(response, tests={
-            'author': "Author field is required."})
+            'author': "Author field is required.",
+            })
         # Try to create a record with an invalid promotion PK.
         data['author'] = author.pk
         data['promotion'] = 999999 # Should be invalid
@@ -195,16 +196,15 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         data['author'] = author.pk
         data['promotion'] = '0'
         response = self.client.post(url, data)
-        msg = "response status: {}, should be 302, values: {}".format(
+        msg = "response status: {}, should be 200, values: {}".format(
             response.status_code, p_values)
-        self.assertEquals(response.status_code, 302, msg)
-        response = self.client.get(response.url)
-        relations = response.context_data.get('relations')
-        value = relations.get(dc2.pk).get('value')
-        msg = "response status: {}, should be 200, relations: {}".format(
-            response.status_code, relations)
         self.assertEquals(response.status_code, 200, msg)
-        self.assertTrue(value == '', msg)
+        msg = "Should have errors: {}".format(response.context_data.get(
+            'form').errors)
+        self.assertTrue(self._has_error(response), msg)
+        self._test_errors(response, tests={
+            'promotion': "Could not find record with value '0'.",
+            })
 
     def test_validate_boolean_type(self):
         """

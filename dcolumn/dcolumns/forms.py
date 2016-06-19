@@ -201,21 +201,24 @@ class CollectionBaseFormMixin(forms.ModelForm):
             model, field = dcolumn_manager.get_relation_model_field(
                 relation.get('relation', ''))
 
-            if relation.get('store_relation', False) and value:
-                if not value.isdigit():
-                    msg = _("Invalid value '{}', must be a number."
-                            ).format(value)
-                    self._errors[key] = self.error_class([msg])
-                elif int(value) != 0:
+            if relation.get('store_relation', False):
+                if value.isdigit():
                     try:
-                        value = model.objects.get_value_by_pk(value, field)
-                    except Exception:
+                        value = model.objects.get(pk=value)
+                    except model.DoesNotExist:
                         msg = _("Could not find record with value '{}'."
                                 ).format(value)
                         self._errors[key] = self.error_class([msg])
+                elif value == '':
+                    pass
+                else:
+                    msg = _("Invalid value '{}', must be a number."
+                            ).format(value)
+                    self._errors[key] = self.error_class([msg])
 
             # A zero would be the "Choose a value" option which we don't want.
-            if value.isdigit() and int(value) == 0:
+            if (isinstance(value, six.string_types) and value.isdigit() and
+                int(value) == 0):
                 value = ''
 
         return value
@@ -300,16 +303,14 @@ class CollectionBaseFormMixin(forms.ModelForm):
         :param value: The possibly prepossessed value from the POST request
         """
         # If store_relation is True then the storage type is DynamicColumn.TEXT.
-        if relation.get('store_relation', False):
-            value_type = DynamicColumn.TEXT
-        else:
+        if not relation.get('store_relation', False):
             value_type = relation.get('value_type')
+            log.debug("key: %s, value: %s, value_type: %s",
+                      key, value, value_type)
 
-        log.debug("key: %s, value: %s, value_type: %s", key, value, value_type)
-
-        if len(value) > self.MAX_FIELD_LENGTH_MAP.get(value_type):
-            msg = _("{} field is too long.").format(relation.get('name'))
-            self._errors[key] = self.error_class([msg])
+            if len(value) > self.MAX_FIELD_LENGTH_MAP.get(value_type):
+                msg = _("{} field is too long.").format(relation.get('name'))
+                self._errors[key] = self.error_class([msg])
 
     def save(self, commit=True):
         """
