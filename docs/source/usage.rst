@@ -1,132 +1,26 @@
-Django Tool to Create Dynamic Fields
-====================================
+*****
+Usage
+*****
 
-*** WARNING *** Version 0.3.0 breaks the previous two versions, but is easy to
-fix. You will need to reassign most 'Value Types' in the Dynamic Column model
-records in the admin. Until version 1.0.0 is reached this may happen again.
+Models and Managers
+-------------------
 
-Have you ever wanted to add new fields to a model, but you didn't have time to
-make the code and model changes required? Well this may be a solution to that
-often occurring scenario.
-
-It is highly recommended that after doing a pip install to clone the git
-repository as many examples exist there that will not be in a pip install.
-Examples of CSS used with the template tags mentioned below and a demo
-PostgreSQL database containing test data is also available. The repository can
-be found at: https://github.com/cnobile2012/dcolumn
-
-Basic Installation
-------------------
-
- 1. Add 'dcolumn' to your INSTALLED_APPS settings:
-
-        INSTALLED_APPS = (
-            ...
-            'dcolumn.dcolumns',
-            )
-
- 2. Add the following code stanza to the settings file. The `COLLECTIONS` key
-    points to key value pairs where the key is the model name and the value
-    is a unique name given to a collection set. This collection set is kept
-    in the model named `ColumnCollection`. As of now there is only a single
-    asynchronous call to the internal API. It is by default only accessed by
-    logged in users. You can change this behavior by setting
-    `INACTIVATE_API_AUTH` to `True`.
-
-        DYNAMIC_COLUMNS = {
-            # The default key/value pairs for the ColumnCollection object to use
-            # for all tables that use dcolumn. The key is the table name and the
-            # value is the name used in the ColumnCollection record.
-            u'COLLECTIONS': {
-                u'Book': u'Book Current',
-                u'Author': u'Author Current',
-                u'Publisher': u'Publisher Current',
-                u'Promotion': u'Promotion Current',
-                },
-            # To allow anybody to access the API set to True.
-            u'INACTIVATE_API_AUTH': False,
-            }
-
- 3. If you want authorization on the API you will need to set the standard
-    Django setting 'LOGIN_URL' to something reasonable.
-
-        # Change the URL below to your login path.
-        LOGIN_URL = u"/admin/"
-
- 4. There are two methods to define page location of each new field that you
-    enter into the system. The 1st method is to just pass a tuple of each CSS
-    class. They are enumerated starting with 0 (zero). They would be
-    referenced as `css.0`, `css.1`, etc. The 2nd method is to pass a tuple of
-    tuples with the first variable as the key and the second variable as the
-    value. They would be reference as `css.top`, `css.center`, etc.
-
-        # First method
-        dcolumn_manager.register_css_containers(
-               (u'top-container', u'center-container', u'bottom-container')
-        )
-
-        # Second method
-        dcolumn_manager.register_css_containers(
-               ((u'top', u'top-container'),
-                (u'center', u'center-container'),
-                (u'bottom', u'bottom-container'))
-        )
-
- 5. The models need to subclass the `CollectionBase` model base class from
-    dcolumn. The model manager needs to subclass `StatusModelManagerMixin` and
-    also needs to implement two methods named `dynamic_column` and
-    `get_choice_map`. See the example code.
-
- 6. The `CollectionBaseManagerBase` manager base class from dcolumn should also
-    be sub-classed to pick up a few convenience methods. This is not mandatory.
-
- 7. Any forms used with a dynamic column model will need to subclass
-    `CollectionFormMixin`. You do not need to subclass `forms.ModelForm`, this
-    is done for you already by `CollectionFormMixin`.
-
- 8. Any views need to subclass `CollectionCreateUpdateViewMixin` which must be
-    before the class-based view that you will use. Once again see the example
-    code.
-
-Do Not's
---------
-Once you have registered the choices/models with
-`dcolumn_manager.register_choice()` do not change it, as the numeric value is
-stored in the `DynamicColumn` table. So obviously if you really really really
-need to change it you can, but you must manually modify the `Relation` in all
-the affected rows in the `DynamicColumn` table. This needs to be done as new
-features are added to the app.
-
-You will see that this is all rather simple and you'll need to write very
-little code to support DynamicColumns.
-
-If you need to hardcode any of the slugs elsewhere in your code then you
-definitely need to set the 'Preferred Slug' field to your desired slug. If you
-do not do this the slug will track any changes made to the 'Name' fields
-breaking your code. The only caveat is that the slug will now track the
-'Preferred Slug' field, so don't change it after your code is using the slug
-value. I've put this out of the way and hidden in the admin 'Status' section
-of the 'Dynamic Columns' entries.
-
-
-API Details
------------
-
-### Models and Managers
-
-#### DynamicColumnManager
+DynamicColumnManager
+--------------------
  1. get_fk_slugs
    * Takes no arguments
    * Returns all dynamic column slugs that have a `value_type` of `CHOICE`.
      These include all Django models and the Choice models.
 
-#### DynamicColumn
+DynamicColumn
+-------------
  1. get_choice_relation_object_and_field
    * Takes no arguments
    * Returns the model object and the field used in the HTML select option
      text value.
 
-#### ColumnCollectionManager
+ColumnCollectionManager
+-----------------------
  1. get_column_collection `method`
    * `name` positional argument and is a collection name as defined in the
      DYNAMIC_COLUMNS.COLLECTIONS dictionary.
@@ -150,10 +44,12 @@ API Details
      instead of the slug as the HTML select option value.
    * Returns a list of tuples that can be used for HTML select options.
 
-#### ColumnCollection
+ColumnCollection
+----------------
 There are no user methods on the `ColumnCollection` model at this time.
 
-#### CollectionBaseManagerBase
+CollectionBaseManagerBase
+-------------------------
  1. get_all_slugs `method`
    * Takes no arguments
    * Returns a list of all slugs
@@ -164,7 +60,8 @@ There are no user methods on the `ColumnCollection` model at this time.
    * Takes no arguments
    * Returns a list of all model fields and slugs.
 
-#### CollectionBase
+CollectionBase
+--------------
  1. serialize_key_value_pairs `method`
    * Takes no arguments
    * Returns a dictionary where the key is the pk of a DynamicColumn instance
@@ -186,13 +83,16 @@ There are no user methods on the `ColumnCollection` model at this time.
      None objects else True save empty strings only.
    * Returns nothing. Sets a value on a keyValue object.
 
-#### KeyValueManager
+KeyValueManager
+---------------
 There are no user methods on the `KeyValueManager` model manager at this time.
 
-#### KeyValue
+KeyValue
+--------
 There are no user methods on the `KeyValue` model at this time.
 
-### DynamicColumnManager
+DynamicColumnManager
+--------------------
 This is not the model manager mentioned above. The `DynamicColumnManager` holds
 all the relevant states of the system and should be the first place you come
 when you need to know something about the system.
@@ -237,11 +137,13 @@ when you need to know something about the system.
      relation field.
    * Returns the field used in the HTML select option text value.
 
-### Template Tags
+Template Tags
+-------------
 There are three template tags that can be used. These tags will help with
 displaying the proper type of fields in your templates.
 
-#### auto_display
+auto_display
+------------
 The `auto_display` tag displays the dynamic columns in your template as either
 form elements or `span` elements. This tag takes one positional argument and
 three keyword arguments. Please look at the example code for usage.
@@ -262,7 +164,8 @@ three keyword arguments. Please look at the example code for usage.
      and generates `input` or `select` tags for form data. If `True` `span`
      tags are generated for detail pages where no forms would generally be used.
 
-#### single_display
+single_display
+--------------
 The `single_display` tag displays a single slug based on a `CollectionBase`
 derived model. This tag would often be used in list templates.
 
@@ -277,7 +180,8 @@ derived model. This tag would often be used in list templates.
      slug. ex. If the slug is `first-name` the context variable could be
      `first_name`.
 
-#### combine_contexts
+combine_contexts
+----------------
 The `combine_contexts` tag combines two different context variables. This would
 often be used to get the template error from a form for a specific slug. ex.
 The combination of `form.error` and `relation.slug` would give you the error
@@ -287,6 +191,3 @@ for a form `input` element.
    * Any instance object that has member objects.
  2. variable `variable indicating member object`
    * Reference to any member object on the `obj`.
-
-
-Feel free to contact me at: carl dot nobile at gmail.com
