@@ -2,8 +2,8 @@
 Django Tool to Create Dynamic Fields
 ====================================
 
-.. image:: http://img.shields.io/pypi/v/django-dcolumn.svg
-   :target: https://pypi.python.org/pypi/django-dcolumn
+.. image:: http://img.shields.io/pypi/v/django-dcolumns.svg
+   :target: https://pypi.python.org/pypi/django-dcolumns
    :alt: PyPI Version
 
 .. image:: http://img.shields.io/travis/cnobile2012/django-dcolumn/master.svg
@@ -20,6 +20,10 @@ Overview
 
 
 
+.. warning::
+
+  Version 1.0 is a complete rewrite of Django DColumns and is NOT backwards
+  compatible with previous versions.
 
 ********
 Provides
