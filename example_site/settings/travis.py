@@ -2,6 +2,10 @@ from .base import *
 
 DEBUG = False
 
+# Make data dir
+DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'data'))
+not os.path.isdir(DATA_DIR) and os.mkdir(DATA_DIR, 0o0775)
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
