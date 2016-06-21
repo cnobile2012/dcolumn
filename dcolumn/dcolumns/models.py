@@ -10,7 +10,7 @@ __docformat__ = "restructuredtext en"
 
 import logging
 import datetime
-import dateutil
+from dateutil import parser
 from collections import OrderedDict
 
 from django.utils import six
@@ -648,7 +648,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
     def _is_get_datetime(self, dc, value):
         try:
-            return dateutil.parser.parse(value)
+            return parser.parse(value)
         except ValueError:
             self._raise_exception(dc, value)
 
@@ -779,7 +779,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
             result = value.isoformat()
         elif isinstance(value, six.string_types):
             try:
-                dt = dateutil.parser.parse(value)
+                dt = parser.parse(value)
             except ValueError as e:
                 self._raise_exception(dc, value, except_msg=e)
             else:
