@@ -39,20 +39,20 @@ conversion in and out of the type you have set.
 Provides
 ********
 
- 1. ``DynamicColumn`` model to define the type of fields you want.
- 2. ``ColumnCollection`` model to group collections of fields for different
-    models that inherit ``CollectionBase``.
- 3. ``KeyValue`` model that stores the field data.
- 4. An instance of the ``DynamicColumnManager`` that manages the system. The
-    instance is ``dcolumn_manager``.
- 5. A ``CollectionBaseFormMixin`` to use in the forms you define for the
-    models that inherit ``CollectionBase``.
- 6. A template tag (``auto_display``) to create the HTML for the defined
-    fields. This tag will can create both an input or display type field.
- 7. A template tag (``single_display``) which rturns a context variable of
-    your choice converted to the appropreate data type.
- 8. A template tag (``combine_contexts``) used to combine two context
-    variables. This is most often used to get the Django field error messages.
+1. ``DynamicColumn`` model to define the type of fields you want.
+2. ``ColumnCollection`` model to group collections of fields for different
+   models that inherit ``CollectionBase``.
+3. ``KeyValue`` model that stores the field data.
+4. An instance of the ``DynamicColumnManager`` that manages the system. The
+   instance is ``dcolumn_manager``.
+5. A ``CollectionBaseFormMixin`` to use in the forms you define for the
+   models that inherit ``CollectionBase``.
+6. A template tag (``auto_display``) to create the HTML for the defined
+   fields. This tag will can create both an input or display type field.
+7. A template tag (``single_display``) which rturns a context variable of
+   your choice converted to the appropreate data type.
+8. A template tag (``combine_contexts``) used to combine two context
+   variables. This is most often used to get the Django field error messages.
 
 
 Feel free to contact me at: carl dot nobile at gmail.com
