@@ -8,7 +8,7 @@ python:
   - "nightly" # currently points to 3.6-dev
 
 # Command to install dependencies
-install: "pip install -r requirements/travis.txt --use-mirrors"
+install: "pip install -r requirements/travis.txt"
 
 # Command to setup Django, database, and run tests
 script:
@@ -17,4 +17,4 @@ script:
   - make coverage
 
 after_success:
-  - coveralls
+  - coveralls 
