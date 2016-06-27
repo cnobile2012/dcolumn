@@ -32,9 +32,9 @@ class TestCollectionAJAXView(BaseDcolumns):
 
     def setUp(self):
         super(TestCollectionAJAXView, self).setUp()
-        self.client = self._set_user_auth(self.user)
+        self.client = self._set_user_auth()
 
-    def _set_user_auth(self, user, username=_TEST_USERNAME,
+    def _set_user_auth(self, username=_TEST_USERNAME,
                        password=_TEST_PASSWORD, login=True):
         client = Client()
 
