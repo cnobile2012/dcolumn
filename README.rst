@@ -6,6 +6,9 @@ Django Tool to Create Dynamic Fields
    :target: https://pypi.python.org/pypi/django-dcolumns
    :alt: PyPI Version
 
+.. image:: https://img.shields.io/pypi/pyversions/django-dcolumns.svg
+    :target: https://pypi.python.org/pypi/django-dcolumns
+
 .. image:: http://img.shields.io/travis/cnobile2012/dcolumn/master.svg
    :target: http://travis-ci.org/cnobile2012/dcolumn
    :alt: Build Status
