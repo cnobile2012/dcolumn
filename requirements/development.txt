@@ -12,6 +12,7 @@ django-extensions
 
 # Documentation
 Sphinx
+sphinx_rtd_theme
 
 # Test coverage
 coverage
