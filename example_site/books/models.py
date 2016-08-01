@@ -12,6 +12,7 @@ from dcolumn.common.model_mixins import (
     UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin,
     ValidateOnSaveMixin)
 from dcolumn.dcolumns.models import CollectionBase, CollectionBaseManager
+from dcolumn.dcolumns.manager import dcolumn_manager
 
 from .choices import Language
 
@@ -152,3 +153,9 @@ class Book(CollectionBase, ValidateOnSaveMixin):
         return '<a href="{}">View Page</a>'.format(self.get_absolute_url())
     detail_producer.short_description = _("View Detail")
     detail_producer.allow_tags = True
+
+
+dcolumn_manager.register_choice(Promotion, 2, 'name')
+dcolumn_manager.register_choice(Author, 3, 'name')
+dcolumn_manager.register_choice(Publisher, 4, 'name')
+dcolumn_manager.register_choice(Book, 5, 'title')

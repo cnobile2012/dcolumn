@@ -7,14 +7,8 @@ import logging
 from django import forms
 
 from dcolumn.dcolumns.forms import CollectionBaseFormMixin
-from dcolumn.dcolumns.manager import dcolumn_manager
 
 from .models import Promotion, Author, Publisher, Book
-
-dcolumn_manager.register_choice(Promotion, 2, 'name')
-dcolumn_manager.register_choice(Author, 3, 'name')
-dcolumn_manager.register_choice(Publisher, 4, 'name')
-dcolumn_manager.register_choice(Book, 5, 'title')
 
 log = logging.getLogger('examples.books.views')
 
