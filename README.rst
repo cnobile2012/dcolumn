@@ -27,8 +27,9 @@ Overview
 ********
 
 At the time of this writing **DColumn** supports Django 1.9.8 and probably
-back to 1.8.0. The biggest issue with supporting older versions is the new
-*urlpatterns* is used. Python 2.7, 3.4, 3.5 and 3.5-dev are supported.
+back to 1.8.0. The biggest issue with supporting older versions of Django
+is with the new way *urlpatterns* is used. Python 2.7, 3.4, 3.5 and 3.5-dev
+are supported.
 
 DColumn is a Django plugin that lets the developer add columns to a model
 dynamically. It does this in the same way that the admin uses an inline model.
