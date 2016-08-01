@@ -6,8 +6,9 @@ The easiest way to install the Django DColumns package is with pip::
 
   $ pip install django-dcolumns
 
-You can also install with GitHub. This is useful if you need to see
-Django DColumns running in a real environment::
+You can also install the GitHub version which has a lot of example code. This
+is also useful if you want to see Django DColumns running in a real
+environment::
 
   $ git clone https://github.com/cnobile2012/dcolumn.git
 
@@ -19,7 +20,7 @@ Django DColumns running in a real environment::
   issue in my GitHub account to let me know.
 
   It is highly recommended that after doing a pip install to clone the git
-  repository as many examples exist there that will not be in a pip install.
+  repository. Many examples exist there that will not be in a pip install.
   Examples of how to use CSS with the template tags and a demo PostgreSQL
   database containing test data is also available. The repository can be
   found at: https://github.com/cnobile2012/dcolumn

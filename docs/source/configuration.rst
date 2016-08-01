@@ -11,26 +11,14 @@ Configuration
         'dcolumn.dcolumns',
         )
 
-2. Add the following code stanza to the settings file. The ``COLLECTIONS``
-   key points to key value pairs where the key is the model name and the value
-   is a unique name given to a collection set. This collection set is kept
-   in the model named ``ColumnCollection``. As of now there is only a single
-   asynchronous call to the internal API. It is by default only accessed by
-   logged in users. You can change this behavior by setting
+2. Add the following code stanza to the settings file. As of now there
+   is only a single API call to the internal API. It is by default only
+   accessed by logged in users. You can change this behavior by setting
    ``INACTIVATE_API_AUTH`` to ``True``.
 
 .. code::
 
     DYNAMIC_COLUMNS = {
-        # The default key/value pairs for the ColumnCollection object to use
-        # for all tables that use dcolumn. The key is the table name and the
-        # value is the name used in the ColumnCollection record.
-        'COLLECTIONS': {
-            'Book': 'Book Current',
-            'Author': 'Author Current',
-            'Publisher': 'Publisher Current',
-            'Promotion': 'Promotion Current',
-            },
         # To allow anybody to access the API set to True.
         'INACTIVATE_API_AUTH': False,
         }
@@ -43,10 +31,12 @@ Configuration
     # Change the URL below to your login path.
     LOGIN_URL = "/admin/"
 
-4. To define page location of each new fields that you enter into the
+4. To define page location for each field that you enter into the
    ``DynamicColumn`` table pass a tuple of tuples with the first variable as
    the key and the second variable as the value. They would be reference as
-   ``css.top``, ``css.center``, etc.
+   ``css.top``, ``css.center``, etc. You can add as many of these as you wish.
+   The first object of the tuple becomes a variable so these names must
+   conform to standard Python variable characters.
 
 .. code::
 
@@ -56,40 +46,81 @@ Configuration
             ('bottom', 'bottom-container')
             ))
 
-5. The models need to subclass the ``CollectionBase`` model base class from
-   dcolumn. The model manager needs to subclass ``StatusModelManagerMixin``
-   and also needs to implement two methods named ``dynamic_column`` and
-   ``get_choice_map``. See the example code.
+5. The models you create that use DColumn need to be a subclass of the
+   ``CollectionBase`` model base class. Your model managers needs to subclass
+   ``CollectionBaseManager``
 
-6. The ``CollectionBaseManagerBase`` manager base class from dcolumn should
-   also be sub-classed to pick up a few convenience methods. This is not
-   mandatory.
+.. code::
 
-7. Any forms used with a dynamic column model will need to subclass
-   ``CollectionFormMixin``. You do not need to subclass ``forms.ModelForm``,
-   this is done for you already by ``CollectionFormMixin``.
+    from dcolumn.dcolumns.models import CollectionBase, CollectionBaseManager
 
-8. Any views need to subclass ``CollectionCreateUpdateViewMixin`` which must
-   be before the class-based view that you will use. Once again see the example
-   code.
+6. Optionally any of your models and managers can subclass a few mixins.
 
-********
-Do Not's
-********
+.. code::
 
-Once you have registered the choices or models with
-``dcolumn_manager.register_choice()`` do not change it, as the numeric value
-is stored in ``DynamicColumn`` table rows. So obviously if you really really
-really need to change it you can, but you must manually modify the
-``Relation`` in all the affected rows in the ``DynamicColumn`` table.
+    from dcolumn.common.model_mixins import (
+        UserModelMixin, TimeModelMixin, StatusModelMixin,
+        StatusModelManagerMixin, ValidateOnSaveMixin)
 
-You will see that this is all rather simple and you'll need to write very
-little code to support DynamicColumns.
+* UserModelMixin--Adds a creator and updater ``ForeignKey`` fields to User
+  on your model.
+* TimeModelMixin--Adds a created and updated ``DateTimeField`` fields to your
+  models.
+* StatusModelMixin--Adds an active ``BooleanField`` field to your models.
+* StatusModelManagerMixin--Adds a DB access method to your model manager.
+* ValidateOnSaveMixin--Calls your clean method in the model. This should
+  be the last class inherited in your model.
 
-If you need to hardcode any of the slugs elsewhere in your code then you
-definitely need to set the 'Preferred Slug' field to your desired slug. If
-you do not do this the slug will track any changes made to the 'Name' fields
-which could break your code. The only caveat is that the slug will now track
-the 'Preferred Slug' field, so don't change it after your code is using the
-slug value. I've put this out of the way and hidden in the admin 'Status'
-section of the 'Dynamic Columns' entries.
+7. Any forms used with your models will need to subclass
+   ``CollectionBaseFormMixin``. You do not need to subclass
+   ``forms.ModelForm``, this is done for you already by
+   ``CollectionBaseFormMixin``.
+
+.. code::
+
+    from dcolumn.dcolumns.forms import CollectionBaseFormMixin
+
+8. Any views need to subclass ``CollectionCreateUpdateViewMixin`` or
+   ``CollectionDetailViewMixin``. These must be first in the MRO before the
+   class-based view that you will use. Once again see the example code.
+
+.. code::
+
+    from dcolumn.dcolumns.views import (
+        CollectionCreateUpdateViewMixin, CollectionDetailViewMixin)
+
+9. If the ``Choice`` mechanism is used the quasi models that you will build
+   need to subclass ``BaseChoice`` in the models and ``BaseChoiceManager``
+   in the managers.
+
+.. code::
+
+    from dcolumn.common.choice_mixins import BaseChoice, BaseChoiceManager
+
+10. The final peice that needs to be configured is to register all you models
+    and ``Choice`` models at the end of each file.
+
+.. code::
+
+    from dcolumn.dcolumns.manager import dcolumn_manager
+
+    ...
+
+    dcolumn_manager.register_choice(<model>, <num>, 'field')
+
+
+.. warning::
+
+  Once you have registered the models and choices with
+  ``dcolumn_manager.register_choice()`` it is not a good idea to change it, as
+  the numeric value is stored in ``DynamicColumn`` table. So with that said,
+  if you really need to change it you can, but you must manually modify the
+  ``Relation`` field for all affected rows in the ``DynamicColumn`` table.
+
+  If you need to hardcode any of the slugs elsewhere in your code then you
+  definitely need to set the *Preferred Slug* field in the admin under
+  **Status** to your desired slug. If you do not do this the slug will track
+  any changes made to the *Name* field which could break code that depends on
+  the slug value. The only caveat is that the slug will now track the
+  *Preferred Slug* field, so don't change it after your code is using the slug
+  value.
