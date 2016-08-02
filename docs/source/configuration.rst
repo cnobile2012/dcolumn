@@ -112,10 +112,10 @@ Configuration
 .. warning::
 
   Once you have registered the models and choices with
-  ``dcolumn_manager.register_choice()`` it is not a good idea to change it, as
-  the numeric value is stored in ``DynamicColumn`` table. So with that said,
-  if you really need to change it you can, but you must manually modify the
-  ``Relation`` field for all affected rows in the ``DynamicColumn`` table.
+  ``dcolumn_manager.register_choice()`` it is not a good idea to change it,
+  as the numeric value is stored in the ``DynamicColumn`` table. So with that
+  said, if you really need to change it you can, but you must manually modify
+  the ``Relation`` field for all affected rows in the ``DynamicColumn`` table.
 
   If you need to hardcode any of the slugs elsewhere in your code then you
   definitely need to set the *Preferred Slug* field in the admin under
