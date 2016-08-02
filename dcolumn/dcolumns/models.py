@@ -474,7 +474,7 @@ class CollectionBaseManager(models.Manager):
         :rtype: List of slugs.
         """
         result = []
-        obj = self.select_related('column_collection__name').first()
+        obj = self.select_related('column_collection').first()
 
         if obj:
             cc_obj = ColumnCollection.objects.filter(
