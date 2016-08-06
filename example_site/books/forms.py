@@ -29,7 +29,7 @@ class PromotionForm(CollectionBaseFormMixin):
 
     class Meta:
         model = Promotion
-        exclude = ('creator', 'updater', 'created', 'updated',)
+        exclude = CollectionBaseFormMixin.Meta.exclude
 
     class Media:
         css = {
