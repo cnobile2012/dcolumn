@@ -424,6 +424,9 @@ class CollectionBaseManager(models.Manager):
 
         :param field: The field of the choice that is used to populate the list.
         :type field: str
+        :param active: If ``True`` only active reords will be returned else if
+                       ``False`` all records will be returned.
+        :type active: bool
         :param comment: Defaults to ``True`` prepending a choice header to the
                         list.
         :type comment: bool
@@ -690,8 +693,9 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         :param slug: The slug associated with a ``KeyValue`` object.
         :type slug: str
-        :param value: Can be a value to set in a ``KeyValue`` object, or a
-                      model that inherits ``CollectionBase`` or ``BaseChoice``.
+        :param value: Can be the actual value to set in a ``KeyValue`` object,
+                      or a model that inherits ``CollectionBase`` or
+                      ``BaseChoice``.
         :type value: string or CollectionBase object
         :param field: Only used with ``CHOICE`` objects. Used to set the value
                       on the ``KeyValue`` object. If this keyword argument is

@@ -43,7 +43,7 @@ class DynamicColumnManager(object):
         multiple-choice non-database columns. ManyToMany is not supported
         at this time.
 
-        :param choice: This can be either a Django model class or choice class.
+        :param choice: This can be either a Django model or sudo model class.
                        A choice class mimics a model class so that this manager
                        can work with them as if they were Django model classes.
         :type choice: ClassType

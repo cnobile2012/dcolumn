@@ -36,13 +36,14 @@ def auto_display(parser, token):
 
     Arguments::
 
-      relation -- One object from the 'relations' template object.
-      prefix   -- A keyword argument used as a prefix in the element id and
-                  name attributes.
-      option   -- A keyword argument that is in the 'dynamicColumns' context.
-                  The entire 'dynamicColumns' context can be supplied or just
-                  the object for this relation.
-      display  -- True use <span> for all tags else False use default tag types.
+      relation -- One object from the 'relations' template context object.
+      prefix   -- A keyword argument who's value is used as a prefix to the
+                  element id and name attributes.
+      option   -- A keyword argument who's value is in the 'dynamicColumns'
+                  context. The entire 'dynamicColumns' context can be supplied
+                  or just the object for this relation.
+      display  -- A keyword argument. If 'True' use <span> for all tags else
+                  'False' use the default tag types.
 
     Assume data structures below for examples::
 

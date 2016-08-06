@@ -218,8 +218,8 @@ class CollectionDetailViewMixin(ContextDataMixin):
         """
         Get context data for the ``KeyValue`` objects.
         """
-        context = super(CollectionDetailViewMixin,
-                        self).get_context_data(**kwargs)
+        context = super(CollectionDetailViewMixin, self
+                        ).get_context_data(**kwargs)
         context.update(self.get_dynamic_column_context_data(**kwargs))
         context.update(self.get_relation_context_data(
             obj=self.object, **kwargs))

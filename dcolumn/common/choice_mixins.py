@@ -39,7 +39,7 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
         2. List in list as such:
            ``(('Arduino', 'Mega2560'), ('Raspberry Pi', 'B+'),)``
 
-      The second method permits multiple fields whereas the first method
+      The second method permits more than one fields whereas the first method
       permits only one field. In neither case does the ``PK`` count as a field.
 
       Both the ``FIELD_LIST`` and ``VALUES`` objects can be either a ``list``
