@@ -2,192 +2,173 @@
 Usage
 *****
 
-Models and Managers
--------------------
+Models and Model Managers
+=========================
 
-DynamicColumnManager
---------------------
- 1. get_fk_slugs
-   * Takes no arguments
-   * Returns all dynamic column slugs that have a `value_type` of `CHOICE`.
-     These include all Django models and the Choice models.
+The models you create that use DColumn need to be a subclass of the
+``CollectionBase`` model base class and optionally ``ValidateOnSaveMixin``
+which will call the model's ``clean`` method.
 
-DynamicColumn
--------------
- 1. get_choice_relation_object_and_field
-   * Takes no arguments
-   * Returns the model object and the field used in the HTML select option
-     text value.
+Your model managers needs to subclass ``CollectionBaseManager`` and
+optionally ``StatusModelManagerMixin`` which supplies an extra method to the
+manager.
 
-ColumnCollectionManager
------------------------
- 1. get_column_collection `method`
-   * `name` positional argument and is a collection name as defined in the
-     DYNAMIC_COLUMNS.COLLECTIONS dictionary.
-   * `unassigned` keyword argument defaults to `False`, if `True` gets the
-     items that are assigned to the collection name plus any unassigned items.
-   * Returns a column collection.
- 2. serialize_columns `method`
-   * `name` positional argument and is a collection name as defined in the
-     DYNAMIC_COLUMNS.COLLECTIONS dictionary.
-   * `obj` keyword argument defaults to `None` otherwise an instance of a
-     dynamic column enabled model.
-   * Returns a serialized version of the dynamic columns.
- 3. get_active_relation_items `method`
-   * `name` positional argument and is a collection name as defined in the
-     DYNAMIC_COLUMNS.COLLECTIONS dictionary.
-   * Returns a list of dynamic columns that have a `value_type` of CHOICE.
- 4. get_collection_choices `method`
-   * `name` positional argument and is a collection name as defined in the
-     DYNAMIC_COLUMNS.COLLECTIONS dictionary.
-   * `use_pk` keyword argument defaults to `False`, if `True` returns the pk
-     instead of the slug as the HTML select option value.
-   * Returns a list of tuples that can be used for HTML select options.
+.. code::
 
-ColumnCollection
-----------------
-There are no user methods on the `ColumnCollection` model at this time.
+    from dcolumn.dcolumns.models import CollectionBase, CollectionBaseManager
+    from dcolumn.common.model_mixins import (
+        StatusModelManagerMixin, ValidateOnSaveMixin)
+    from dcolumn.dcolumns.manager import dcolumn_manager
 
-CollectionBaseManagerBase
--------------------------
- 1. get_all_slugs `method`
-   * Takes no arguments
-   * Returns a list of all slugs
- 2. get_all_fields `method`
-   * Takes no arguments
-   * Returns a list of all model fields.
- 3. get_all_fields_and_slugs `method`
-   * Takes no arguments
-   * Returns a list of all model fields and slugs.
+    class MyNewClassManager(CollectionBaseManager, StatusModelManagerMixin):
+        pass
 
-CollectionBase
---------------
- 1. serialize_key_value_pairs `method`
-   * Takes no arguments
-   * Returns a dictionary where the key is the pk of a DynamicColumn instance
-     and the value of the KeyValue instance associated with the DynamicColumn
-     instance.
- 2. get_dynamic_column `method`
-   * `slug` positional argument, is the slug of any dynamic column object.
-   * Returns the DynamicColumn instance relitive to this model instance.
- 3. get_key_value_pair `method`
-   * `slug` positional argument, is the slug of any dynamic column object.
-   * `field` keyword argument indicating the field to use in a choice or
-      model. Defaults to a field named `value`.
-   * Returns the value of the dynamic column.
- 4. set_key_value_pair `method`
-   * `slug` positional argument, is the slug of any dynamic column object.
-   * `value` positional argument, is a value to be set on a keyvalue pair.
-   * `field` keyword argument, is the field used to get the value on the object.
-   * `force` keyword argument, default is False, do not save empty strings or
-     None objects else True save empty strings only.
-   * Returns nothing. Sets a value on a keyValue object.
+    class MyNewClass(CollectionBase, ValidateOnSaveMixin):
+        name = models.CharField(max_length=250)
 
-KeyValueManager
----------------
-There are no user methods on the `KeyValueManager` model manager at this time.
+        objects = MyNewClassManager()
 
-KeyValue
---------
-There are no user methods on the `KeyValue` model at this time.
+        def clean(self):
+            ...
 
-DynamicColumnManager
---------------------
-This is not the model manager mentioned above. The `DynamicColumnManager` holds
-all the relevant states of the system and should be the first place you come
-when you need to know something about the system.
+    dcolumn_manager.register_choice(MyNewClass, 1, 'name')
 
- 1. register_choice `method`
-   * `choice` positional argument and is a CHOICE type object either a Django
-     model or a choice model.
-   * `relation_num` positional argument and is a numeric identifier used as the
-     HTML select option value.
-   * `field` positional argument and is a string used as the HTML select option
-     text value.
- 2. choice_relations `property`
-   * Takes no arguments
-   * Returns a list of choices.
- 3. choice_relation_map `property`
-   * Takes no arguments
-   * Returns a dictionary of choices.
- 4. choice_map `property`
-   * Takes no arguments
-   * Returns a dictionary where the key is the choice model name and the value
-     is a tuple of the choice model object and the relevant field name.
- 5. register_css_containers `method`
-   * `container_list` positional argument and is a list of the CSS classes or
-     ids that will determine the location on the page of the various dynamic
-     columns.
-   * Returns nothing.
- 6. css_containers `property`
-   * Takes no arguments
-   * Returns a list of tuples where the tuple is (num, text)
- 7. css_container_map `property`
-   * Takes no arguments
-   * Returns a dictionary of the CSS containers.
- 8. get_collection_name `method`
-   * `model_name` positional argument and is the key name used in the
-     settings.DYNAMIC_COLUMNS.COLLECTIONS.
-   * Returns the `ColumnCollection` instance name.
- 9. get_api_auth_state `method`
-   * Takes no arguments
-   * Returns the value of settings.DYNAMIC_COLUMNS.INACTIVATE_API_AUTH
- 10. get_relation_model_field `method`
-   * `relation` positional argument and is the value in the `DynamicColumn`
-     relation field.
-   * Returns the field used in the HTML select option text value.
+The predefined fields on ``CollectionBase`` are:
+  * *column_collection*--ForeignKey to the ``ColumnCollection`` model.
+  * *creator*--The user object that created this record.
+  * *created*--A DateTimeField of when the record was created.
+  * *updater*--The user that last updated this record.
+  * *updated*--A DateTimeField of when the record was last updated.
+  * *active*--BooleanField indicating if this record is currently active.
 
-Template Tags
--------------
-There are three template tags that can be used. These tags will help with
-displaying the proper type of fields in your templates.
+Views
+=====
 
-auto_display
-------------
-The `auto_display` tag displays the dynamic columns in your template as either
-form elements or `span` elements. This tag takes one positional argument and
-three keyword arguments. Please look at the example code for usage.
+Views need to subclass ``CollectionCreateUpdateViewMixin`` or
+``CollectionDetailViewMixin``. These must be first in the MRO before the
+class-based view that you will use. Once again see the example code.
 
- 1. relation `dict`
-   * A dictionary representing the meta data for a specific field. This data
-     is a single value dict that can be found in the context as `relations`.
- 2. prefix `str`
-   * Defaults to an empty string, but can be used to put a common prefix on all
-     tag id and name attributes. Not often used.
- 3. option `(list, tuple) or dict`
-   * Used only for choice type fields, but can be passed into the template tag
-     for all types--if needed it will be used. The entire `dynamicColumns` from
-     the context can be passed in (dict) or just the specific field's data
-     `list or tuple`.
- 4. display `bool`
-   * This keyword argument is either `True` or `False`. `False` is the default
-     and generates `input` or `select` tags for form data. If `True` `span`
-     tags are generated for detail pages where no forms would generally be used.
+.. code::
 
-single_display
---------------
-The `single_display` tag displays a single slug based on a `CollectionBase`
-derived model. This tag would often be used in list templates.
+    from django.views.generic import CreateView, UpdateView, DetailView
+    from dcolumn.dcolumns.views import (
+        CollectionCreateUpdateViewMixin, CollectionDetailViewMixin)
 
- 1. obj `model instance`
-   * A model instance that is derived from `CollectionBase`.
- 2. slug `str`
-   * The `slug` from a DynamicColumn record.
- 3. as `str`
-   * A delimiter keyword used to define the next argument.
- 4. name `str`
-   * The variable name created in the context that will hold the value of the
-     slug. ex. If the slug is `first-name` the context variable could be
-     `first_name`.
+    class MyNewCreateView(CollectionCreateUpdateViewMixin, CreateView):
+        ...
 
-combine_contexts
-----------------
-The `combine_contexts` tag combines two different context variables. This would
-often be used to get the template error from a form for a specific slug. ex.
-The combination of `form.error` and `relation.slug` would give you the error
-for a form `input` element.
+    class MyNewUpdateView(CollectionCreateUpdateViewMixin, UpdateView):
+        ...
 
- 1. obj `instance object`
-   * Any instance object that has member objects.
- 2. variable `variable indicating member object`
-   * Reference to any member object on the `obj`.
+    class MyNewDetailView(CollectionCreateUpdateViewMixin, DetailView):
+        ...
+
+Forms
+=====
+
+Forms need to subclass ``CollectionBaseFormMixin``. Be sure to add the
+``exclude`` from the mixin to your ``exclude``.
+
+.. code::
+
+    from dcolumn.dcolumns.forms import CollectionBaseFormMixin
+    from .models import MyNewClass
+
+    class MyNewForm(CollectionBaseFormMixin):
+
+        class Meta:
+            model = MyNewClass
+            exclude = CollectionBaseFormMixin.Meta.exclude
+
+Sudo Models (Choice)
+====================
+
+If the *Choice* mechanism is used the quasi models that you will build need
+to subclass ``BaseChoice`` and the managers ``BaseChoiceManager``.
+
+These sudo models let you create a list of choices somewhat similar to the
+standard Django choice that can be used in Django model fields.
+
+There are two ways to set the ``VALUES`` manager class member object as
+shown below. The first method permits only one field in the sudo model and
+the second method permits multiple fields.
+
+.. code::
+
+    VALUES = ('Green', 'Red', 'Blue',)
+    FIELD_LIST = ('color',)
+
+or
+
+.. code::
+
+    VALUES = (('Arduino', 'Mega2560'), ('Raspberry Pi', 'B+'),)
+    FIELD_LIST = ('hardware', 'model',)
+
+All sudo models need to define a ``pk`` field, but this will be done for you
+making it unnecessary to define the field yourself.
+
+.. code::
+
+    from dcolumn.common.choice_mixins import BaseChoice, BaseChoiceManager
+    from dcolumn.dcolumns.manager import dcolumn_manager
+
+    class MyNewSudoClassManager(BaseChoiceManager):
+        VALUES = ('Green', 'Red', 'Blue',)
+        FIELD_LIST = ('color',)
+
+        def __init__(self):
+            super(MyNewSudoClassManager, self).__init__()
+
+    class MyNewSudoClass(BaseChoice):
+        pk = 0
+        color = ''
+
+        objects = MyNewSudoClassManager()
+
+        def __str__(self):
+            return self.color
+
+    dcolumn_manager.register_choice(MyNewSudoClass, 2, 'color')
+
+Remember when registering a model that subclasses ``CollectionBase`` or a
+sudo model to increment the second argument. No two can have the same value.
+A ``ValueError`` will be raised if you use the same number more than once.
+
+.. warning::
+
+  Once you have registered the models and choices with
+  ``dcolumn_manager.register_choice()`` it is not a good idea to change them,
+  as the numeric values are stored in the ``DynamicColumn`` table. So with that
+  said, if you really need to change them you can, but you must manually modify
+  the ``Relation`` field for all affected rows in the ``DynamicColumn`` table
+  through the admin.
+
+  If you need to hardcode any of the slugs elsewhere in your code then you
+  definitely need to set the *Preferred Slug* field in the admin under
+  **Status** to your desired slug. If you do not do this the slug will track
+  any changes made to the *Name* field which could break code that depends on
+  the slug value. The only caveat is that the slug will now track the
+  *Preferred Slug* field, so don't change it after your code is using the slug
+  value.
+
+Optional Mixins
+===============
+
+Optionally any of your models and managers other than the ones that use
+*DColumn* can subclass a few mixins.
+
+.. code::
+
+    from dcolumn.common.model_mixins import (
+        UserModelMixin, TimeModelMixin, StatusModelMixin,
+        StatusModelManagerMixin, ValidateOnSaveMixin)
+
+* UserModelMixin--Adds a creator and updater ``ForeignKey`` fields to your
+  User model on your model.
+* TimeModelMixin--Adds a created and updated ``DateTimeField`` fields to your
+  models.
+* StatusModelMixin--Adds an active ``BooleanField`` field to your models.
+* StatusModelManagerMixin--Adds a DB access method to your model manager.
+* ValidateOnSaveMixin--Calls your clean method in the model. This should
+  be the last class inherited in your model.

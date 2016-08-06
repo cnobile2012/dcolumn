@@ -11,8 +11,11 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   overview
    installation
    configuration
+   usage
+   methods
    modules
 
 Indices and tables

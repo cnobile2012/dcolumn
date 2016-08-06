@@ -67,7 +67,19 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.autodoc',
     'sphinx.ext.githubpages',
+    'sphinx.ext.extlinks',
     ]
+
+# External links
+extlinks = {
+    'base': ('https://github.com/cnobile2012/dcolumn/blob/master/%s', 'GitHub'),
+    'example-html': ('https://github.com/cnobile2012/dcolumn/blob/master/example_site/templates/%s',
+                     'GitHub'),
+    'example-code': ('https://github.com/cnobile2012/dcolumn/blob/master/example_site/%s',
+                     'GitHub'),
+    'dcolumn-code': ('https://github.com/cnobile2012/dcolumn/blob/master/dcolumn/%s',
+                     'GitHub'),
+     }
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -147,8 +159,8 @@ todo_include_todos = True
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#html_theme = 'alabaster'
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'alabaster'
+#html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
