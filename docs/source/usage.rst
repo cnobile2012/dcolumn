@@ -15,12 +15,14 @@ manager.
 
 .. code::
 
-    from dcolumn.dcolumns.models import CollectionBase, CollectionBaseManager
+    from dcolumn.dcolumns.models import (
+        CollectionBase, CollectionBaseManager)
     from dcolumn.common.model_mixins import (
         StatusModelManagerMixin, ValidateOnSaveMixin)
     from dcolumn.dcolumns.manager import dcolumn_manager
 
-    class MyNewClassManager(CollectionBaseManager, StatusModelManagerMixin):
+    class MyNewClassManager(CollectionBaseManager,
+                            StatusModelManagerMixin):
         pass
 
     class MyNewClass(CollectionBase, ValidateOnSaveMixin):
@@ -80,17 +82,17 @@ Forms need to subclass ``CollectionBaseFormMixin``. Be sure to add the
             model = MyNewClass
             exclude = CollectionBaseFormMixin.Meta.exclude
 
-Sudo Models (Choice)
-====================
+Pseudo Models (Choices)
+=======================
 
-If the *Choice* mechanism is used the quasi models that you will build need
+If the *Choice* mechanism is used the pseudo models that you will build need
 to subclass ``BaseChoice`` and the managers ``BaseChoiceManager``.
 
-These sudo models let you create a list of choices somewhat similar to the
+These pseudo models let you create a list of choices somewhat similar to the
 standard Django choice that can be used in Django model fields.
 
 There are two ways to set the ``VALUES`` manager class member object as
-shown below. The first method permits only one field in the sudo model and
+shown below. The first method permits only one field in the pseudo model and
 the second method permits multiple fields.
 
 .. code::
@@ -105,7 +107,7 @@ or
     VALUES = (('Arduino', 'Mega2560'), ('Raspberry Pi', 'B+'),)
     FIELD_LIST = ('hardware', 'model',)
 
-All sudo models need to define a ``pk`` field, but this will be done for you
+All pseudo models need to define a ``pk`` field, but this will be done for you
 making it unnecessary to define the field yourself.
 
 .. code::
@@ -113,26 +115,26 @@ making it unnecessary to define the field yourself.
     from dcolumn.common.choice_mixins import BaseChoice, BaseChoiceManager
     from dcolumn.dcolumns.manager import dcolumn_manager
 
-    class MyNewSudoClassManager(BaseChoiceManager):
+    class MyNewPseudoClassManager(BaseChoiceManager):
         VALUES = ('Green', 'Red', 'Blue',)
         FIELD_LIST = ('color',)
 
         def __init__(self):
-            super(MyNewSudoClassManager, self).__init__()
+            super(MyNewPseudoClassManager, self).__init__()
 
-    class MyNewSudoClass(BaseChoice):
+    class MyNewPseudoClass(BaseChoice):
         pk = 0
         color = ''
 
-        objects = MyNewSudoClassManager()
+        objects = MyNewPseudoClassManager()
 
         def __str__(self):
             return self.color
 
-    dcolumn_manager.register_choice(MyNewSudoClass, 2, 'color')
+    dcolumn_manager.register_choice(MyNewPseudoClass, 2, 'color')
 
 Remember when registering a model that subclasses ``CollectionBase`` or a
-sudo model to increment the second argument. No two can have the same value.
+pseudo model to increment the second argument. No two can have the same value.
 A ``ValueError`` will be raised if you use the same number more than once.
 
 .. warning::

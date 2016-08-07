@@ -15,7 +15,7 @@ DynamicColumnManager
 +==============+===========+==================================================+
 | get_fk_slugs | None      | Returns all dynamic column slugs that have a     |
 |              |           | `value_type` of `CHOICE`. These include all      |
-|              |           | Django models and the sudo models.               |
+|              |           | Django models and the pseudo models.             |
 +--------------+-----------+--------------------------------------------------+
 
 DynamicColumn
@@ -111,8 +111,9 @@ CollectionBaseManagerBase
 |                          |           | Returns a Django queryset.           |
 +--------------------------+-----------+--------------------------------------+
 | get_choices              | `field`   | A positional argument. This value    |
-|                          |           | is the field in a model or sudo model|
-|                          |           | that is used in the list od choices. |
+|                          |           | is the field in a model or pseudo    |
+|                          |           | model that is used in the list of    |
+|                          |           | choices.                             |
 |                          +-----------+--------------------------------------+
 |                          | `active`  | A keyword argument. This value if    |
 |                          |           | ``True`` only active reords will be  |
@@ -132,7 +133,7 @@ CollectionBaseManagerBase
 |                          |           | inherited model.                     |
 |                          +-----------+--------------------------------------+
 |                          | `field`   | A positional argument. This value is |
-|                          |           | the field on a model or sudo model   |
+|                          |           | the field on a model or pseudo model |
 |                          |           | that a value is returned from.       |
 |                          +-----------+--------------------------------------+
 |                          |           | Returns the value from the ``field`` |
@@ -170,8 +171,8 @@ CollectionBase
 |                      |           | represents any ``DynamicColumn`` object. |
 |                      +-----------+------------------------------------------+
 |                      | `field`   | A keyword argument indicating the field  |
-|                      |           | to use in a model or sudo model. Defaults|
-|                      |           | to ``None``.                             |
+|                      |           | to use in a model or pseudo model.       |
+|                      |           | Defaults to ``None``.                    |
 |                      +-----------+------------------------------------------+
 |                      |           | Returns the coersed value of a           |
 |                      |           | ``KeyValue`` object.                     |
@@ -185,7 +186,7 @@ CollectionBase
 |                      |           | or ``BaseChoice``.                       |
 |                      +-----------+------------------------------------------+
 |                      | `field`   | A keyword argument, indication the field |
-|                      |           | used in a model or sudo model. Defaults  |
+|                      |           | used in a model or pseudo model. Defaults|
 |                      |           | to ``None``.                             |
 |                      +-----------+------------------------------------------+
 |                      | `force`   | A keyword argument. The default is       |
@@ -217,7 +218,7 @@ when you need to know something about the system.
 +==========================+==================+===============================+
 | register_choice          | `choice`         | A positional argument. This   |
 |                          |                  | can be either a Django model  |
-|                          |                  | or sudo model class object.   |
+|                          |                  | or pseudo model class object. |
 |                          +------------------+-------------------------------+
 |                          | `relation_num`   | A positional argument. This   |
 |                          |                  | value is a numeric identifier |
@@ -236,7 +237,7 @@ when you need to know something about the system.
 |                          |                  | choices.                      |
 +--------------------------+------------------+-------------------------------+
 | choice_map               | Property         | Returns a dictionary where the|
-|                          |                  | key is the Django or sudo     |
+|                          |                  | key is the Django or pseudo   |
 |                          |                  | model name and the value is a |
 |                          |                  | tuple of the choice model     |
 |                          |                  | object and the relevant field |
@@ -300,7 +301,7 @@ three keyword arguments. Please look at the example code on
 
  3. option `(list, tuple)` or `dict`
 
-     Used only for Django model or sudo model type fields, but can be passed
+     Used only for Django model or pseudo model type fields, but can be passed
      into the template tag for all types and will be ignored if not needed. The
      entire ``dynamicColumns`` `dict` from the context can be passed in or just
      the specific field's data `list` or `tuple`.

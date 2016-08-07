@@ -72,7 +72,8 @@ extensions = [
 
 # External links
 extlinks = {
-    'base': ('https://github.com/cnobile2012/dcolumn/blob/master/%s', 'GitHub'),
+    'issues': ('https://github.com/cnobile2012/dcolumn/issues/%s', 'GitHub'),
+    'base': ('https://github.com/cnobile2012/dcolumn/%s', 'GitHub'),
     'example-html': ('https://github.com/cnobile2012/dcolumn/blob/master/example_site/templates/%s',
                      'GitHub'),
     'example-code': ('https://github.com/cnobile2012/dcolumn/blob/master/example_site/%s',
