@@ -327,6 +327,7 @@ class CollectionBaseFormMixin(forms.ModelForm):
         if request:
             inst.updater = request.user
 
+            # Populate the creator only on new records.
             if not hasattr(inst, 'creator') or not inst.creator:
                 inst.creator = request.user
                 inst.active = True
