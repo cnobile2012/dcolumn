@@ -1,8 +1,19 @@
+*****************
 API Documentation
 *****************
 
-.. toctree::
-   :maxdepth: 1
+Basic Functionallity (dcolumns)
+===============================
 
-   dcolumns
-   common
+.. toctree::
+   :maxdepth: 2
+
+   dcolumn.dcolumns
+
+Mixins and Utilities (common)
+=============================
+
+.. toctree::
+   :maxdepth: 2
+
+   dcolumn.common

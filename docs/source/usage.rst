@@ -4,14 +4,12 @@ Usage
 
 Models and Model Managers
 =========================
-
 The models you create that use DColumn need to be a subclass of the
-``CollectionBase`` model base class and optionally ``ValidateOnSaveMixin``
-which will call the model's ``clean`` method.
+``CollectionBase`` model class and optionally ``ValidateOnSaveMixin`` which
+will call the model's ``clean`` method.
 
-Your model managers needs to subclass ``CollectionBaseManager`` and
-optionally ``StatusModelManagerMixin`` which supplies an extra method to the
-manager.
+Your model managers needs to subclass ``CollectionBaseManager`` and optionally
+``StatusModelManagerMixin`` which supplies an extra method to the manager.
 
 .. code::
 
@@ -45,10 +43,10 @@ The predefined fields on ``CollectionBase`` are:
 
 Views
 =====
-
 Views need to subclass ``CollectionCreateUpdateViewMixin`` or
 ``CollectionDetailViewMixin``. These must be first in the MRO before the
-class-based view that you will use. Once again see the example code.
+class-based view that you will use. See :example-code:`GitHub <books/views.py>`
+for example code.
 
 .. code::
 
@@ -67,9 +65,9 @@ class-based view that you will use. Once again see the example code.
 
 Forms
 =====
-
 Forms need to subclass ``CollectionBaseFormMixin``. Be sure to add the
-``exclude`` from the mixin to your ``exclude``.
+``exclude`` from the mixin to your ``exclude``. See :example-code:`GitHub
+<books/forms.py>` for example code.
 
 .. code::
 
@@ -84,16 +82,16 @@ Forms need to subclass ``CollectionBaseFormMixin``. Be sure to add the
 
 Pseudo Models (Choices)
 =======================
-
-If the *Choice* mechanism is used the pseudo models that you will build need
-to subclass ``BaseChoice`` and the managers ``BaseChoiceManager``.
+If the *Choice* mechanism is used the pseudo models that you build need to
+subclass ``BaseChoice`` and the managers ``BaseChoiceManager``.
 
 These pseudo models let you create a list of choices somewhat similar to the
 standard Django choice that can be used in Django model fields.
 
-There are two ways to set the ``VALUES`` manager class member object as
-shown below. The first method permits only one field in the pseudo model and
-the second method permits multiple fields.
+There are two ways to set the ``VALUES`` manager class member object as shown
+below. The first method permits only one field in the pseudo model and the
+second method permits multiple fields. See :example-code:`GitHub
+<books/choices.py>` for example code.
 
 .. code::
 
@@ -156,7 +154,6 @@ A ``ValueError`` will be raised if you use the same number more than once.
 
 Optional Mixins
 ===============
-
 Optionally any of your models and managers other than the ones that use
 *DColumn* can subclass a few mixins.
 
@@ -166,11 +163,71 @@ Optionally any of your models and managers other than the ones that use
         UserModelMixin, TimeModelMixin, StatusModelMixin,
         StatusModelManagerMixin, ValidateOnSaveMixin)
 
-* UserModelMixin--Adds a creator and updater ``ForeignKey`` fields to your
-  User model on your model.
-* TimeModelMixin--Adds a created and updated ``DateTimeField`` fields to your
-  models.
-* StatusModelMixin--Adds an active ``BooleanField`` field to your models.
-* StatusModelManagerMixin--Adds a DB access method to your model manager.
-* ValidateOnSaveMixin--Calls your clean method in the model. This should
-  be the last class inherited in your model.
+* UserModelMixin
+
+  Adds ``creator`` and ``updater`` ``ForeignKey`` fields from your User model
+  to your model. See ``UserAdminMixin`` below on how to populate these fields
+  in your admin. It is your responsibility to populate these fields in places
+  other than the admin. See below for one method on how to do this.
+
+  First put the request object in the form from your view. Then populate the
+  fields in the your form's ``save`` method.
+
+.. code::
+
+    class MyNewView(...):
+
+        ...
+
+        def get_initial(self):
+            """
+            Provides initial data to forms.
+            """
+            return {'request': self.request}
+
+.. code::
+
+    class MyNewForm(forms.ModelForm):
+
+        ...
+
+        def save(self, commit=True):
+            request = self.initial.get('request')
+
+            if request:
+                inst.updater = request.user
+
+                # Populate the creator only on new records.
+                if not hasattr(inst, 'creator') or not inst.creator:
+                    inst.creator = request.user
+                    inst.active = True
+
+* UserAdminMixin
+
+  Saves the ``request.user`` to the ``creator`` and ``updater`` in your admin
+  when ``UserModelMixin`` is used.
+
+* TimeModelMixin
+
+  Adds ``created`` and ``updated`` ``DateTimeField`` fields to your models.
+  This mixin will save the UTC aware time in the two fields.
+
+* StatusModelMixin
+
+  Adds an ``active`` ``BooleanField`` field to your models. See the above code
+  snippet on how to populate the active field in the form's ``save`` method.
+
+* StatusModelManagerMixin
+
+  Adds a DB access method to your model manager. See :dcolumn-code:`GitHub
+  <common/model_mixins.py>` for how it is implemented.
+
+* ValidateOnSaveMixin
+
+  Calls the clean method on the model. This should be the last class inherited
+  in your model. The one farthermost on the right.
+
+.. code::
+
+    class MyNewModel(..., ..., ValidateOnSaveMixin):
+        ...
