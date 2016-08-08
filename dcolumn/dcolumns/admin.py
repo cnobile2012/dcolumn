@@ -41,6 +41,7 @@ class KeyValueInline(admin.TabularInline):
 #
 # ColumnCollection
 #
+@admin.register(ColumnCollection)
 class ColumnCollectionAdmin(UserAdminMixin):
     """
     Used internally to DColumn for the ``ColumnCollection`` model.
@@ -65,6 +66,7 @@ class ColumnCollectionAdmin(UserAdminMixin):
 #
 # DynamicColumn
 #
+@admin.register(DynamicColumn)
 class DynamicColumnAdmin(UserAdminMixin):
     """
     Used internally to DColumn for the ``DynamicColumn`` model.
@@ -85,7 +87,3 @@ class DynamicColumnAdmin(UserAdminMixin):
     list_editable = ('location', 'order', 'active',)
     ordering = ('column_collection__name', 'location', 'order', 'name',)
     form = DynamicColumnForm
-
-
-admin.site.register(ColumnCollection, ColumnCollectionAdmin)
-admin.site.register(DynamicColumn, DynamicColumnAdmin)
