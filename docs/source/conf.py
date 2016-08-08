@@ -66,7 +66,6 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
     'sphinx.ext.autodoc',
-    'sphinx.ext.githubpages',
     'sphinx.ext.extlinks',
     ]
 
