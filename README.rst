@@ -22,9 +22,10 @@ Django Tool to Create Dynamic Fields
    :target: https://pypi.python.org/pypi/django-dcolumns
    :alt: PyPI Downloads
 
-********
+The MIT License (MIT)
+
 Overview
-********
+--------
 
 At the time of this writing **DColumn** supports Django 1.9.10 and probably
 back to 1.8.0. The biggest issue with supporting older versions of Django
@@ -41,16 +42,12 @@ This can be done, because any type of field can be represented as a string.
 There are two methods on any model you define as a **Dcolumn** model that
 does conversion in and out of the type you have set.
 
-.. todo::
-   Add a reference to readthedocs.org.
-
 .. warning::
    Version 1.0 is a complete rewrite of **Django DColumns** and is NOT
    backwards compatible with previous versions.
 
-********
 Provides
-********
+--------
 
 1. Functionality to permit the addition of fields to a model through the admin.
 
@@ -60,3 +57,7 @@ Provides
 
 
 Feel free to contact me at: carl dot nobile at gmail.com
+
+Complete Documentation can be found on
+`Read the Docs <https://readthedocs.org/>`_ at:
+`Django DColumns <http://django-dcolumns.readthedocs.io/en/latest/>`_

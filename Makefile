@@ -42,14 +42,13 @@ build	: clean
 upload	: clobber
 	python setup.py sdist upload -r pypi
 
+.PHONY	: upload-test
+upload-test: clobber
+	python setup.py sdist upload -r pypitest
 
 .PHONY	: install-dev
 install-dev:
 	pip install $(PIP_ARGS) -r requirements/development.txt
-
-.PHONY	: upload-test
-upload-test: clobber
-	python setup.py sdist upload -r pypitest
 
 #----------------------------------------------------------------------
 
