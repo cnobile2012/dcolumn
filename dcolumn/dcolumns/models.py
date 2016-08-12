@@ -2,6 +2,7 @@
 #
 # dcolumn/dcolumns/models.py
 #
+from __future__ import unicode_literals
 
 """
 Dynamic Column dependent models.
@@ -13,6 +14,7 @@ import datetime
 from dateutil import parser
 from collections import OrderedDict
 
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils import six
 from django.db import models
 from django.utils.translation import ugettext, ugettext_lazy as _
@@ -54,6 +56,7 @@ class DynamicColumnManager(StatusModelManagerMixin):
         return result
 
 
+@python_2_unicode_compatible
 class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
                     ValidateOnSaveMixin):
     """
@@ -341,6 +344,7 @@ class ColumnCollectionManager(StatusModelManagerMixin):
         return choices
 
 
+@python_2_unicode_compatible
 class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin,
                        ValidateOnSaveMixin):
     """
@@ -850,6 +854,7 @@ class KeyValueManager(models.Manager):
     pass
 
 
+@python_2_unicode_compatible
 class KeyValue(ValidateOnSaveMixin):
     collection = models.ForeignKey(
         CollectionBase, verbose_name=_("Collection Type"),

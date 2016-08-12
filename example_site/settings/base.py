@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admindocs',
-    'django.contrib.sites',
+    #'django.contrib.sites',
     'dcolumn.dcolumns',
     'example_site.books',
     ]
