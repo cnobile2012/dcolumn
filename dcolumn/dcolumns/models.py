@@ -76,12 +76,12 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
         (BOOLEAN, _("Boolean")),
         (CHOICE, _("Choice")),
         (DATE, _("Date")),
-        (DATETIME, ("Date Time")),
+        (DATETIME, _("Date Time")),
         (FLOAT, _("Floating Point")),
         (NUMBER, _("Number")),
         (TEXT, _("Text")),
         (TEXT_BLOCK, _("Text Block")),
-        (TIME, ("Time")),
+        (TIME, _("Time")),
         )
     VALUE_TYPES_MAP = dict(VALUE_TYPES)
     NO = False
