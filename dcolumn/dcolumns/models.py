@@ -689,17 +689,18 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
     def set_key_value(self, slug, value, field=None, force=False):
         """
-        This method sets an arbitrary key/value object, it will log an error
-        if the key/value object could not be found.
+        This method sets an arbitrary key/value object, it will create a
+        new objects or updated a pre-existing object.
 
-        If the argument value contains the value 'increment' or 'decrement'
-        the value associated with the slug will be incremented or decremented.
+        If the argument ``value`` contains the value 'increment' or
+        'decrement' the value associated with the slug will be
+        incremented or decremented.
 
         :param slug: The slug associated with a ``KeyValue`` object.
         :type slug: str
-        :param value: Can be the actual value to set in a ``KeyValue`` object,
-                      or a model that inherits ``CollectionBase`` or
-                      ``BaseChoice``.
+        :param value: Can be the actual value to set in a ``KeyValue``
+                      object, or a model that inherits
+                      ``CollectionBase`` or ``BaseChoice``.
         :type value: string or CollectionBase object
         :param field: Only used with ``CHOICE`` objects. Used to set the value
                       on the ``KeyValue`` object. If this keyword argument is
