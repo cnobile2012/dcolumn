@@ -428,7 +428,7 @@ class CollectionBaseManager(models.Manager):
 
         :param field: The field of the choice that is used to populate the list.
         :type field: str
-        :param active: If ``True`` only active reords will be returned else if
+        :param active: If ``True`` only active records will be returned else if
                        ``False`` all records will be returned.
         :type active: bool
         :param comment: Defaults to ``True`` prepending a choice header to the
@@ -476,7 +476,7 @@ class CollectionBaseManager(models.Manager):
 
     def get_all_slugs(self):
         """
-        Returns all ``DynamicColumn`` slug names relitive to this model.
+        Returns all ``DynamicColumn`` slug names relative to this model.
 
         :rtype: List of slugs.
         """
