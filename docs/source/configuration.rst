@@ -2,6 +2,16 @@
 Configuration
 *************
 
+IMPORT dcolumn_manager
+======================
+At the top of your settings import ``dcolumn_manager``.
+
+.. code::
+
+    from dcolumn.dcolumns.manager import dcolumn_manager
+
+
+
 INSTALLED_APPS
 ==============
 Add ``dcolumn`` to your INSTALLED_APPS settings:
