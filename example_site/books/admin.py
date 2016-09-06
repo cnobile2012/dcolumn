@@ -15,6 +15,7 @@ from .forms import PromotionForm, BookForm, AuthorForm, PublisherForm
 #
 # Promotion
 #
+@admin.register(Promotion)
 class PromotionAdmin(UserAdminMixin):
     fieldsets = (
         (None, {'fields': ('name',)}),
@@ -33,6 +34,7 @@ class PromotionAdmin(UserAdminMixin):
 #
 # Author
 #
+@admin.register(Author)
 class AuthorAdmin(UserAdminMixin):
     fieldsets = (
         (None, {'fields': ('name',)}),
@@ -50,6 +52,7 @@ class AuthorAdmin(UserAdminMixin):
 #
 # Publisher
 #
+@admin.register(Publisher)
 class PublisherAdmin(UserAdminMixin):
     fieldsets = (
         (None, {'fields': ('name',)}),
@@ -67,6 +70,7 @@ class PublisherAdmin(UserAdminMixin):
 #
 # Book
 #
+@admin.register(Book)
 class BookAdmin(UserAdminMixin):
     fieldsets = (
         (None, {'fields': ('title',)}),
@@ -80,9 +84,3 @@ class BookAdmin(UserAdminMixin):
                     'updated', 'detail_producer',)
     inlines = (KeyValueInline,)
     form = BookForm
-
-
-admin.site.register(Promotion, PromotionAdmin)
-admin.site.register(Publisher, PublisherAdmin)
-admin.site.register(Author, AuthorAdmin)
-admin.site.register(Book, BookAdmin)
