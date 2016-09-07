@@ -48,7 +48,7 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         """
         self.skipTest("Temporarily skipped")
         url = reverse('book-create')
-        # Test that we get an error indicating that no there is prerequisite
+        # Test that we get an error indicating that there is no prerequisite
         # data setup with a 200 status code.
         data = {'title': "Test Book Title"}
         response = self.client.post(url, data)
@@ -58,6 +58,32 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         self.assertTrue(self._has_error(response), msg)
         self._test_errors(response, tests={
             'column_collection': "A ColumnCollection needs to "
+            })
+
+    def test_not_authenticated(self):
+        """
+        Test that an unauthenticated user cannot access this form.
+        """
+        #self.skipTest("Temporarily skipped")
+        client = self._set_user_auth(self.user, login=False)
+        # Create the initial configuration objects.
+        required = DynamicColumn.YES
+        book, cc, values = self._create_book_objects(required=required)
+        log.debug("Created Book: %s, ColumnCollection: %s, values: %s",
+                  book, cc, values)
+        # Test that we get a field required error on the 'abstract' slug.
+        url = reverse('book-create')
+        data = {'title': "Test Book Title"}
+        response = client.post(url, data)
+        log.debug("POST url: %s", url)
+        msg = "response status: {}, should be 200".format(response.status_code)
+        self.assertEquals(response.status_code, 200, msg)
+        msg = "Should have errors: {}".format(response.context_data.get(
+            'form').errors)
+        self.assertTrue(self._has_error(response), msg)
+        self._test_errors(response, tests={
+            'abstract': "Abstract field is required.",
+            '__all__': "You must login to use the site.",
             })
 
     def test_create(self):
