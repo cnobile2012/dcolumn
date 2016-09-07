@@ -71,6 +71,8 @@ class DynamicColumnForm(forms.ModelForm):
         The constructor sets up the proper ``relation`` field HTML object.
         """
         super(DynamicColumnForm, self).__init__(*args, **kwargs)
+        self.fields['location'] = forms.ChoiceField(
+            widget=forms.Select, choices=dcolumn_manager.css_containers)
         self.fields['relation'] = forms.ChoiceField(
             widget=forms.Select, choices=dcolumn_manager.choice_relations)
         self.fields['relation'].required = False

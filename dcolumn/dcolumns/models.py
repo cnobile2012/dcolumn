@@ -121,7 +121,6 @@ class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
                     "common usage is the default 'No', to not store."))
     location = models.CharField(
         verbose_name=_("Display Location"), max_length=50,
-        choices=dcolumn_manager.css_containers,
         help_text=_("Choose a display location."))
     order = models.PositiveSmallIntegerField(verbose_name='Display Order')
 
