@@ -229,16 +229,12 @@ class CollectionBaseFormMixin(forms.ModelForm):
                        "string, true/false, or yes/no.")
 
     def validate_boolean_type(self, relation, key, value):
-        if relation.get('value_type') == DynamicColumn.BOOLEAN:
-            if isinstance(value, six.string_types):
-                if value.isdigit():
-                    result = str(0 if int(value) == 0 else 1)
-                elif (value.lower() in CollectionBase.TRUE_FALSE or
-                      value.lower() in CollectionBase.YES_NO):
-                    pass
-                else:
-                    self._errors[key] = self.error_class(
-                        [self._boolean_error.format(value)])
+        if relation.get('value_type') == DynamicColumn.BOOLEAN and value:
+            if value.isdigit():
+                result = str(0 if int(value) == 0 else 1)
+            elif (value.lower() in CollectionBase.TRUE_FALSE or
+                  value.lower() in CollectionBase.YES_NO):
+                pass
             else:
                 self._errors[key] = self.error_class(
                     [self._boolean_error.format(value)])
