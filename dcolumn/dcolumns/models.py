@@ -421,7 +421,7 @@ class CollectionBaseManager(models.Manager):
 
         return result
 
-    def get_choices(self, field, active=True, comment=True):
+    def get_choices(self, field, active=True, comment=True, sort=True):
         """
         Returns choices that can be used in HTML select options.
 
@@ -433,10 +433,17 @@ class CollectionBaseManager(models.Manager):
         :param comment: Defaults to ``True`` prepending a choice header to the
                         list.
         :type comment: bool
+        :param sort: Defaults to ``True`` sorting results, a ``False`` will
+                     turn off sorting, however, if the model sorts this may
+                     have no effect.
+        :type sort: bool
         :rtype: A list of tuples suitable for use in HTML select option tags.
         """
         choices = [(obj.pk, getattr(obj, field))
                    for obj in self.model_objects(active=active)]
+
+        if sort:
+            choices.sort(key=lambda x: x[1])
 
         if comment:
             choices.insert(

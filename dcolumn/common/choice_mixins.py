@@ -123,7 +123,7 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
 
         return value
 
-    def get_choices(self, field, comment=True):
+    def get_choices(self, field, comment=True, sort=True):
         """
         Calls model_objects() to be sure the choice objects are created, then
         returns a list appropriate for HTML select option tags.
@@ -133,12 +133,17 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
         :param comment: Defaults to ``True`` prepending a choice header to the
                         list.
         :type comment: bool
+        :param sort: Defaults ro ``True`` sorting the results, a ``False``
+                     will turn off sorting.
+        :type sort: bool
         :rtype: A list of tuples suitable for use in HTML select option tags.
 
         """
-        choices = [(obj.pk, getattr(obj, field))
+        choices = [(obj.pk, ugettext(getattr(obj, field)))
                    for obj in self.model_objects()]
-        choices.sort(key=lambda x: x[1])
+
+        if sort:
+            choices.sort(key=lambda x: x[1])
 
         if comment:
             choices.insert(
