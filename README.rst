@@ -27,7 +27,7 @@ The MIT License (MIT)
 Overview
 --------
 
-At the time of this writing **DColumn** supports Django 1.9.10 and probably
+At the time of this writing **DColumn** supports Django 1.10.1 and probably
 back to 1.8.0. The biggest issue with supporting older versions of Django
 is with the new way *urlpatterns* is used. Python 2.7, 3.4, 3.5 and 3.5-dev
 are supported.
