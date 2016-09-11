@@ -243,7 +243,7 @@ class ColumnCollectionManager(StatusModelManagerMixin):
 
         try:
             queryset = self.active().get(
-                related_model=name.lower()).dynamic_column.active()
+                related_model__iexact=name).dynamic_column.active()
         except self.model.DoesNotExist as e:
             if not unassigned:
                 raise e

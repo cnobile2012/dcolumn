@@ -38,12 +38,13 @@ class ColumnCollectionForm(forms.ModelForm):
         super(ColumnCollectionForm, self).__init__(*args, **kwargs)
         log.debug("args: %s, kwargs: %s", args, kwargs)
         columns = ColumnCollection.objects.get_column_collection(
-            self.instance.name, unassigned=True)
+            self.instance.related_model, unassigned=True)
         self.fields['dynamic_column'].queryset = columns
         choices = dcolumn_manager.get_related_object_names()
         self.choice_map = dict(choices)
         self.fields['related_model'] = forms.ChoiceField(choices=choices)
         self.fields['related_model'].required = True
+        log.debug("name: %s, columns: %s", self.instance.related_model, columns)
 
     def clean_related_model(self):
         related_model = self.cleaned_data.get('related_model')
