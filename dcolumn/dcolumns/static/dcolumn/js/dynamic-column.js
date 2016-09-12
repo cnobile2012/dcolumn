@@ -141,7 +141,7 @@ String.prototype.trim = function(charlist) {
       switch(value_type) {
         case 1: // Boolean
           $obj = $('<select id="' + id +'" name="' + name + '"></select>');
-          var data = [[1, "Unknown"], [2, "Yes"], [3, "No"]];
+          var data = [[0, "No"], [1, "Yes"],];
           var option = "<option></option>";
           var $option = null;
 
