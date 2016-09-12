@@ -276,7 +276,12 @@ class DynamicColumnManager(object):
 
         :rtype: ``True`` or ``False``.
         """
-        return settings.DYNAMIC_COLUMNS.get('INACTIVATE_API_AUTH', False)
+        if hasattr(settings, 'DYNAMIC_COLUMNS'):
+            result = settings.DYNAMIC_COLUMNS.get('INACTIVATE_API_AUTH', False)
+        else:
+            result = False
+
+        return result
 
     def get_related_object_names(self, choose=True):
         """

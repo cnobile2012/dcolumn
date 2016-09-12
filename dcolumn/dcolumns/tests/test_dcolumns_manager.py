@@ -6,7 +6,8 @@
 #          framework from https://github.com/cnobile2012/dcolumn.
 #
 
-from django.test import TestCase
+from django.conf import settings
+from django.test import TestCase, override_settings
 
 from example_site.books.choices import Language
 from example_site.books.models import Author, Book, Promotion, Publisher
@@ -300,12 +301,18 @@ class TestManager(BaseDcolumns):
             msg = "name: {}, expected: {}".format(name, expected_name)
             self.assertEqual(name, expected_name, msg)
 
+    @override_settings()
     def test_api_auth_state(self):
         """
         Test that the API (AJAX) auth state is returned properly.
         """
         #self.skipTest("Temporarily skipped")
         # Test API auth state.
+        state = self.manager.api_auth_state
+        msg = "state: {}".format(state)
+        self.assertEqual(state, False, msg)
+        # Remove the DYNAMIC_COLUMNS settings
+        del settings.DYNAMIC_COLUMNS
         state = self.manager.api_auth_state
         msg = "state: {}".format(state)
         self.assertEqual(state, False, msg)
