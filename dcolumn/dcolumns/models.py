@@ -533,7 +533,8 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
     TRUE_FALSE = (TRUE, FALSE, "true", "false")
 
     column_collection = models.ForeignKey(
-        ColumnCollection, verbose_name=_("Column Collection"),
+        ColumnCollection, on_delete=models.CASCADE,
+        verbose_name=_("Column Collection"),
         help_text=_("Choose the version of the dynamic columns you want "
                     "for all Collections."))
 
@@ -864,11 +865,11 @@ class KeyValueManager(models.Manager):
 @python_2_unicode_compatible
 class KeyValue(ValidateOnSaveMixin):
     collection = models.ForeignKey(
-        CollectionBase, verbose_name=_("Collection Type"),
-        related_name='keyvalues')
+        CollectionBase, on_delete=models.CASCADE,
+        verbose_name=_("Collection Type"), related_name='keyvalues')
     dynamic_column = models.ForeignKey(
-        DynamicColumn, verbose_name=_("Dynamic Column"),
-        related_name='keyvalues')
+        DynamicColumn, on_delete=models.CASCADE,
+        verbose_name=_("Dynamic Column"), related_name='keyvalues')
     value = models.TextField(verbose_name=_("Value"), null=True, blank=True)
 
     objects = KeyValueManager()

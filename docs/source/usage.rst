@@ -80,6 +80,18 @@ Forms need to subclass ``CollectionBaseFormMixin``. Be sure to add the
             model = MyNewClass
             exclude = CollectionBaseFormMixin.Meta.exclude
 
+Admin
+=====
+The ``column_collection`` field **must** be included in your admin
+``fieldsets`` or ``fields`` member objects.
+
+.. code::
+
+   class MyAdmin(admin.ModelAdmin):
+    fieldsets = (
+        (None, {'fields': ('...', 'column_collection', '...', '...',)}),
+        )
+
 Pseudo Models (Choices)
 =======================
 If the *Choice* mechanism is used the pseudo models that you build need to

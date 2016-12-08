@@ -65,3 +65,14 @@ settings is optional at this time.
         # To allow anybody to access the API set to True.
         'INACTIVATE_API_AUTH': False,
         }
+
+Setting the URLs
+================
+The master ``urls.py`` file needs to have added the following line for the
+admin to work properly::
+
+    urlpatterns = [
+        ...,
+	url(r'^dcolumns/', include('dcolumn.dcolumns.urls')),
+        ...,
+	]
