@@ -20,7 +20,7 @@ SERVER_ADDRESS = 'localhost:8002'
 ALLOWED_HOSTS = ('*',)
 
 # Add to the MIDDLEWARE_CLASSES here.
-MIDDLEWARE_CLASSES.append('debug_toolbar.middleware.DebugToolbarMiddleware')
+MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
 
 # Add to the INSTALLED_APPS here.
 INSTALLED_APPS.append('debug_toolbar')

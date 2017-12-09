@@ -7,8 +7,8 @@ import logging
 
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
+from django.urls import reverse, NoReverseMatch
 from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse, NoReverseMatch
 
 from dcolumn.common.model_mixins import (
     UserModelMixin, TimeModelMixin, StatusModelMixin, StatusModelManagerMixin,

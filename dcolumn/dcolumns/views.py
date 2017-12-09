@@ -11,7 +11,7 @@ import logging
 
 from django.shortcuts import render
 from django.views.generic import TemplateView
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 
 from dcolumn.common.view_mixins import JSONResponseMixin
@@ -59,7 +59,7 @@ class ContextDataMixin(object):
         """
         context = {}
         fk_slugs = DynamicColumn.objects.get_fk_slugs()
-        name = kwargs.pop('class_name', None) # Use in AJAX call only.
+        name = kwargs.pop('class_name', None) # Used in AJAX call only.
 
         if not name:
             name = dcolumn_manager.get_collection_name(self.model.__name__)
@@ -82,9 +82,9 @@ class ContextDataMixin(object):
         """
         Generates an OrderedDict of meta data needed to determine how the
         values of a ``KeyValue`` is to interpreted. If ``obj`` is supplied
-        and ``form`` is not supplied values from the ``KeyWord`` objects will
-        be included in the list of meta data. If ``form`` is supplied the
-        meta data will be taken from the Django form exclusively.
+        and ``form`` is not supplied values from the ``KeyWord`` objects
+        will be included in the list of meta data. If ``form`` is supplied
+        the meta data will be taken from the Django form exclusively.
 
         Example of Output::
 
@@ -111,7 +111,8 @@ class ContextDataMixin(object):
                'value_type': 2}),
             ...])
 
-        :param obj: Optional model object that inherits from ``CollectionBase``.
+        :param obj: Optional model object that inherits from
+                    ``CollectionBase``.
         :type obj: object
         :param form: Optional form object.
         :type form: Django Form object.
@@ -137,8 +138,8 @@ class ContextDataMixin(object):
 #
 class CollectionAJAXView(JSONResponseMixin, TemplateView, ContextDataMixin):
     """
-    Web service endpoint used in the Django admin to format ``KeyValue`` values
-    as per the ``DynamicColumn`` meta data.
+    Web service endpoint used in the Django admin to format ``KeyValue``
+    values as per the ``DynamicColumn`` meta data.
     """
     http_method_names = ('get',)
 
@@ -150,7 +151,8 @@ class CollectionAJAXView(JSONResponseMixin, TemplateView, ContextDataMixin):
         return super(CollectionAJAXView, self).dispatch(*args, **kwargs)
 
     def render_to_response(self, context, **response_kwargs):
-        # Remove the view object--it cannot be serialized and we don't need it.
+        # Remove the view object--it cannot be serialized and we don't
+        # need it.
         context.pop('view', None)
         return self.render_to_json_response(context, **response_kwargs)
 
@@ -158,8 +160,8 @@ class CollectionAJAXView(JSONResponseMixin, TemplateView, ContextDataMixin):
         """
         Get context data for the ``KeyValue`` objects.
 
-        Do not call super on get_context_data, it puts self into the context
-        which is not valid JSON.
+        Do not call super on get_context_data, it puts self into the
+        context which is not valid JSON.
         """
         log.debug("context: %s", context)
         context['valid'] = True
@@ -210,8 +212,8 @@ class CollectionCreateUpdateViewMixin(ContextDataMixin):
 #
 class CollectionDetailViewMixin(ContextDataMixin):
     """
-    This mixin is needed by any detail view where the view is associated with
-    a model that inherits ``CollectionBase``.
+    This mixin is needed by any detail view where the view is associated
+    with a model that inherits ``CollectionBase``.
     """
 
     def get_context_data(self, **kwargs):

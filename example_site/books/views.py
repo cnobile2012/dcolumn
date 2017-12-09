@@ -5,7 +5,7 @@
 import logging
 
 from django.views.generic import DetailView, CreateView, UpdateView, ListView
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from dcolumn.dcolumns.views import (
     CollectionCreateUpdateViewMixin, CollectionDetailViewMixin)
