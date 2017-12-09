@@ -171,7 +171,8 @@ class DynamicColumnManager(object):
                                the location on the page of the various dynamic
                                columns.
         :type container_list: list or tuple
-        :raises TypeError: If ``container_list`` is not a ``list`` or ``tuple``.
+        :raises TypeError: If ``container_list`` is not a ``list`` or
+                           ``tuple``.
         """
         if isinstance(container_list, (list, tuple)):
             if len(container_list) <= 0:
