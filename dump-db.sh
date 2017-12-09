@@ -5,6 +5,19 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-pg_dump --compress=9 --username=dcolumn dcolumn > db-snapshots/$1-$(date +"%Y%m%d%H%M").sql.gz
+SNAPSHOT_DIR='db-snapshots'
+
+if [ ! -d $SNAPSHOT_DIR ]; then
+    mkdir $SNAPSHOT_DIR
+fi
+
+pg_dump --username=dcolumn -c --compress=9 -h localhost dcolumn > \
+        $SNAPSHOT_DIR/$1-$(date +"%Y%m%d%H%M-%s").sql.gz
 
 exit 0
+
+#
+# Reload Data
+#
+# zcat db-snapshots/<env>-<date>.sql.gz | ./manage.py dbshell
+#
