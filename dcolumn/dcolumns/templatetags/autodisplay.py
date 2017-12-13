@@ -163,7 +163,8 @@ class AutoDisplayNode(template.Node):
         except template.VariableDoesNotExist:
             relation = None
 
-        log.debug(ugettext("relation: %s, display: %s"), relation, self.display)
+        log.debug(ugettext("relation: %s, display: %s"),
+                  relation, self.display)
 
         if relation:
             value_type = relation.get('value_type')
@@ -192,7 +193,8 @@ class AutoDisplayNode(template.Node):
                         if (relation.get('store_relation', False) and
                             'selected' not in elem):
                             tmp_elem = self._find_value(
-                                self.DISPLAY_TAG, 'store-' + attr, {}, relation)
+                                self.DISPLAY_TAG, 'store-' + attr, {},
+                                relation)
                             elem = self.STORE_WRAPPER.format(elem, tmp_elem)
                 else:
                     elem = "<span>{}{}</span>".format(self.OPTION_ERROR_MSG,
@@ -208,7 +210,8 @@ class AutoDisplayNode(template.Node):
                 elem = elem.format("id-" + attr, attr,
                                    relation.get('value', ''))
         else:
-            elem = "<span>{}{}</span>".format(self.RELATION_ERROR_MSG, relation)
+            elem = "<span>{}{}</span>".format(self.RELATION_ERROR_MSG,
+                                              relation)
 
         return mark_safe(elem)
 
@@ -216,9 +219,10 @@ class AutoDisplayNode(template.Node):
         """
         Find the options for this relation.
 
-        The fk_option argument can either be a list or tuple of a single set of
-        ``CHOICE`` options or a complete set in a dict of all ``CHOICE``
-        options. In the latter case the options will be found in the full list.
+        The fk_option argument can either be a list or tuple of a single
+        set of ``CHOICE`` options or a complete set in a dict of all
+        ``CHOICE`` options. In the latter case the options will be found
+        in the full list.
 
         :param relation: The meta data for a dynamic column.
         :type relation: dict
@@ -337,7 +341,8 @@ class AutoDisplayNode(template.Node):
 #
 # single_display
 #
-# NOTE: Formatting of the doc string is to conform with django docs not Sphinx.
+# NOTE: Formatting of the doc string is to conform with django docs not
+#       Sphinx.
 #
 @register.tag(name='single_display')
 def single_display(parser, token):
@@ -400,7 +405,7 @@ class SingleDisplayNode(template.Node):
         except template.VariableDoesNotExist:
             msg = _("The model object does not exist in the context, "
                     "found '{}'").format(self.obj)
-            log.warn(ugettext(msg))
+            log.warning(ugettext(msg))
             raise template.VariableDoesNotExist(msg)
 
         context[self.name] = obj.get_key_value(self.slug)
