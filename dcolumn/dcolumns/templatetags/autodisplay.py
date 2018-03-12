@@ -272,7 +272,7 @@ class AutoDisplayNode(template.Node):
         # Get the ID if the value is stored not the pk.
         if relation.get('store_relation', False):
             value = [k for k, v in options if v == value]
-            value = len(value) >= 1 and value[0] or 0
+            value = value[0] if len(value) > 0 else 0
 
         if isinstance(value, six.string_types) and value.isdigit():
             value = int(value)

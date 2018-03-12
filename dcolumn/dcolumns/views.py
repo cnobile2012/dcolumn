@@ -9,10 +9,12 @@ __docformat__ = "restructuredtext en"
 
 import logging
 
+from django.db.transaction import atomic
+from django.forms import formset_factory
 from django.shortcuts import render
-from django.views.generic import TemplateView
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.views.generic import TemplateView
 
 from dcolumn.common.view_mixins import JSONResponseMixin
 from dcolumn.common.decorators import dcolumn_login_required
@@ -26,6 +28,7 @@ class ContextDataMixin(object):
     """
     Mixin for context data.
     """
+    formset_class = None
 
     def get_dynamic_column_context_data(self, **kwargs):
         """
@@ -122,12 +125,13 @@ class ContextDataMixin(object):
             relations = form.relations
         else:
             name = kwargs.pop('class_name', None) # Used in AJAX call only.
+            by_slug = kwargs.pop('by_slug', False)
 
             if not name:
                 name = dcolumn_manager.get_collection_name(self.model.__name__)
 
             relations = ColumnCollection.objects.serialize_columns(
-                name, obj=obj)
+                name, obj=obj, by_slug=by_slug)
 
         log.debug("relations: %s", relations)
         return {'relations': relations}
@@ -192,7 +196,7 @@ class CollectionCreateUpdateViewMixin(ContextDataMixin):
         """
         Provides initial data to forms.
         """
-        return {'request': self.request}
+        return {'request': self.request, 'parent_instance': self.object}
 
     def get_context_data(self, **kwargs):
         """
@@ -215,13 +219,12 @@ class CollectionDetailViewMixin(ContextDataMixin):
     This mixin is needed by any detail view where the view is associated
     with a model that inherits ``CollectionBase``.
     """
-
     def get_context_data(self, **kwargs):
         """
         Get context data for the ``KeyValue`` objects.
         """
-        context = super(CollectionDetailViewMixin, self
-                        ).get_context_data(**kwargs)
+        context = super(
+            CollectionDetailViewMixin, self).get_context_data(**kwargs)
         context.update(self.get_dynamic_column_context_data(**kwargs))
         context.update(self.get_relation_context_data(
             obj=self.object, **kwargs))

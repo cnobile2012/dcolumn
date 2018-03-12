@@ -24,8 +24,9 @@
     <form name="book-update" method="post"
           action="{% url 'book-create' %}">
 {% endif %}
+      {% csrf_token %}
       <div class="container">
-        {% csrf_token %}
+        {{ keyvalue_set.management_form }}
         <div id="message">
           {{ form.non_field_errors }}
         </div>

@@ -13,7 +13,8 @@ from django.utils.translation import ugettext_lazy as _
 from dcolumn.common.admin_mixins import UserAdminMixin
 
 from .models import DynamicColumn, ColumnCollection, KeyValue
-from .forms import DynamicColumnForm, ColumnCollectionForm, KeyValueForm
+from .forms import (
+    DynamicColumnAdminForm, ColumnCollectionAdminForm, KeyValueAdminForm)
 
 
 #
@@ -30,7 +31,7 @@ class KeyValueInline(admin.TabularInline):
     ordering = ('dynamic_column__location', 'dynamic_column__order',)
     extra = 0
     model = KeyValue
-    form = KeyValueForm
+    form = KeyValueAdminForm
 
     class Media:
         js = ('dcolumn/js/js.cookie-2.0.4.min.js',
@@ -55,7 +56,7 @@ class ColumnCollectionAdmin(UserAdminMixin):
     readonly_fields = ('creator', 'created', 'updater', 'updated',)
     list_display = ('name', 'related_model', 'updater_producer', 'updated',)
     filter_horizontal = ('dynamic_column',)
-    form = ColumnCollectionForm
+    form = ColumnCollectionAdminForm
 
     class Media:
         js = ('dcolumn/js/inheritance.js',
@@ -85,5 +86,7 @@ class DynamicColumnAdmin(UserAdminMixin):
                     'relation_producer', 'store_relation', 'required',
                     'location', 'order', 'updated', 'active',)
     list_editable = ('location', 'order', 'active',)
+    search_fields = ('slug', 'location',)
+    list_filter = ('column_collection', 'value_type', 'store_relation')
     ordering = ('column_collection__name', 'location', 'order', 'name',)
-    form = DynamicColumnForm
+    form = DynamicColumnAdminForm

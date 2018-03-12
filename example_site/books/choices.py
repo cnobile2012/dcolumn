@@ -37,3 +37,12 @@ class Language(BaseChoice):
 
 
 dcolumn_manager.register_choice(Language, 1, 'name')
+
+"""
+In [17]: i = filter(lambda x: x.pk == 2, Language.objects.model_objects())
+
+In [18]: m = next(i)
+
+In [19]: m.name
+Out[19]: 'English'
+"""

@@ -3,7 +3,8 @@
 .#*
 *#*#
 .DS_Store
-#*.txt
+*.txt
+!LICENSE.txt
 *.pdf
 .~lock.*
 local.py
@@ -11,7 +12,6 @@ example_site/static
 html
 shared
 uploads
-#db-snapshots
 logs/*.log*
 old
 

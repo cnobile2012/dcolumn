@@ -48,7 +48,6 @@ TEMPLATES = [
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
             ],
-#        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -140,7 +139,7 @@ dcolumn_manager.register_css_containers(
      ))
 
 # Change the URL below to your login path.
-LOGIN_URL = "/admin/"
+LOGIN_URL = '/admin/login/'
 
 # A sample logging configuration. The only tangible logging performed by this
 # configuration is to send an email to the site admins on every HTTP 500 error

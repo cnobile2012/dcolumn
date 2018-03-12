@@ -25,6 +25,7 @@
           action="{% url 'publisher-create' %}">
 {% endif %}
       <div class="container">
+        {{ keyvalue_set.management_form }}
         {% csrf_token %}
         <div id="message">
           {{ form.non_field_errors }}

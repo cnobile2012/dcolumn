@@ -8,7 +8,7 @@ django
 docutils
 
 # Postgres
-psycopg2
+psycopg2-binary
 
 # Python shell
 ipython

@@ -44,8 +44,7 @@ class Country(object):
     objects = CountryManager()
 
     def __str__(self):
-        return "{}--{}".format(
-            self.name, self.language).decode(encoding='utf-8')
+        return "{}--{}".format(self.name, self.language)
 
 
 # Invalid choice model.
@@ -53,7 +52,7 @@ class InvalidChoice(object):
     pass
 
 
-class TestManager(BaseDcolumns):
+class TestManager(BaseDcolumns, TestCase):
 
     def __init__(self, name):
         super(TestManager, self).__init__(name)

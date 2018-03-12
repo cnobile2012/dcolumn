@@ -89,7 +89,7 @@ class ViewMixinTest(ContextDataMixin):
         return context
 
 
-class TestAutoDisplay(BaseDcolumns):
+class TestAutoDisplay(BaseDcolumns, TestCase):
 
     def __init__(self, name):
         super(TestAutoDisplay, self).__init__(name)
@@ -351,7 +351,7 @@ class TestAutoDisplay(BaseDcolumns):
         msg = "result: {}, context: {}, values: {}".format(
             result, context, p_values)
         self.assertEqual(result.count('span'), 6, msg)
-        value = promotion.get_key_value('start-date').isoformat()
+        value = promotion.get_key_value('start_date').isoformat()
         self.assertTrue(value in result, msg)
 
     def test_DATE_entry(self):
@@ -366,7 +366,7 @@ class TestAutoDisplay(BaseDcolumns):
         msg = "result: {}, context: {}, values: {}".format(
             result, context, p_values)
         self.assertEqual(result.count('input'), 3, msg)
-        value = promotion.get_key_value('start-date').isoformat()
+        value = promotion.get_key_value('start_date').isoformat()
         self.assertTrue(value in result, msg)
 
     def test_DATETIME_display(self):
@@ -423,7 +423,7 @@ class TestAutoDisplay(BaseDcolumns):
         msg = "result: {}, context: {}, values: {}".format(
             result, context, p_values)
         self.assertEqual(result.count('span'), 6, msg)
-        value = promotion.get_key_value('start-time').isoformat()
+        value = promotion.get_key_value('start_time').isoformat()
         self.assertTrue(value in result, msg)
 
     def test_TIME_entry(self):
@@ -438,7 +438,7 @@ class TestAutoDisplay(BaseDcolumns):
         msg = "result: {}, context: {}, values: {}".format(
             result, context, p_values)
         self.assertEqual(result.count('input'), 3, msg)
-        value = promotion.get_key_value('start-time').isoformat()
+        value = promotion.get_key_value('start_time').isoformat()
         self.assertTrue(value in result, msg)
 
     def test_FLOAT_display(self):
@@ -595,7 +595,7 @@ class TestAutoDisplay(BaseDcolumns):
         self.assertTrue(value in result, msg)
 
 
-class TestSingleDisplay(BaseDcolumns):
+class TestSingleDisplay(BaseDcolumns, TestCase):
 
     def __init__(self, name):
         super(TestSingleDisplay, self).__init__(name)
@@ -741,8 +741,8 @@ class TestSingleDisplay(BaseDcolumns):
         promotion, p_cc, p_values = self._create_promotion_objects()
         # Execute the template tag and test.
         context = self._setup_template(
-            Promotion, promotion, 'start-date', context_name='start_date')
-        value = promotion.get_key_value('start-date')
+            Promotion, promotion, 'start_date', context_name='start_date')
+        value = promotion.get_key_value('start_date')
         msg = "context: {}, p_values: {}, value: {}".format(
             context, p_values, value)
         self.assertEqual(value, context.get('start_date'), msg)
@@ -855,7 +855,7 @@ class TestSingleDisplay(BaseDcolumns):
         self.assertEqual(value, context.get('now'), msg)
 
 
-class TestCombineContexts(BaseDcolumns):
+class TestCombineContexts(BaseDcolumns, TestCase):
 
     def __init__(self, name):
         super(TestCombineContexts, self).__init__(name)

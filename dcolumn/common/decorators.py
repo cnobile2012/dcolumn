@@ -70,7 +70,7 @@ class InspectChoice(object):
         stack = inspect.stack()
         start = 0 + skip
 
-        if len(stack) < start + 1:
+        if len(stack) < start + 1: # pragma: no cover
             return ''
 
         parentframe = stack[start][0]
@@ -83,7 +83,7 @@ class InspectChoice(object):
             name_list.append(module.__name__)
 
         # detect classname
-        if 'self' in parentframe.f_locals:
+        if 'self' in parentframe.f_locals: # pragma: no cover
             # I don't know any way to detect a call from the object method
             # XXX: there seems to be no way to detect a static method call--it
             # will be just a function call.
@@ -108,12 +108,12 @@ class InspectChoice(object):
         :type method: str
         :rtype: The enclosed function embedded in this method.
         """
-        def wrapper(this):
+        def wrapper(this, *args, **kwargs):
             modules = __import__(
                 this._path, globals=globals(), locals=locals(),
                 fromlist=(this._caller_name,), level=0)
             this.model = getattr(modules, this._caller_name)
-            return method(this)
+            return method(this, *args, **kwargs)
 
         # Make the wrapper look like the decorated method.
         wrapper.__name__ = method.__name__

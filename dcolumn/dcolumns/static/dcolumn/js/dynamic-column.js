@@ -12,6 +12,8 @@
  *            (http://www.sitepoint.com/trimming-strings-in-javascript/)
  */
 
+"use strict";
+
 String.prototype.trimLeft = function(charlist) {
   if (charlist === undefined)
     charlist = "\s";
@@ -31,8 +33,6 @@ String.prototype.trim = function(charlist) {
 };
 
 (function($) {
-  'use strict';
-
   var DynamicColumn = Class.extend({
     ADMIN_KEYVALUE_CLASS: "td.field-dynamic_column select",
 
@@ -112,7 +112,7 @@ String.prototype.trim = function(charlist) {
       if(json.valid) {
         this.data = json;
       } else {
-        this._mimicDjangoErrors(json.message, $('fieldset:first'));
+        this._mimicDjangoErrors(json.message, '.errornote');
       }
     },
 
@@ -175,7 +175,7 @@ String.prototype.trim = function(charlist) {
           $obj = $('<input class="vDateField" id="' + id + '" name="' + name +
             '" type="date" />');
           break;
-      case 4: // Datetime
+        case 4: // Datetime
           $obj = $('<input class="vDateField" id="' + id + '" name="' + name +
             '" type="datetime" />');
           break;
@@ -195,7 +195,7 @@ String.prototype.trim = function(charlist) {
           $obj = $('<textarea class="vLargeTextField" id="' + id +
             '" name="' + name + '" cols="40" rows="10"></textarea>');
           break;
-      case 9: // Time
+        case 9: // Time
           $obj = $('<input class="vTimeField" id="' + id + '" name="' + name +
             '" type="time" />');
           break;
@@ -255,7 +255,7 @@ String.prototype.trim = function(charlist) {
                   "led to this error and send them in a bug report.";
         var data = {};
         data[name] = [msg];
-        this._mimicDjangoErrors(data);
+        this._mimicDjangoErrors(data, '.errornote');
       } else {
         for(var i = 0; i < options.length; i++) {
           $option = $(option);
@@ -268,26 +268,30 @@ String.prototype.trim = function(charlist) {
       return $obj;
     },
 
-    _mimicDjangoErrors: function(data) {
+    _mimicDjangoErrors: function(data, elm) {
       // Mimic Django error messages.
       var ul = '<ul class="errorlist"></ul>';
-      var li = '<li></li>'
-      var $errorUl = null;
-      var $errorLi = null;
-      var $li = null;
+      var li = '<li></li>';
+      var $tag = null, $errorUl = null, $errorLi = null;
 
       for(var key in data) {
-        $li = $('select[name=' + key +
-          '], input[name=' + key + '], textarea[name=' + key + ']').parent();
+        $tag = $('select[name=' + key + '], input[name=' + key +
+                 '], textarea[name=' + key + ']');
         $errorUl = $(ul);
+
+        if($tag.prev().prop('tagName') === 'LABEL') {
+          $tag = $tag.prev();
+          $errorUl.insertBefore($tag);
+        } else if($tag.length === 0) {
+          $tag = $(elm);
+          $errorUl.appendTo($tag);
+        }
 
         for(var i = 0; i < data[key].length; i++) {
           $errorLi = $(li);
           $errorLi.html(data[key][i]);
           $errorLi.appendTo($errorUl);
         }
-
-        $errorUl.appendTo($li);
       }
     },
 

@@ -4,8 +4,11 @@
 
 import logging
 
-from django.views.generic import DetailView, CreateView, UpdateView, ListView
+from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect
 from django.urls import reverse
+from django.views.generic import DetailView, CreateView, UpdateView, ListView
 
 from dcolumn.dcolumns.views import (
     CollectionCreateUpdateViewMixin, CollectionDetailViewMixin)
@@ -19,7 +22,9 @@ log = logging.getLogger('examples.books.views')
 #
 # BookCreateView
 #
-class BookCreateView(CollectionCreateUpdateViewMixin, CreateView):
+class BookCreateView(LoginRequiredMixin,
+                     CollectionCreateUpdateViewMixin,
+                     CreateView):
     template_name = 'books/book_create_view.html'
     form_class = BookForm
     model = Book
@@ -35,7 +40,9 @@ book_create_view = BookCreateView.as_view()
 #
 # BookUpdateView
 #
-class BookUpdateView(CollectionCreateUpdateViewMixin, UpdateView):
+class BookUpdateView(LoginRequiredMixin,
+                     CollectionCreateUpdateViewMixin,
+                     UpdateView):
     template_name = 'books/book_create_view.html'
     form_class = BookForm
     model = Book
@@ -51,7 +58,9 @@ book_update_view = BookUpdateView.as_view()
 #
 # BookDetailView
 #
-class BookDetailView(CollectionDetailViewMixin, DetailView):
+class BookDetailView(LoginRequiredMixin,
+                     CollectionDetailViewMixin,
+                     DetailView):
     template_name = 'books/book_detail_view.html'
     model = Book
 
@@ -85,7 +94,8 @@ book_detail_view = BookDetailView.as_view()
 #
 # BookListView
 #
-class BookListView(ListView):
+class BookListView(LoginRequiredMixin,
+                   ListView):
     template_name = 'books/book_list_view.html'
     model = Book
     paginate_by = 50
@@ -96,7 +106,9 @@ book_list_view = BookListView.as_view()
 #
 # PublisherCreateView
 #
-class PublisherCreateView(CollectionCreateUpdateViewMixin, CreateView):
+class PublisherCreateView(LoginRequiredMixin,
+                          CollectionCreateUpdateViewMixin,
+                          CreateView):
     template_name = 'books/publisher_create_view.html'
     form_class = PublisherForm
     model = Publisher
@@ -112,7 +124,9 @@ publisher_create_view = PublisherCreateView.as_view()
 #
 # PublisherUpdateView
 #
-class PublisherUpdateView(CollectionCreateUpdateViewMixin, UpdateView):
+class PublisherUpdateView(LoginRequiredMixin,
+                          CollectionCreateUpdateViewMixin,
+                          UpdateView):
     template_name = 'books/publisher_create_view.html'
     form_class = PublisherForm
     model = Publisher
@@ -128,7 +142,9 @@ publisher_update_view = PublisherUpdateView.as_view()
 #
 # PublisherDetailView
 #
-class PublisherDetailView(CollectionDetailViewMixin, DetailView):
+class PublisherDetailView(LoginRequiredMixin,
+                          CollectionDetailViewMixin,
+                          DetailView):
     template_name = 'books/publisher_detail_view.html'
     model = Publisher
 
@@ -162,7 +178,8 @@ publisher_detail_view = PublisherDetailView.as_view()
 #
 # PublisherListView
 #
-class PublisherListView(ListView):
+class PublisherListView(LoginRequiredMixin,
+                        ListView):
     template_name = 'books/publisher_list_view.html'
     model = Publisher
     paginate_by = 50
@@ -173,7 +190,9 @@ publisher_list_view = PublisherListView.as_view()
 #
 # AuthorCreateView
 #
-class AuthorCreateView(CollectionCreateUpdateViewMixin, CreateView):
+class AuthorCreateView(LoginRequiredMixin,
+                       CollectionCreateUpdateViewMixin,
+                       CreateView):
     template_name = 'books/author_create_view.html'
     form_class = AuthorForm
     model = Author
@@ -189,7 +208,9 @@ author_create_view = AuthorCreateView.as_view()
 #
 # AuthorUpdateView
 #
-class AuthorUpdateView(CollectionCreateUpdateViewMixin, UpdateView):
+class AuthorUpdateView(LoginRequiredMixin,
+                       CollectionCreateUpdateViewMixin,
+                       UpdateView):
     template_name = 'books/author_create_view.html'
     form_class = AuthorForm
     model = Author
@@ -205,7 +226,9 @@ author_update_view = AuthorUpdateView.as_view()
 #
 # AuthorDetailView
 #
-class AuthorDetailView(CollectionDetailViewMixin, DetailView):
+class AuthorDetailView(LoginRequiredMixin,
+                       CollectionDetailViewMixin,
+                       DetailView):
     template_name = 'books/author_detail_view.html'
     model = Author
 
@@ -239,7 +262,8 @@ author_detail_view = AuthorDetailView.as_view()
 #
 # AuthorListView
 #
-class AuthorListView(ListView):
+class AuthorListView(LoginRequiredMixin,
+                     ListView):
     template_name = 'books/author_list_view.html'
     model = Author
     paginate_by = 50
@@ -250,7 +274,9 @@ author_list_view = AuthorListView.as_view()
 #
 # PromotionCreateView
 #
-class PromotionCreateView(CollectionCreateUpdateViewMixin, CreateView):
+class PromotionCreateView(LoginRequiredMixin,
+                          CollectionCreateUpdateViewMixin,
+                          CreateView):
     template_name = 'books/promotion_create_view.html'
     form_class = PromotionForm
     model = Promotion
@@ -266,8 +292,11 @@ promotion_create_view = PromotionCreateView.as_view()
 #
 # PromotionUpdateView
 #
-class PromotionUpdateView(CollectionCreateUpdateViewMixin, UpdateView):
+class PromotionUpdateView(LoginRequiredMixin,
+                          CollectionCreateUpdateViewMixin,
+                          UpdateView):
     template_name = 'books/promotion_create_view.html'
+    formset_template_name = 'books/_keyvalue_view.html'
     form_class = PromotionForm
     model = Promotion
 
@@ -282,7 +311,9 @@ promotion_update_view = PromotionUpdateView.as_view()
 #
 # PromotionDetailView
 #
-class PromotionDetailView(CollectionDetailViewMixin, DetailView):
+class PromotionDetailView(LoginRequiredMixin,
+                          CollectionDetailViewMixin,
+                          DetailView):
     template_name = 'books/promotion_detail_view.html'
     model = Promotion
 
@@ -316,7 +347,8 @@ promotion_detail_view = PromotionDetailView.as_view()
 #
 # PromotionListView
 #
-class PromotionListView(ListView):
+class PromotionListView(LoginRequiredMixin,
+                        ListView):
     template_name = 'books/promotion_list_view.html'
     model = Promotion
     paginate_by = 50

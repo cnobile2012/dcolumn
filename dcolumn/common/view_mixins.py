@@ -31,7 +31,7 @@ class JSONResponseMixin(object):
         """
         return JsonResponse(self.get_data(**context), **response_kwargs)
 
-    def get_data(self, **context):
+    def get_data(self, **context): # pragma: no cover
         """
         Returns the context that will be serialized to JSON.
 

@@ -6,8 +6,9 @@ from __future__ import unicode_literals
 import logging
 
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from django.urls import reverse, NoReverseMatch
+from django.utils.encoding import python_2_unicode_compatible
+from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
 from dcolumn.common.model_mixins import (
@@ -52,9 +53,9 @@ class Promotion(CollectionBase, ValidateOnSaveMixin):
         return reverse('promotion-detail', kwargs={'pk': self.pk})
 
     def detail_producer(self):
-        return '<a href="{}">View Page</a>'.format(self.get_absolute_url())
+        return format_html('<a href="{}">View Page</a>',
+                           self.get_absolute_url())
     detail_producer.short_description = _("View Detail")
-    detail_producer.allow_tags = True
 
 
 #
@@ -87,9 +88,9 @@ class Author(CollectionBase, ValidateOnSaveMixin):
         return reverse('author-detail', kwargs={'pk': self.pk})
 
     def detail_producer(self):
-        return '<a href="{}">View Page</a>'.format(self.get_absolute_url())
+        return format_html('<a href="{}">View Page</a>',
+                           self.get_absolute_url())
     detail_producer.short_description = _("View Detail")
-    detail_producer.allow_tags = True
 
 
 #
@@ -122,9 +123,10 @@ class Publisher(CollectionBase, ValidateOnSaveMixin):
         return reverse('publisher-detail', kwargs={'pk': self.pk})
 
     def detail_producer(self):
-        return '<a href="{}">View Page</a>'.format(self.get_absolute_url())
+        return format_html('<a href="{}">View Page</a>',
+                           self.get_absolute_url())
     detail_producer.short_description = _("View Detail")
-    detail_producer.allow_tags = True
+
 
 #
 # Book
@@ -156,9 +158,9 @@ class Book(CollectionBase, ValidateOnSaveMixin):
         return reverse('book-detail', kwargs={'pk': self.pk})
 
     def detail_producer(self):
-        return '<a href="{}">View Page</a>'.format(self.get_absolute_url())
+        return format_html('<a href="{}">View Page</a>',
+                           self.get_absolute_url())
     detail_producer.short_description = _("View Detail")
-    detail_producer.allow_tags = True
 
 
 dcolumn_manager.register_choice(Promotion, 2, 'name')

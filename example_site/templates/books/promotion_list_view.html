@@ -65,15 +65,15 @@
                 {{ object.name }}
               </a>
             </td>
-{% single_display object promotion-description as description %}
+{% single_display object promotion_description as description %}
             <td>{{ description }}</td>
-{% single_display object promotion-start-date as start_date %}
+{% single_display object promotion_start_date as start_date %}
             <td>{{ start_date|date:"Y-m-d" }}</td>
-{% single_display object promotion-start-time as start_time %}
+{% single_display object promotion_start_time as start_time %}
             <td>{{ start_time|date:"H:i:s" }}</td>
-{% single_display object promotion-end-date as end_date %}
+{% single_display object promotion_end_date as end_date %}
             <td>{{ end_date|date:"Y-m-d" }}</td>
-{% single_display object promotion-end-time as end_time %}
+{% single_display object promotion_end_time as end_time %}
             <td>{{ end_time|date:"H:i:s" }}</td>
             <td>{{ object.active|yesno }}</td>
           </tr>

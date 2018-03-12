@@ -28,7 +28,6 @@ class PromotionAdmin(UserAdminMixin):
                     'updated', 'detail_producer',)
     list_editable = ('active',)
     inlines = (KeyValueInline,)
-    form = PromotionForm
 
 
 #
@@ -46,7 +45,6 @@ class AuthorAdmin(UserAdminMixin):
     list_display = ('name', 'column_collection', 'updater_producer',
                     'updated', 'detail_producer',)
     inlines = (KeyValueInline,)
-    form = AuthorForm
 
 
 #
@@ -64,7 +62,6 @@ class PublisherAdmin(UserAdminMixin):
     list_display = ('name', 'column_collection', 'updater_producer',
                     'updated', 'detail_producer',)
     inlines = (KeyValueInline,)
-    form = PublisherForm
 
 
 #
@@ -83,4 +80,3 @@ class BookAdmin(UserAdminMixin):
     list_display = ('title', 'column_collection', 'active', 'updater_producer',
                     'updated', 'detail_producer',)
     inlines = (KeyValueInline,)
-    form = BookForm

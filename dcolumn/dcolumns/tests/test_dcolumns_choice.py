@@ -6,6 +6,7 @@
 #          framework from https://github.com/cnobile2012/dcolumn.
 #
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase
 
 from dcolumn.dcolumns.manager import DynamicColumnManager
@@ -30,6 +31,41 @@ class TestChoices(TestCase):
 
         for model in modal_objects:
             self.assertTrue(model.name in dict(values), msg)
+
+    def test_get_pk(self):
+        """
+        Test that the get method returns the correct object.
+        """
+        #self.skipTest("Temporarily skipped")
+        values = Country.objects.VALUES
+        obj = Country.objects.get(pk=3)
+        msg = "get: {}, values: {}".format(obj, values)
+        self.assertEqual(obj.language, dict(values).get('Brazil'), msg)
+
+    def test_get_name(self):
+        """
+        Test that the get method returns the correct object.
+        """
+        #self.skipTest("Temporarily skipped")
+        name = 'Brazil'
+        values = Country.objects.VALUES
+        obj = Country.objects.get(name=name)
+        msg = "get: {}, values: {}".format(obj, values)
+        self.assertEqual(obj.language, dict(values).get(name), msg)
+
+    def test_get_DoesNotExist(self):
+        """
+        Test that the get method returns the correct object.
+        """
+        #self.skipTest("Temporarily skipped")
+        name = 'XzXzXz'
+        values = Country.objects.VALUES
+
+        with self.assertRaises(ObjectDoesNotExist) as cm:
+            obj = Country.objects.get(name=name)
+
+        msg = "Country matching query does not exist."
+        self.assertTrue(msg in str(cm.exception))
 
     def test_get_value_by_pk(self):
         """
@@ -69,7 +105,8 @@ class TestChoices(TestCase):
         msg = "choices: {}, objs: {}".format(choices, objs)
         self.assertFalse(0 in dict(choices), msg)
 
-        # Test that the language is in the choices instead of the country name.
+        # Test that the language is in the choices instead of the country
+        # name.
         choices = Country.objects.get_choices('language')
         msg = "choices: {}, objs: {}".format(choices, objs)
 

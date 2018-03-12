@@ -10,6 +10,7 @@ import dateutil
 import pytz
 
 from django.core.exceptions import ValidationError
+from django.test import TestCase
 
 from example_site.books.choices import Language
 from example_site.books.models import Author, Book, Publisher, Promotion
@@ -18,7 +19,7 @@ from ..models import DynamicColumn, ColumnCollection, KeyValue
 from .base_tests import BaseDcolumns
 
 
-class TestDynamicColumn(BaseDcolumns):
+class TestDynamicColumn(BaseDcolumns, TestCase):
 
     def __init__(self, name):
         super(TestDynamicColumn, self).__init__(name)
@@ -129,12 +130,13 @@ class TestDynamicColumn(BaseDcolumns):
     def test_clean(self):
         """
         Test that ``DynamicColumn.preferred_slug`` is populated in
-        ``DynamicColumn.slug``. Also test that if a ``DynamicColumn.value_type``
-        is a ``CHOICE`` that ``DynamicColumn.relation`` is also set.
+        ``DynamicColumn.slug``. Also test that if a
+        ``DynamicColumn.value_type`` is a ``CHOICE`` that
+        ``DynamicColumn.relation`` is also set.
         """
         #self.skipTest("Temporarily skipped")
         # Create a DynamicColumn object.
-        preferred_slug = 'zip-code'
+        preferred_slug = 'zip_code'
         dc0 = self._create_dynamic_column_record(
             "Postal Code", DynamicColumn.TEXT, 'publisher_top', 1,
             preferred_slug=preferred_slug)
@@ -177,7 +179,7 @@ class TestDynamicColumn(BaseDcolumns):
         self.assertEqual(field, 'name', msg)
 
 
-class TestColumnCollection(BaseDcolumns):
+class TestColumnCollection(BaseDcolumns, TestCase):
 
     def __init__(self, name):
         super(TestColumnCollection, self).__init__(name)
@@ -265,7 +267,8 @@ class TestColumnCollection(BaseDcolumns):
             relation=self.choice2index.get("Publisher"))
         dc2 = self._create_dynamic_column_record(
             "Abstract", DynamicColumn.TEXT_BLOCK, 'book_top', 3)
-        # Test that the serialized object is correct using pks and has no value.
+        # Test that the serialized object is correct using pks and has no
+        # value.
         cc0 = self._create_column_collection_record(
             "Books", 'book', dynamic_columns=[dc0, dc1, dc2])
         result = ColumnCollection.objects.serialize_columns('book')
@@ -347,7 +350,7 @@ class TestColumnCollection(BaseDcolumns):
             self.assertTrue(value in dict(result).values(), msg)
 
 
-class TestCollectionBase(BaseDcolumns):
+class TestCollectionBase(BaseDcolumns, TestCase):
 
     def __init__(self, name):
         super(TestCollectionBase, self).__init__(name)
@@ -372,7 +375,7 @@ class TestCollectionBase(BaseDcolumns):
             value = result.get(slug).get('value')
             self.assertEqual(value, dc_value, msg)
 
-    def test_model_objects(self):
+    def test_model_objects_active(self):
         """
         Test that the correct object types get returned.
         """
@@ -389,10 +392,27 @@ class TestCollectionBase(BaseDcolumns):
         for record in result:
             self.assertEqual(record.title, book.title, msg)
 
+    def test_model_objects_not_active(self):
+        """
+        Test that the correct object types get returned.
+        """
+        #self.skipTest("Temporarily skipped")
+        # Create a few book objects.
+        author, a_cc, a_values = self._create_author_objects()
+        promotion, p_cc, p_values = self._create_promotion_objects()
+        book, b_cc, b_values = self._create_book_objects(
+            author=author, promotion=promotion)
+        # Get object list.
+        result = Book.objects.model_objects(active=False)
+        msg = "result: {}, book: {}".format(result, book)
+
+        for record in result:
+            self.assertEqual(record.title, book.title, msg)
+
     def test_get_choice(self):
         """
-        Test that a valid list of HTML select option choices are returned both
-        with and without a header option.
+        Test that a valid list of HTML select option choices are returned
+        both with and without a header option.
         """
         #self.skipTest("Temporarily skipped")
         # Create a few book objects.
@@ -464,8 +484,8 @@ class TestCollectionBase(BaseDcolumns):
 
     def test_get_all_fields_and_slugs(self):
         """
-        Test that all field names and dynamic column slugs are returned in a
-        sorted list for the requested model.
+        Test that all field names and dynamic column slugs are returned in
+        a sorted list for the requested model.
         """
         #self.skipTest("Temporarily skipped")
         # Create a few book objects.
@@ -581,21 +601,21 @@ class TestCollectionBase(BaseDcolumns):
         with self.assertRaises(TypeError) as cm:
             book.get_key_value(slug, book)
         # Test TIME
-        slug = 'start-time'
+        slug = 'start_time'
         value = promotion.get_key_value(slug)
         msg = "value: {}, b_values: {}, p_values: {}".format(
             value, b_values, p_values)
         t = p_values.get(slug)
         self.assertEqual(value, t, msg)
         # Test DATE
-        slug = 'start-date'
+        slug = 'start_date'
         value = promotion.get_key_value(slug)
         msg = "value: {}, b_values: {}, p_values: {}".format(
             value, b_values, p_values)
         d = p_values.get(slug)
         self.assertEqual(value, d, msg)
         # Test DATETIME
-        slug = 'date-time'
+        slug = 'date_time'
         value = book.get_key_value(slug)
         msg = "value: {}, b_values: {}".format(value, b_values)
         dt = b_values.get(slug)
@@ -607,7 +627,7 @@ class TestCollectionBase(BaseDcolumns):
         bool_value = True if b_values.get(slug).lower() == 'true' else False
         self.assertEqual(value, bool_value, msg)
         # Test bad BOOLEAN
-        slug = 'bad-bool'
+        slug = 'bad_bool'
         with self.assertRaises(ValueError) as cm:
             value = book.get_key_value(slug)
         # Test NUMBER
@@ -616,7 +636,7 @@ class TestCollectionBase(BaseDcolumns):
         msg = "value: {}, b_values: {}".format(value, b_values)
         self.assertEqual(value, int(b_values.get(slug)), msg)
         # Test invalid NUMBER.
-        slug = 'bad-number'
+        slug = 'bad_number'
         with self.assertRaises(ValueError) as cm:
             book.get_key_value(slug)
         # Test FLOAT
@@ -625,7 +645,7 @@ class TestCollectionBase(BaseDcolumns):
         msg = "value: {}, b_values: {}".format(value, b_values)
         self.assertEqual(value, float(b_values.get(slug)), msg)
         # Test invalid FLOAT.
-        slug = 'bad-float'
+        slug = 'bad_float'
         with self.assertRaises(ValueError) as cm:
             book.get_key_value(slug)
         # Test TEXT
@@ -644,9 +664,40 @@ class TestCollectionBase(BaseDcolumns):
         msg = "value: {}, b_values: {}".format(value, b_values)
         self.assertEqual(value, '', msg)
         # Test invalid value other that a bad bolean.
-        slug = 'bad-date'
+        slug = 'bad_date'
         with self.assertRaises(ValueError) as cm:
             value = book.get_key_value(slug)
+
+    def test_get_key_value_exception(self):
+        """
+        Check that all the possible combinations of this method work
+        correctly.
+        """
+        #self.skipTest("Temporarily skipped")
+        a_name = 'Some Woman'
+        author, a_cc, a_values = self._create_author_objects(name=a_name)
+        p_name = '1000% Off'
+        promotion, p_cc, p_values = self._create_promotion_objects(name=p_name)
+        language = Language.objects.model_objects()[3] # Russian
+        book, b_cc, b_values = self._create_book_objects(
+            author=author, promotion=promotion, language=language)
+        a_value = Author.objects.get_value_by_pk(author.pk, 'name')
+        self.assertEqual(a_value, a_name)
+        p_value = Promotion.objects.get_value_by_pk(promotion.pk, 'name')
+        self.assertEqual(p_value, p_name)
+
+        with self.assertRaises(Author.DoesNotExist) as cm:
+            a_value = Author.objects.get_value_by_pk(1000, 'name')
+
+        with self.assertRaises(AttributeError) as cm:
+            a_value = Author.objects.get_value_by_pk(author.pk, 'unknown')
+
+        with self.assertRaises(Promotion.DoesNotExist) as cm:
+            a_value = Promotion.objects.get_value_by_pk(1000, 'name')
+
+        with self.assertRaises(AttributeError) as cm:
+            a_value = Promotion.objects.get_value_by_pk(promotion.pk,
+                                                        'unknown')
 
     def _create_test_objects(self):
         # Add a few columns to author, promotion, and book.
@@ -761,7 +812,7 @@ class TestCollectionBase(BaseDcolumns):
         (book, b_values, author, a_values, new_author, promotion, p_values,
          new_promotion, language) = self._create_test_objects()
         # Test TIME
-        slug = 'start-time'
+        slug = 'start_time'
         dt = datetime.datetime.now(pytz.utc)
         time = datetime.time(hour=dt.hour, minute=dt.minute, second=dt.second,
                              microsecond=dt.microsecond, tzinfo=dt.tzinfo)
@@ -780,7 +831,7 @@ class TestCollectionBase(BaseDcolumns):
         (book, b_values, author, a_values, new_author, promotion, p_values,
          new_promotion, language) = self._create_test_objects()
         # Test DATE with object
-        slug = 'start-date'
+        slug = 'start_date'
         date = datetime.date.today() + datetime.timedelta(days=1)
         promotion.set_key_value(slug, date)
         found_value = promotion.get_key_value(slug)
@@ -788,7 +839,7 @@ class TestCollectionBase(BaseDcolumns):
             p_values.get(slug), found_value, date)
         self.assertEqual(found_value, date, msg)
         # Test DATE with string
-        slug = 'start-date'
+        slug = 'start_date'
         date = '2015-01-01'
         dt = dateutil.parser.parse(date)
         parsed_date = datetime.date(year=dt.year, month=dt.month, day=dt.day)
@@ -798,12 +849,12 @@ class TestCollectionBase(BaseDcolumns):
             p_values.get(slug), found_value, parsed_date)
         self.assertEqual(found_value, parsed_date, msg)
         # Test DATE with bad date string
-        slug = 'start-date'
+        slug = 'start_date'
         date = '2015-13-01'
         with self.assertRaises(ValueError) as cm:
             promotion.set_key_value(slug, date)
         # Test DATE with garbage text string.
-        slug = 'start-date'
+        slug = 'start_date'
         date = 'garbage string'
         with self.assertRaises(ValueError) as cm:
             promotion.set_key_value(slug, date)
@@ -817,7 +868,7 @@ class TestCollectionBase(BaseDcolumns):
         (book, b_values, author, a_values, new_author, promotion, p_values,
          new_promotion, language) = self._create_test_objects()
         # Test Choice ValueError exception.
-        slug = 'date-time'
+        slug = 'date_time'
         with self.assertRaises(ValueError) as cm:
             book.set_key_value(slug, 2000)
         # Test DATETIME
@@ -972,7 +1023,7 @@ class TestCollectionBase(BaseDcolumns):
             b_values.get(slug), found_value, value)
         self.assertEqual(found_value, value, msg)
         # Test creating a TEXT KeyValue object.
-        slug = 'web-site'
+        slug = 'web_site'
         value = "www.example.org"
         book.set_key_value(slug, value)
         found_value = book.get_key_value(slug)
@@ -984,7 +1035,7 @@ class TestCollectionBase(BaseDcolumns):
         self.assertEqual(len(result), len(b_values), msg)
 
 
-class TestKeyValue(BaseDcolumns):
+class TestKeyValue(BaseDcolumns, TestCase):
 
     def __init__(self, name):
         super(TestKeyValue, self).__init__(name)
@@ -998,8 +1049,8 @@ class TestKeyValue(BaseDcolumns):
         dc0 = self._create_dynamic_column_record(
             "Edition", DynamicColumn.NUMBER, 'book_top', 4)
         book, b_cc, b_values = self._create_book_objects(extra_dcs=[dc0,])
-        value = 5
+        value = 'Edition'
         kv = self._create_key_value_record(book, dc0, value)
         # Test that the values are the same.
         msg = "value: {}, instance value: {!s}".format(kv.value, kv)
-        self.assertEqual(kv.value, str(kv), msg)
+        self.assertEqual(value, str(kv), msg)

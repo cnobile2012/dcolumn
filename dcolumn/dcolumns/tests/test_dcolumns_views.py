@@ -13,7 +13,7 @@ import json
 
 from django.test import TestCase, Client
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from dcolumn.dcolumns.views import CollectionAJAXView
 from dcolumn.dcolumns.models import DynamicColumn
@@ -22,7 +22,7 @@ from example_site.books.choices import Language
 from .base_tests import BaseDcolumns
 
 
-class TestCollectionAJAXView(BaseDcolumns):
+class TestCollectionAJAXView(BaseDcolumns, TestCase):
     _TEST_USERNAME = 'TestUser'
     _TEST_PASSWORD = 'TestPassword_007'
 
@@ -51,7 +51,8 @@ class TestCollectionAJAXView(BaseDcolumns):
         # Setup objects for the collections.
         # Test for proper response
         class_name = 'bookX'
-        url = reverse('api-collections', kwargs={'class_name': class_name})
+        url = reverse('dcolumns:api-collections',
+                      kwargs={'class_name': class_name})
         response = self.client.get(url)
         msg = "response status: {}, should be 200".format(response.status_code)
         self.assertEquals(response.status_code, 200, msg)
@@ -96,7 +97,8 @@ class TestCollectionAJAXView(BaseDcolumns):
         b_values[dc3.slug] = kv3.value
         # Test for proper response
         class_name = 'book'
-        url = reverse('api-collections', kwargs={'class_name': class_name})
+        url = reverse('dcolumns:api-collections',
+                      kwargs={'class_name': class_name})
         response = self.client.get(url)
         msg = "response status: {}, should be 200".format(response.status_code)
         self.assertEquals(response.status_code, 200, msg)

@@ -23,8 +23,9 @@ ALLOWED_HOSTS = ('*',)
 MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
 
 # Add to the INSTALLED_APPS here.
-INSTALLED_APPS.append('debug_toolbar')
+INSTALLED_APPS.append('dcolumn.test_app')
 INSTALLED_APPS.append('django_extensions')
+INSTALLED_APPS.append('debug_toolbar')
 
 TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 

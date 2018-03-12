@@ -15,8 +15,6 @@ from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.db.models.query import QuerySet
 
-from dcolumn.common.deprication import RemovedInDColumns130Warning
-
 log = logging.getLogger('dcolumns.dcolumns.manager')
 
 
@@ -183,19 +181,8 @@ class DynamicColumnManager(object):
                 raise TypeError(msg)
 
             self._css_container_map.clear()
-
-            if isinstance(container_list[0], (list, tuple)):
-                self._css_containers += list(container_list)
-                self._css_container_map.update(dict(self._css_containers))
-            else: # This format will be deprecated in version 1.3
-                warnings.warn(
-                    "Deprecation Warning: The enumeration method of "
-                    "generating the display location will be deprecated "
-                    "with the release of version 1.3.0.",
-                    RemovedInDColumns130Warning)
-                self._css_containers += [
-                    (key, css) for key, css in enumerate(container_list)]
-                self._css_container_map.update(dict(self._css_containers))
+            self._css_containers += list(container_list)
+            self._css_container_map.update(dict(self._css_containers))
         else:
             msg = ("Invalid container_list type '{}', should be either a list "
                    "of tuple.").format(type(container_list))

@@ -8,9 +8,12 @@
 
 import logging
 
-from django.test import TestCase, Client
+from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
+from django.test import TestCase, Client
+from django.urls import reverse
+
+from example_site.books.models import Book #, Author, Publisher, Promotion
 
 from ..models import DynamicColumn, ColumnCollection
 
@@ -19,9 +22,7 @@ from .base_tests import BaseDcolumns
 log = logging.getLogger('tests.dcolumns.forms')
 
 
-class TestCollectionBaseFormMixin(BaseDcolumns):
-    _TEST_USERNAME = 'TestUser'
-    _TEST_PASSWORD = 'TestPassword_007'
+class TestCollectionBaseFormMixin(BaseDcolumns, TestCase):
 
     def __init__(self, name):
         super(TestCollectionBaseFormMixin, self).__init__(name)
@@ -29,16 +30,54 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
 
     def setUp(self):
         super(TestCollectionBaseFormMixin, self).setUp()
-        self.client = self._set_user_auth(self.user)
+        self.client = Client()
+        self.client.force_login(self.user)
+        self.dc0 = self._create_dynamic_column_record(
+            "Test Bool", DynamicColumn.BOOLEAN, 'book_top', 1)
+        self.author, a_cc, a_values = self._create_author_objects()
+        self.dc1 = self._create_dynamic_column_record(
+            "Author", DynamicColumn.CHOICE, 'book_top', 2,
+            relation=self.choice2index.get("Author"),
+            required=DynamicColumn.YES, preferred_slug='test_choice')
+        self.dc2 = self._create_dynamic_column_record(
+            "Language", DynamicColumn.CHOICE, 'book_top', 3,
+            relation=self.choice2index.get("Language"),
+            store_relation=DynamicColumn.YES, required=DynamicColumn.NO,
+            preferred_slug='test_pseudo_choice')
+        self.promotion, p_cc, p_values = self._create_promotion_objects()
+        self.dc3 = self._create_dynamic_column_record(
+            "Promotion", DynamicColumn.CHOICE, 'book_top', 4,
+            relation=self.choice2index.get("Promotion"),
+            required=DynamicColumn.NO, preferred_slug='test_store_relation')
+        self.dc4 = self._create_dynamic_column_record(
+            "Test Date", DynamicColumn.DATE, 'book_center', 1,
+            required=DynamicColumn.NO)
+        self.dc5 = self._create_dynamic_column_record(
+            "Test Time", DynamicColumn.TIME, 'book_center', 2,
+            required=DynamicColumn.NO)
+        self.dc6 = self._create_dynamic_column_record(
+            "Test Datetime", DynamicColumn.DATETIME, 'book_center', 3,
+            required=DynamicColumn.NO)
+        self.dc7 = self._create_dynamic_column_record(
+            "Test Float", DynamicColumn.FLOAT, 'book_bottom', 1,
+            required=DynamicColumn.NO)
+        self.dc8 = self._create_dynamic_column_record(
+            "Test Integer", DynamicColumn.NUMBER, 'book_bottom', 2,
+            required=DynamicColumn.NO)
+        self.dc9 = self._create_dynamic_column_record(
+            "Test Text", DynamicColumn.TEXT, 'book_bottom', 3,
+            required=DynamicColumn.NO)
+        self.dc10 = self._create_dynamic_column_record(
+            "Test Text Block", DynamicColumn.TEXT_BLOCK, 'book_bottom', 4,
+            required=DynamicColumn.NO)
+        self.cc = self._create_column_collection_record(
+            "Book Current", 'book', dynamic_columns=[
+                self.dc0, self.dc1, self.dc2, self.dc3, self.dc4, self.dc5,
+                self.dc6, self.dc7, self.dc8, self.dc9, self.dc10])
 
-    def _set_user_auth(self, user, username=_TEST_USERNAME,
-                       password=_TEST_PASSWORD, login=True):
-        client = Client()
-
-        if login:
-            client.login(username=username, password=password)
-
-        return client
+    def tearDown(self):
+        self.client.logout()
+        super(TestCollectionBaseFormMixin, self).tearDown()
 
     def test_proper_configuration(self):
         """
@@ -47,13 +86,17 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         as of now it raises a ValueError causing a 500 response code.
         """
         self.skipTest("Temporarily skipped")
-        url = reverse('book-create')
+        url = reverse('test-book-create')
         # Test that we get an error indicating that there is no prerequisite
         # data setup with a 200 status code.
-        data = {'title': "Test Book Title"}
+        data = {
+            'title': "Test Book Title",
+            'test_choice': self.author.pk
+            }
         response = self.client.post(url, data)
         log.debug("POST url: %s", url)
-        msg = "response status: {}, should be 200".format(response.status_code)
+        msg = "response status: {}, should be 200, request: {} ".format(
+            response.status_code, response.request)
         self.assertEquals(response.status_code, 200, msg)
         self.assertTrue(self._has_error(response), msg)
         self._test_errors(response, tests={
@@ -65,61 +108,59 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         Test that an unauthenticated user cannot access this form.
         """
         #self.skipTest("Temporarily skipped")
-        client = self._set_user_auth(self.user, login=False)
-        # Create the initial configuration objects.
-        required = DynamicColumn.YES
-        book, cc, values = self._create_book_objects(required=required)
-        log.debug("Created Book: %s, ColumnCollection: %s, values: %s",
-                  book, cc, values)
+        client = Client()
         # Test that we get a field required error on the 'abstract' slug.
-        url = reverse('book-create')
+        url = reverse('test-book-create')
         data = {'title': "Test Book Title"}
         response = client.post(url, data)
         log.debug("POST url: %s", url)
-        msg = "response status: {}, should be 200".format(response.status_code)
+        msg = ("response status: {}, should be 302 redirected to login."
+               ).format(response.status_code)
+        self.assertEquals(response.status_code, 302, msg)
+
+    def test_detail(self):
+        """
+        Test that a detail page returns correctly.
+        """
+        title = "Detail Page Request"
+        book = self._create_dcolumn_record(Book, self.cc, title=title)
+        author_slug = "test_choice"
+        book.set_key_value(author_slug, self.author)
+        url = reverse('test-book-detail', kwargs={'pk': book.pk})
+        response = self.client.get(url)
+        msg = "response status: {}, should be 200, request: {}".format(
+            response.status_code, response.request)
         self.assertEquals(response.status_code, 200, msg)
-        msg = "Should have errors: {}".format(response.context_data.get(
-            'form').errors)
-        self.assertTrue(self._has_error(response), msg)
-        self._test_errors(response, tests={
-            'abstract': "Abstract field is required.",
-            '__all__': "You must login to use the site.",
-            })
+        # We only set one fiels the author, check if it's in the relations.
+        author_relation = response.context['relations'][self.dc1.pk]
+        msg = "author_relation: {}".format(author_relation)
+        self.assertEqual(author_relation['value'], self.author.pk, msg)
 
     def test_create(self):
         """
         Test that creating a book works properly.
         """
-        #self.skipTest("Temporarily skipped")
-        # Create the initial configuration objects.
-        required = DynamicColumn.YES
-        book, cc, values = self._create_book_objects(required=required)
-        log.debug("Created Book: %s, ColumnCollection: %s, values: %s",
-                  book, cc, values)
         # Test that we get a field required error on the 'abstract' slug.
-        url = reverse('book-create')
-        data = {'title': "Test Book Title"}
-        response = self.client.post(url, data)
-        log.debug("POST url: %s", url)
-        msg = "response status: {}, should be 200".format(response.status_code)
-        self.assertEquals(response.status_code, 200, msg)
-        msg = "Should have errors: {}".format(response.context_data.get(
-            'form').errors)
-        self.assertTrue(self._has_error(response), msg)
-        self._test_errors(response, tests={
-            'abstract': "Abstract field is required."})
-        # Test saving a new record.
-        data['abstract'] = "Short abstract to satisfy the required field."
-        response = self.client.post(url, data)
-        msg = "response status: {}, should be 302".format(response.status_code)
+        url = reverse('test-book-create')
+        data = {'title': "Test Book Title",
+                'test_choice': self.author.pk,
+                #'publisher': publisher.pk
+                }
+        response = self.client.post(url, data=data)
+        self.assertTrue(response.has_header('location'))
+        location = response._headers['location']
+        log.debug("POST url: %s, location: %s", url, location)
+        msg = "response status: {}, should be 302, request: {}".format(
+            response.status_code, response.request)
         self.assertEquals(response.status_code, 302, msg)
         # Check that we have a record.
-        response = self.client.get(response.url)
+        response = self.client.get(location[1])
         msg = "response status: {}, should be 200".format(response.status_code)
         self.assertEquals(response.status_code, 200, msg)
-        title = response.context_data.get('object').title
-        msg = "title: '{}' should match '{}'.".format(title, data.get('title'))
-        self.assertEqual(title, data.get('title'), msg)
+        # Check that we have an author.
+        msg = "author: '{}' should be in the content '{}'.".format(
+            self.author.name, response.content)
+        self.assertTrue(self.author.name in str(response.content), msg)
 
     def test_update(self):
         """
@@ -128,12 +169,18 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         #self.skipTest("Temporarily skipped")
         # Create the initial configuration objects.
         required = DynamicColumn.YES
-        book, cc, values = self._create_book_objects(required=required)
+        author, a_cc, a_values = self._create_author_objects()
+        publisher, p_cc, p_values = self._create_publisher_objects()
+        book, cc, values = self._create_book_objects(author=author,
+                                                     publisher=publisher,
+                                                     required=required)
         log.debug("Created Book: %s, ColumnCollection: %s, values: %s",
                   book, cc, values)
         # Test that we get a valid response.
-        url = reverse('book-create')
+        url = reverse('book-update', kwargs={'pk': book.pk})
         data = {'title': "Test Book Title",
+                'author': author.pk,
+                'publisher': publisher.pk,
                 'abstract': "Short abstract to satisfy the required field."}
         response = self.client.post(url, data)
         log.debug("Create POST url: %s", url)
@@ -155,7 +202,8 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         log.debug("GET url: %s, context: %s", url, response.context_data)
         msg = "response status: {}, should be 200".format(response.status_code)
         self.assertEquals(response.status_code, 200, msg)
-        abstract = response.context_data.get('object').get_key_value('abstract')
+        abstract = response.context_data.get('object').get_key_value(
+            'abstract')
         msg = "abstract: '{}' should match '{}'.".format(
             abstract, data.get('abstract'))
         self.assertEqual(abstract, data.get('abstract'), msg)
@@ -167,25 +215,25 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         #self.skipTest("Temporarily skipped")
         # Create the DynamicColumn for the author and promotion.
         author, a_cc, a_values = self._create_author_objects()
-        dc1 = self._create_dynamic_column_record(
+        dc0 = self._create_dynamic_column_record(
             "Author", DynamicColumn.CHOICE, 'book_top', 2,
             relation=self.choice2index.get("Author"),
             required=DynamicColumn.YES)
         log.debug("Created Author: %s, ColumnCollection: %s, values: %s",
                   author, a_cc, a_values)
         promotion, p_cc, p_values = self._create_promotion_objects()
-        dc2 = self._create_dynamic_column_record(
+        dc1 = self._create_dynamic_column_record(
             "Promotion", DynamicColumn.CHOICE, 'book_top', 4,
             relation=self.choice2index.get("Promotion"),
             store_relation=DynamicColumn.YES)
         log.debug("Created Promotion: %s, ColumnCollection: %s, values: %s",
                   promotion, p_cc, p_values)
         cc = self._create_column_collection_record(
-            "Book Current", 'book', dynamic_columns=[dc1, dc2])
+            "Book Current", 'book', dynamic_columns=[dc0, dc1])
         # Try to create a book entry with errors.
         url = reverse('book-create')
         data = {'title': "Test Book Title"}
-        response = self.client.post(url, data)
+        response = self.client.post(url, data=data)
         log.debug("POST url: %s", url)
         msg = "response status: {}, should be 200".format(response.status_code)
         self.assertEquals(response.status_code, 200, msg)
@@ -193,23 +241,26 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
             'form').errors)
         self.assertTrue(self._has_error(response), msg)
         self._test_errors(response, tests={
-            'author': "Author field is required.",
+            'author': "This field is required.",
+            'publisher': "This field is required.",
             })
         # Try to create a record with an invalid promotion PK.
         data['author'] = author.pk
         data['promotion'] = 999999 # Should be invalid
-        response = self.client.post(url, data)
+        response = self.client.post(url, data=data)
         msg = "response status: {}, should be 200".format(response.status_code)
         self.assertEquals(response.status_code, 200, msg)
         msg = "Should have errors: {}".format(response.context_data.get(
             'form').errors)
         self.assertTrue(self._has_error(response), msg)
         self._test_errors(response, tests={
-            'promotion': "Could not find record "})
+            'promotion': " 999999 is not one of the available choices.",
+            'publisher': "This field is required.",
+            })
         # Try to create a record with an empty promotion PK.
         data['author'] = author.pk
         data['promotion'] = 'junk'
-        response = self.client.post(url, data)
+        response = self.client.post(url, data=data)
         msg = "response status: {}, should be 200, values: {}".format(
             response.status_code, p_values)
         self.assertEquals(response.status_code, 200, msg)
@@ -217,19 +268,8 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
             'form').errors)
         self.assertTrue(self._has_error(response), msg)
         self._test_errors(response, tests={
-            'promotion': ", must be a number."})
-        # Try to create a record with a promotion PK set to 0 (zero).
-        data['author'] = author.pk
-        data['promotion'] = '0'
-        response = self.client.post(url, data)
-        msg = "response status: {}, should be 200, values: {}".format(
-            response.status_code, p_values)
-        self.assertEquals(response.status_code, 200, msg)
-        msg = "Should have errors: {}".format(response.context_data.get(
-            'form').errors)
-        self.assertTrue(self._has_error(response), msg)
-        self._test_errors(response, tests={
-            'promotion': "Could not find record with value '0'.",
+            'promotion': " junk is not one of the available choices.",
+            'publisher': "This field is required.",
             })
 
     def test_validate_boolean_type(self):
@@ -239,17 +279,25 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         #self.skipTest("Temporarily skipped")
         author, a_cc, a_values = self._create_author_objects()
         dc0 = self._create_dynamic_column_record(
-            "Author", DynamicColumn.CHOICE, 'book_top', 2,
+            "Author", DynamicColumn.CHOICE, 'book_top', 1,
             relation=self.choice2index.get("Author"),
             required=DynamicColumn.YES)
+        publisher, p_cc, p_values = self._create_publisher_objects()
         dc1 = self._create_dynamic_column_record(
-            "Ignore", DynamicColumn.BOOLEAN, 'book_top', 1)
+            "Publisher", DynamicColumn.CHOICE, 'book_top', 2,
+            relation=self.choice2index.get("Publisher"),
+            required=DynamicColumn.YES)
+        dc2 = self._create_dynamic_column_record(
+            "Ignore", DynamicColumn.BOOLEAN, 'book_top', 3)
         # Create the collection.
         cc = self._create_column_collection_record(
-            "Book Current", 'book', dynamic_columns=[dc0, dc1,])
+            "Book Current", 'book', dynamic_columns=[dc0, dc1, dc2])
         # Setup default required fields and uri.
         url = reverse('book-create')
-        data = {'title': "Test Book Title", 'author': author.pk}
+        data = {'title': "Test Book Title",
+                'author': author.pk,
+                'publisher': publisher.pk
+                }
         # Test the BOOLEAN type with a numeric value.
         data['ignore'] = 1
         response = self.client.post(url, data)
@@ -260,7 +308,7 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         msg = "response status: {}, should be 200".format(response.status_code)
         self.assertEquals(response.status_code, 200, msg)
         relations = response.context_data.get('relations')
-        value = relations.get(dc1.pk).get('value')
+        value = relations.get(dc2.pk).get('value')
         msg = "value: {}, ignore: {}, relations: {}".format(
             value, data['ignore'], relations)
         self.assertTrue(value == 1, msg)
@@ -297,7 +345,8 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         self.assertEquals(response.status_code, 200, msg)
         self.assertTrue(self._has_error(response), msg)
         self._test_errors(response, tests={
-            'ignore': "be an integer, numeric string, true/false, or yes/no."})
+            'ignore': "be an integer, numeric string, true/false, or yes/no."
+            })
 
     def test_validate_date_types(self):
         """
@@ -311,27 +360,27 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         dc1 = self._create_dynamic_column_record(
             "Start Time", DynamicColumn.TIME, 'promotion_top', 3,
             required=DynamicColumn.NO)
-        dc2 = self._create_dynamic_column_record(
-            "Date and Time", DynamicColumn.DATETIME, 'promotion_top', 3,
-            required=DynamicColumn.NO)
         cc = self._create_column_collection_record(
-            "Promotions", 'promotion', dynamic_columns=[dc0, dc1, dc2])
+            "Promotions", 'promotion', dynamic_columns=[dc0, dc1])
         # Try to create a publisher entry with errors.
         url = reverse('promotion-create')
-        data = {'name': "100% off everything.",
-                'start-date': '03/01/20000',
-                'start-time': 'xxx',
-                'date-and-time': 'date and time'}
-        response = self.client.post(url, data)
+        data = {
+            'name': "100% off everything.",
+            'promotion_start_date': '03/01/20000',
+            'promotion_start_time': 'xxx',
+            }
+        response = self.client.post(url, data=data)
         msg = "response status: {}, should be 200".format(response.status_code)
         self.assertEquals(response.status_code, 200, msg)
         msg = "Should have errors: {}".format(response.context_data.get(
             'form').errors)
         self.assertTrue(self._has_error(response), msg)
         self._test_errors(response, tests={
-            'start-date': "Invalid date and/or time object ",
-            'start-time': 'Invalid date and/or time object ',
-            'date-and-time': 'Invalid date and/or time object '})
+            'promotion_start_date': "Enter a valid date.",
+            'promotion_start_time': "Enter a valid time.",
+            'promotion_end_date': "This field is required.",
+            'promotion_end_time': "This field is required.",
+            })
 
     def test_validate_numeric_type(self):
         """
@@ -344,36 +393,47 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
             "Author", DynamicColumn.CHOICE, 'book_top', 2,
             relation=self.choice2index.get("Author"),
             required=DynamicColumn.YES)
+        publisher, p_cc, p_values = self._create_publisher_objects()
         dc1 = self._create_dynamic_column_record(
-            "Edition", DynamicColumn.NUMBER, 'book_top', 3,
+            "Publisher", DynamicColumn.CHOICE, 'book_top', 3,
+            relation=self.choice2index.get("Publisher"),
+            required=DynamicColumn.YES)
+        dc2 = self._create_dynamic_column_record(
+            "Edition", DynamicColumn.NUMBER, 'book_top', 4,
             required=DynamicColumn.NO)
         cc = self._create_column_collection_record(
-            "Book Current", 'book', dynamic_columns=[dc0, dc1,])
+            "Book Current", 'book', dynamic_columns=[dc0, dc1, dc2])
         # Setup default required fields and uri.
-        url = reverse('book-create')
-        data = {'title': "Test Book Title", 'author': author.pk}
+        post_url = reverse('book-create')
+        data = {
+            'title': "Test Book Title",
+            'author': author.pk,
+            'publisher': publisher.pk
+            }
         # Test the NUMBER type.
         data['edition'] = 1
-        response = self.client.post(url, data)
+        response = self.client.post(post_url, data=data)
         msg = "response status: {}, should be 302".format(response.status_code)
         self.assertEquals(response.status_code, 302, msg)
         # Get the page
-        response = self.client.get(response.url)
+        book = Book.objects.get(title=data.get('title'))
+        get_url = reverse('book-detail', kwargs={'pk': book.pk})
+        response = self.client.get(get_url)
         msg = "response status: {}, should be 200".format(response.status_code)
         self.assertEquals(response.status_code, 200, msg)
         relations = response.context_data.get('relations')
-        value = relations.get(dc1.pk).get('value')
-        msg = "value: {}, edition: {}, relations: {}".format(
+        value = relations.get(dc2.pk).get('value')
+        msg = "value: '{}', edition: '{}', relations: {}".format(
             value, data['edition'], relations)
-        self.assertTrue(value == 1, msg)
+        self.assertEqual(value, data['edition'], msg)
         # Test the NUMBER type with a non-number.
         data['edition'] = 'bad number'
-        response = self.client.post(url, data)
+        response = self.client.post(post_url, data)
         msg = "response status: {}, should be 200".format(response.status_code)
         self.assertEquals(response.status_code, 200, msg)
         self.assertTrue(self._has_error(response), msg)
         self._test_errors(response, tests={
-            'edition': 'Edition field is not a number.'})
+            'edition': 'Enter a whole number.'})
 
     def test_validate_value_length(self):
         """
@@ -385,23 +445,35 @@ class TestCollectionBaseFormMixin(BaseDcolumns):
         dc0 = self._create_dynamic_column_record(
             "Author", DynamicColumn.CHOICE, 'book_top', 2,
             relation=self.choice2index.get("Author"),
+            preferred_slug='author',
             required=DynamicColumn.YES)
+        publisher, p_cc, p_values = self._create_publisher_objects()
         dc1 = self._create_dynamic_column_record(
-            "Extra Field", DynamicColumn.TEXT, 'book_top', 3,
+            "Publisher", DynamicColumn.CHOICE, 'book_top', 3,
+            relation=self.choice2index.get("Publisher"),
+            preferred_slug='publisher',
+            required=DynamicColumn.YES)
+        dc2 = self._create_dynamic_column_record(
+            "Abstract", DynamicColumn.TEXT, 'book_top', 4,
+            preferred_slug='abstract',
             required=DynamicColumn.NO)
         cc = self._create_column_collection_record(
-            "Book Current", 'book', dynamic_columns=[dc0, dc1,])
+            "Book Current", 'book', dynamic_columns=[dc0, dc1, dc2])
         # Setup default required fields and uri.
         url = reverse('book-create')
-        data = {'title': "Test Book Title", 'author': author.pk}
-        # Test length of extra-field
-        data['extra-field'] = "Xo"*150
-        response = self.client.post(url, data)
+        data = {
+            'title': "Test Book Title",
+            'author': author.pk,
+            'publisher': publisher.pk
+            }
+        # Test length of extra_field
+        data['abstract'] = "Xo"*1500
+        response = self.client.post(url, data=data)
         msg = "response status: {}, should be 200".format(response.status_code)
         self.assertEquals(response.status_code, 200, msg)
-        msg = "Should have errors: {}".format(response.context_data.get(
-            'form').errors)
+        errors = response.context_data.get('form').errors
+        msg = "Should have errors: {}".format(errors)
         self.assertTrue(self._has_error(response), msg)
         self._test_errors(response, tests={
-            'extra-field': "Extra Field field is too long."
+            'abstract': "Ensure this value has at most 2048 characters "
             })

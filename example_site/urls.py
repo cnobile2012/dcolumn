@@ -23,6 +23,7 @@ if DEBUG:
         url(r'^dev/(?P<path>.*)$', serve,
             {'document_root': STATIC_URL, 'show_indexes': True}),
         url(r'^__debug__/', include(debug_toolbar.urls)),
+        url(r'^tests/', include('dcolumn.test_app.urls'))
         ]
 else:
     urlpatterns += [
