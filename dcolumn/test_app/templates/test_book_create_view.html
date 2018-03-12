@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load autodisplay %}
+{% block title %}Book{% endblock %}
+{% block head_extras %}{{ form.media }}{% endblock %}
+{% block header %}
+  <div class="header">
+    <h2>Test Book</h2>
+  </div>
+{% endblock %}
+{% block content %}
+  <div class="wrapper">
+{% if object %}
+    <form name="test-book-update" method="post"
+          action="{% url 'book-update' object.pk %}">
+{% else %}
+    <form name="test-book-update" method="post"
+          action="{% url 'book-create' %}">
+{% endif %}
+      {% csrf_token %}
+      <div class="container">
+        {{ keyvalue_set.management_form }}
+        <div id="message">
+          {{ form.non_field_errors }}
+        </div>
+        <div class="dynamic-container {{ css.book_top }}">
+          <ul>
+            <li>
+              {{ form.title.label_tag }}
+              {{ form.title.as_widget }}
+              {{ form.title.errors }}
+            </li>
+{% for relation in relations.values %}
+{% if relation.location == css.book_top %}
+            <li>
+              <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
+              {% auto_display relation options=dynamicColumns %}
+              {% combine_contexts form.errors relation.slug %}
+            </li>
+{% endif %}
+{% endfor %}
+          </ul>
+        </div>
+        <div class="dynamic-container {{ css.book_center }}">
+          <ul>
+{% for relation in relations.values %}
+{% if relation.location == css.book_center %}
+            <li>
+              <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
+              {% auto_display relation options=dynamicColumns %}
+              {% combine_contexts form.errors relation.slug %}
+            </li>
+{% endif %}
+{% endfor %}
+          </ul>
+        </div>
+        <div class="dynamic-container {{ css.book_bottom }}">
+          <ul>
+{% for relation in relations.values %}
+{% if relation.location == css.book_bottom %}
+            <li>
+              <label for="id-{{ relation.slug }}">{{ relation.name }}</label>
+              {% auto_display relation options=dynamicColumns %}
+              {% combine_contexts form.errors relation.slug %}
+            </li>
+{% endif %}
+{% endfor %}
+            <li>
+              {{ form.active.label_tag }}
+              {{ form.active.as_widget }}
+              {{ form.active.errors }}
+            </li>
+          </ul>
+        </div>
+      </div> <!-- div.container -->
+      <div class="actions">
+{% if object %}
+        <button type="submit"
+                class="book-submit"
+                formaction="{% url 'book-update' object.pk %}">Update</button>
+{% else %}
+        <button type="submit"
+                class="book-submit"
+                formaction="{% url 'book-create' %}">Save</button>
+{% endif %}
+      </div> <!-- div.actions -->
+    </form>
+  </div> <!-- div.wrapper -->
+{% endblock %}

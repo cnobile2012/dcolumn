@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load autodisplay %}
+{% block title %}Book Detail{% endblock %}
+{% block header %}
+  <div class="header">
+    <h2>Book Detail</h2>
+    <div class="dashboard">
+      <ul>
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'author-create' %}">Create Author</a></li>
+        <li><a href="{% url 'publisher-create' %}">Create Publisher</a></li>
+        <li><a href="{% url 'promotion-create' %}">Create Promotion</a></li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}
+{% block content %}
+  <div class="wrapper">
+      <div class="actions">
+{% spaceless %}
+{% if actions %}
+        <ul>
+{% for action in actions %}
+          <li><a href="{{ action.url }}">{{ action.name }}</a></li>
+{% endfor %}
+        </ul>        
+{% endif %}
+{% endspaceless %}
+      </div>
+      <div class="container">
+        <div class="message">
+{% if info_message.created %}
+          <div>The record has been created and is displayed below.</div>
+{% elif info_message.updated %}
+          <div>The record has been updated and is displayed below.</div>
+{% endif %}
+        </div>
+        <div class="dynamic-container {{ css.book_top }}">
+          <ul>
+            <li>
+              <label>Title</label>
+              <span>{{ object.title }}</span>
+            </li>
+{% for relation in relations.values %}
+{% if relation.location == css.book_top %}
+            <li>
+              <label>{{ relation.name }}</label>
+              {% auto_display relation options=dynamicColumns display=True %}
+            </li>
+{% endif %}
+{% endfor %}
+          </ul>
+        </div>
+        <div class="dynamic-container {{ css.book_center }}">
+          <ul>
+{% for relation in relations.values %}
+{% if relation.location == css.book_center %}
+            <li>
+              <label>{{ relation.name }}</label>
+              {% auto_display relation options=dynamicColumns display=True %}
+            </li>
+{% endif %}
+{% endfor %}
+          </ul>
+        </div>
+        <div class="dynamic-container {{ css.book_bottom }}">
+          <ul>
+{% for relation in relations.values %}
+{% if relation.location == css.book_bottom %}
+            <li>
+              <label>{{ relation.name }}</label>
+              {% auto_display relation options=dynamicColumns display=True %}
+            </li>
+{% endif %}
+{% endfor %}
+            <li>
+              <label>Active</label>
+              <span>{{ object.active|yesno }}</span>
+            </li>
+          </ul>
+        </div>
+      </div> <!-- div.container -->
+  </div> <!-- div.wrapper -->
+{% endblock %}
