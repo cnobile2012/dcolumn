@@ -19,6 +19,9 @@ ALLOWED_HOSTS = [
     '127.0.0.1'
     ]
 
+# Add to the INSTALLED_APPS here.
+INSTALLED_APPS.append('dcolumn.test_app')
+
 # email settings
 EMAIL_HOST = 'localhost'
 EMAIL_HOST_USER = ''
