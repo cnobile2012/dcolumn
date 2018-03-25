@@ -50,11 +50,12 @@ class TestBookForm(CollectionBaseFormMixin):
     def __init__(self, *args, **kwargs):
         super(TestBookForm, self).__init__(*args, **kwargs)
         log.debug("BookForm args: %s, kwargs: %s", args, kwargs)
-        self.fields['test_choice'].choices = Author.objects.get_choices('name')
-        self.fields['test_pseudo_choice'].choices = (Language.objects
-                                                     .get_choices('name'))
-        self.fields['test_store_relation'].choices = (Promotion.objects
-                                                      .get_choices('name'))
+        self.fields['test_choice'].choices = (
+            Author.objects.get_choices('name'))
+        self.fields['test_pseudo_choice'].choices = (
+            Language.objects.get_choices('name'))
+        self.fields['test_store_relation'].choices = (
+            Promotion.objects.get_choices('name'))
         # Get rid of the annoying colon after every label.
         self.label_suffix = ''
 
@@ -90,6 +91,8 @@ class TestBookForm(CollectionBaseFormMixin):
                     model.__name__, value)
                 raise forms.ValidationError(msg)
 
+        log.debug("Choices--field: %s, value: %s, is_zero: %s, obj: %s",
+                  field, value, is_zero, obj)
         return obj
 
     def clean(self):

@@ -379,7 +379,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
             "Date & Time", DynamicColumn.DATETIME, 'promotion_top', 6)
         promotion, p_cc, p_values = self._create_promotion_objects(
             extra_dcs=[dc0])
-        value = datetime.datetime.now(pytz.utc).isoformat()
+        value = datetime.datetime.now(pytz.utc).isoformat().replace('T', ' ')
         kv0 = self._create_key_value_record(promotion, dc0, value)
         p_values[dc0.slug] = kv0.value
         # Execute the template tag and test.
@@ -400,13 +400,13 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
             "Date & Time", DynamicColumn.DATETIME, 'promotion_top', 6)
         promotion, p_cc, p_values = self._create_promotion_objects(
             extra_dcs=[dc0])
-        value = datetime.datetime.now(pytz.utc).isoformat()
+        value = datetime.datetime.now(pytz.utc).isoformat().replace('T', ' ')
         kv0 = self._create_key_value_record(promotion, dc0, value)
         p_values[dc0.slug] = kv0.value
         # Execute the template tag and test.
         context, result = self._setup_template(Promotion, object=promotion)
-        msg = "result: {}, context: {}, values: {}".format(
-            result, context, p_values)
+        msg = "result: {}, context: {}, values: {}, value: {}".format(
+            result, context, p_values, value)
         self.assertEqual(result.count('input'), 4, msg)
         self.assertTrue(value in result, msg)
 

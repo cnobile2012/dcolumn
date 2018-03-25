@@ -515,7 +515,7 @@ class TestCollectionBase(BaseDcolumns, TestCase):
 
         self.assertEqual(len(result), len(b_values), msg)
 
-        # TODO Addetest for by_slug.
+        # TODO Add test for by_slug.
 
     def test_get_dynamic_column(self):
         """

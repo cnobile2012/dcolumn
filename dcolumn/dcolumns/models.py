@@ -560,11 +560,11 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         else:
             field = 'pk'
 
-        for kv in self.keyvalues.select_related('dynamic_column').all():
-            value = int(kv.value) if kv.value.isdigit() else kv.value
-            result[getattr(kv.dynamic_column, field)] = value
-
-        return result
+        return {
+            getattr(kv.dynamic_column, field):
+            self.get_key_value(kv.dynamic_column.slug, choice_raw=True)
+            for kv in self.keyvalues.select_related('dynamic_column').all()
+            }
 
     def get_dynamic_column(self, slug):
         """
@@ -583,7 +583,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return dc
 
-    def get_key_value(self, slug, field=None):
+    def get_key_value(self, slug, field=None, choice_raw=False):
         """
         Return the ``KeyValue`` object value for the ``DynamicColumn`` slug.
 
@@ -611,7 +611,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
             dc = obj.dynamic_column
 
             if dc.value_type == dc.CHOICE and obj.value:
-                value = self._is_get_choice(dc, obj.value, field)
+                value = self._is_get_choice(dc, obj.value, field, choice_raw)
             elif dc.value_type == dc.TIME and obj.value:
                 value = self._is_get_time(dc, obj.value)
             elif dc.value_type == dc.DATE and obj.value:
@@ -634,9 +634,9 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
 
         return value
 
-    def _is_get_choice(self, dc, value, field):
-        if dc.store_relation:
-            result = value
+    def _is_get_choice(self, dc, value, field, choice_raw):
+        if dc.store_relation or choice_raw:
+            result = int(value) if value.isdigit() else value
         else:
             model, m_field = dc.get_choice_relation_object_and_field()
 
