@@ -14,13 +14,14 @@ DATABASES = {
         }
     }
 
-
 ALLOWED_HOSTS = [
     '127.0.0.1'
     ]
 
 # Add to the INSTALLED_APPS here.
 INSTALLED_APPS.append('dcolumn.test_app')
+
+TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 
 # email settings
 EMAIL_HOST = 'localhost'
