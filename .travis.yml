@@ -15,7 +15,7 @@ install: "pip install -r requirements/travis.txt"
 script:
   - (cd example_site/settings/; ln -s travis.py local.py)
   - python manage.py migrate
-  - make coverage
+  - make tests
 
 after_success:
   - coveralls 
