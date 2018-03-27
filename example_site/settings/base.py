@@ -25,6 +25,7 @@ SECRET_KEY = 'gsx-ua^+oo7aqw=jn2ln2jiy3w4sl+5q$lxb2k-5tqasw+sxl*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+TRAVIS = False
 
 ALLOWED_HOSTS = []
 

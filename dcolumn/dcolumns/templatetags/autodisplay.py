@@ -347,9 +347,9 @@ class AutoDisplayNode(template.Node):
 @register.tag(name='single_display')
 def single_display(parser, token):
     """
-    Returns a context variable containing a single value where the data type is
-    based on the type of object. You will need to warp the result in an html
-    tag of your choice.
+    Returns a context variable containing a single value where the data
+    type is based on the type of object. You will need to warp the result
+    in an html tag of your choice.
 
     Arguments::
 

@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.views.generic.base import TemplateView
 from django.views.static import serve
 
-from .settings import DEBUG, STATIC_URL
+from .settings import DEBUG, TRAVIS, STATIC_URL
 
 admin.autodiscover()
 admin.site.site_header = "Books Admin"
@@ -23,6 +23,10 @@ if DEBUG:
         url(r'^dev/(?P<path>.*)$', serve,
             {'document_root': STATIC_URL, 'show_indexes': True}),
         url(r'^__debug__/', include(debug_toolbar.urls)),
+        url(r'^tests/', include('dcolumn.test_app.urls'))
+        ]
+elif TRAVIS:
+    urlpatterns += [
         url(r'^tests/', include('dcolumn.test_app.urls'))
         ]
 else:
