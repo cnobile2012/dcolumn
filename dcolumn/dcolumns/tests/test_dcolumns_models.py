@@ -495,7 +495,7 @@ class TestCollectionBase(BaseDcolumns, TestCase):
             author=author, promotion=promotion)
         # Test get_all_fields_and_slugs.
         result = Book.objects.get_all_fields_and_slugs()
-        msg = "result: {}".format(result)
+        msg = "result: {}, b_values: {}".format(result, b_values)
         self.assertEqual(len(result), 10, msg)
 
     def test_serialize_key_values(self):

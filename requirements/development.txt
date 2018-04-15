@@ -8,6 +8,7 @@ django_debug_toolbar
 slimit
 
 # Extensions
+pygraphviz
 django-extensions
 
 # Documentation
@@ -15,4 +16,5 @@ Sphinx
 sphinx_rtd_theme
 
 # Test coverage
+tblib
 coverage

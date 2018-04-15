@@ -484,15 +484,9 @@ class CollectionBaseManager(models.Manager):
         obj = self.select_related('column_collection').first()
 
         if obj:
-            cc_obj = ColumnCollection.objects.filter(
-                name=obj.column_collection.name).prefetch_related(
-                'dynamic_column')
-
-            if cc_obj:
-                cc_obj = cc_obj[0]
-                result[:] = [
-                    r.slug
-                    for r in cc_obj.dynamic_column.all().order_by('slug')]
+            kvs = obj.column_collection.dynamic_column.values_list(
+                'slug', flat=True).order_by('slug')
+            result[:] = list(kvs)
 
         return result
 

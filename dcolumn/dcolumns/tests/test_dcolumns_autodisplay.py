@@ -97,6 +97,9 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
     def setUp(self):
         super(TestAutoDisplay, self).setUp()
 
+    def tearDown(self):
+        super(TestAutoDisplay, self).tearDown()
+
     def _setup_template(self, model, object=None, prefix=None, options=None,
                         display=None, except_test=False, invalid_kwargs=None,
                         relation_name='relation', munge_slug=(None, None)):
@@ -190,7 +193,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
         context, result = self._setup_template(Book, object=book, display=True)
         msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
-        self.assertEqual(result.count('<span'), 2, msg)
+        self.assertEqual(result.count('<span'), len(b_values), msg)
         self.assertTrue("No" in result, msg)
         # Same test, but change the value to 0.
         value = '0'
@@ -199,7 +202,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
         context, result = self._setup_template(Book, object=book, display=True)
         msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
-        self.assertEqual(result.count('<span'), 2, msg)
+        self.assertEqual(result.count('<span'), len(b_values), msg)
         self.assertTrue("No" in result, msg)
         # Same test, but change the value to true.
         value = 'TrUe'
@@ -208,7 +211,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
         context, result = self._setup_template(Book, object=book, display=True)
         msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
-        self.assertEqual(result.count('<span'), 2, msg)
+        self.assertEqual(result.count('<span'), len(b_values), msg)
         self.assertTrue("Yes" in result, msg)
         # Same test, but change the value to non 0.
         value = '100'
@@ -217,7 +220,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
         context, result = self._setup_template(Book, object=book, display=True)
         msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
-        self.assertEqual(result.count('<span'), 2, msg)
+        self.assertEqual(result.count('<span'), len(b_values), msg)
         self.assertTrue("Yes" in result, msg)
 
     def test_BOOLEAN_entry(self):
@@ -250,7 +253,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
             Book, object=book, options='dynamicColumns', display=True)
         msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
-        self.assertEqual(result.count('<span'), 2, msg)
+        self.assertEqual(result.count('<span'), len(b_values), msg)
         value = book.get_key_value('author')
         self.assertTrue(value in result, msg)
         # Test that partial dynamicColumns work properly.
@@ -258,7 +261,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
             Book, object=book, options='dynamicColumns.author', display=True)
         msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
-        self.assertEqual(result.count('<span'), 2, msg)
+        self.assertEqual(result.count('<span'), len(b_values), msg)
         value = book.get_key_value('author')
         self.assertTrue(value in result, msg)
 
@@ -294,7 +297,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
             Book, object=book, options='dynamicColumns', display=True)
         msg = "result: {}, context: {}, b_values: {}".format(
             result, context, b_values)
-        self.assertEqual(result.count('<span'), 2, msg)
+        self.assertEqual(result.count('<span'), len(b_values), msg)
         value = book.get_key_value('promotion')
         self.assertTrue(value in result, msg)
 
@@ -316,7 +319,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
             Book, object=book, options='dynamicColumns', display=True)
         msg = "result: {}, context: {}, b_values: {}".format(
             result, context, b_values)
-        self.assertEqual(result.count('<span'), 2, msg)
+        self.assertEqual(result.count('<span'), len(b_values), msg)
         self.assertFalse(">0<" in result, msg)
 
     def test_CHOICE_store_relation_entry(self):
@@ -350,7 +353,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
             Promotion, object=promotion, display=True)
         msg = "result: {}, context: {}, values: {}".format(
             result, context, p_values)
-        self.assertEqual(result.count('<span'), 3, msg)
+        self.assertEqual(result.count('<span'), len(p_values), msg)
         value = promotion.get_key_value('start_date').isoformat()
         self.assertTrue(value in result, msg)
 
@@ -387,7 +390,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
             Promotion, object=promotion, display=True)
         msg = "result: {}, context: {}, values: {}".format(
             result, context, p_values)
-        self.assertEqual(result.count('<span'), 4, msg)
+        self.assertEqual(result.count('<span'), len(p_values), msg)
         self.assertTrue(value in result, msg)
 
     def test_DATETIME_entry(self):
@@ -422,7 +425,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
             Promotion, object=promotion, display=True)
         msg = "result: {}, context: {}, values: {}".format(
             result, context, p_values)
-        self.assertEqual(result.count('<span'), 3, msg)
+        self.assertEqual(result.count('<span'), len(p_values), msg)
         value = promotion.get_key_value('start_time').isoformat()
         self.assertTrue(value in result, msg)
 
@@ -457,7 +460,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
         context, result = self._setup_template(Book, object=book, display=True)
         msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
-        self.assertEqual(result.count('<span'), 2, msg)
+        self.assertEqual(result.count('<span'), len(b_values), msg)
         self.assertTrue(value in result, msg)
 
     def test_FLOAT_entry(self):
@@ -496,7 +499,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
         context, result = self._setup_template(Book, object=book, display=True)
         msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
-        self.assertEqual(result.count('<span'), 2, msg)
+        self.assertEqual(result.count('<span'), len(b_values), msg)
         self.assertTrue(value in result, msg)
 
     def test_NUMBER_entry(self):
@@ -534,7 +537,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
         context, result = self._setup_template(Book, object=book, display=True)
         msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
-        self.assertEqual(result.count('<span'), 2, msg)
+        self.assertEqual(result.count('<span'), len(b_values), msg)
         self.assertTrue(value in result, msg)
 
     def test_TEXT_entry(self):
@@ -572,7 +575,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
         context, result = self._setup_template(Book, object=book, display=True)
         msg = "result: {}, context: {}, values: {}".format(
             result, context, b_values)
-        self.assertEqual(result.count('<span'), 2, msg)
+        self.assertEqual(result.count('<span'), len(b_values), msg)
         self.assertTrue(value in result, msg)
 
     def test_TEXT_BLOCK_entry(self):
@@ -602,6 +605,9 @@ class TestSingleDisplay(BaseDcolumns, TestCase):
 
     def setUp(self):
         super(TestSingleDisplay, self).setUp()
+
+    def tearDown(self):
+        super(TestSingleDisplay, self).tearDown()
 
     def _setup_template(self, model, object, slug, delimiter='as',
                         context_name=None, object_name='object'):

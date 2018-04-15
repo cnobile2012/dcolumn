@@ -8,10 +8,17 @@ DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'data'))
 not os.path.isdir(DATA_DIR) and os.mkdir(DATA_DIR, 0o0775)
 
 DATABASES = {
+    #'default': {
+    #    'ENGINE': 'django.db.backends.sqlite3',
+    #    'NAME': os.path.abspath(os.path.join(
+    #        BASE_DIR, '..', 'data', 'db.sqlite3')),
+    #    }
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.abspath(os.path.join(
-            BASE_DIR, '..', 'data', 'db.sqlite3')),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'dcolumn',
+        'USER': 'dcolumn',
+        'PASSWORD': 'dcolumn',
+        'HOST': 'localhost',
         }
     }
 

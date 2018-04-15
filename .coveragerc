@@ -1,5 +1,6 @@
 [run]
 source = dcolumn
+parallel = True
 
 omit =
     ../*migrations*
@@ -11,7 +12,7 @@ omit =
 [report]
 show_missing = True
 skip_covered = True
-precision = 2
+precision = 3
 
 # Regexes for lines to exclude from consideration
 exclude_lines =

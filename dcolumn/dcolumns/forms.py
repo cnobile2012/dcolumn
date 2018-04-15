@@ -151,7 +151,7 @@ class ColumnCollectionAdminForm(forms.ModelForm):
             initial = kwargs.get('initial', {})
             self.request = initial.get('request')
 
-        super(ColumnCollectionForm, self).__init__(*args, **kwargs)
+        super(ColumnCollectionAdminForm, self).__init__(*args, **kwargs)
         log.debug("args: %s, kwargs: %s", args, kwargs)
         columns = ColumnCollection.objects.get_column_collection(
             self.instance.related_model, unassigned=True)

@@ -239,6 +239,7 @@ class BaseDcolumns(object):
         if promotion:
             dc3_slug = 'promotion'
             book.set_key_value(dc3_slug, promotion)
+            # store_relation not PK
             values[dc3.slug] = book.get_key_value(dc3_slug)
 
         if language:

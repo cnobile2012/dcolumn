@@ -13,6 +13,8 @@ html
 shared
 uploads
 logs/*.log*
+.coverage.conundrum.*
+db.sqlite3
 old
 
 # C extensions
