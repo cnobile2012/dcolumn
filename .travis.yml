@@ -9,7 +9,7 @@ python:
 sudo: true
 
 before_script:
-  - psql template1 -f db/create_schema.ddl -U postgres
+  - sudo -u postgres psql template1 -f db/create_schema.ddl
 
 # Command to install dependencies
 install: "pip install -r requirements/travis.txt"
