@@ -8,6 +8,7 @@ omit =
     *tests*
     *admin*
     dcolumn/common/__init__.py
+    dcolumn/test_app/forms.py
 
 [report]
 show_missing = True
