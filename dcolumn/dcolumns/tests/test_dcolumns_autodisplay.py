@@ -482,7 +482,6 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
         self.assertEqual(result.count('input'), 1, msg)
         self.assertTrue(value in result, msg)
 
-
     def test_NUMBER_display(self):
         """
         Test that the NUMBER type display HTML is correct.

@@ -274,7 +274,8 @@ class AutoDisplayNode(template.Node):
             value = [k for k, v in options if v == value]
             value = value[0] if len(value) > 0 else 0
 
-        if isinstance(value, six.string_types) and value.isdigit():
+        if (isinstance(value, six.string_types)
+            and value.isdigit()): # pragma: no cover
             value = int(value)
 
         for k, v in options:
@@ -320,14 +321,15 @@ class AutoDisplayNode(template.Node):
                 value = ''
         else:
             if value_type == DynamicColumn.BOOLEAN:
-                if isinstance(value, six.string_types):
+                if isinstance(value, six.string_types): # pragma: no cover
                     if value.isdigit():
                         key = 0 if int(value) == 0 else 1
                     elif value.lower() in ('true', 'false'):
                         key = 0 if value.lower() == 'false' else 1
                 else:
                     key = 0 if value == 0 else 1
-            elif isinstance(value, six.string_types) and value.isdigit():
+            elif (isinstance(value, six.string_types)
+                  and value.isdigit()): # pragma: no cover
                 key = int(value)
             else:
                 key = value
