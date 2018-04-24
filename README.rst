@@ -43,7 +43,8 @@ does conversion in and out of the type you have set.
    backwards compatible with previous versions. It now needs to use fields
    defined in user forms. The latest releases of Django would not work
    with the old way Dcolumns had previously handled fields. This is
-   actually better as it is more Django like.
+   actually better as it is now more consistent with how Django does
+   things.
 
 Provides
 --------
