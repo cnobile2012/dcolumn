@@ -29,6 +29,7 @@ setup(
     description=('An app to give any Django database model the ability to '
                  'dynamically add fields.'),
     long_description=README,
+    long_description_content_type='text/x-rst',
     url='https://github.com/cnobile2012/dcolumn',
     author='Carl J. Nobile',
     author_email='carl.nobile@gmail.com',
@@ -45,9 +46,12 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Topic :: Software Development :: Build Tools',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         ],
+    keywords='Django DColumns',
+    project_urls={'Source': 'https://github.com/cnobile2012/dcolumn'},
     install_requires=[
         'django',
         'dateutils',
