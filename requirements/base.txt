@@ -1,7 +1,6 @@
 # MUST DO ABOVE BEFORE RUNNING THIS FILE WITH:
 # pip install -r requirements/...
 
-# Dugh
 django
 
 # Provides Django admin documentation support.

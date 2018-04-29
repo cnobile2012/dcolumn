@@ -27,9 +27,4 @@ environment::
   repository. Many examples exist there that will not be in a pip install.
   Examples of how to use CSS with the template tags and a demo PostgreSQL
   database containing test data is also available. The repository can be
-  found at :base:`GitHub <>`
-
-.. warning::
-
-  Version 1.0 is a complete rewrite of Django DColumns and is NOT backwards
-  compatible with previous versions.
+  found at :base:`GitHub Code <>`

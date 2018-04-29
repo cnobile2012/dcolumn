@@ -25,14 +25,6 @@ dcolumn.common.decorators module
     :undoc-members:
     :show-inheritance:
 
-dcolumn.common.deprication module
----------------------------------
-
-.. automodule:: dcolumn.common.deprication
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 dcolumn.common.model_mixins module
 ----------------------------------
 

@@ -273,7 +273,7 @@ class DynamicColumnManager(object):
 
     def get_related_object_names(self, choose=True):
         """
-        This method would provide the models that inherit ``CollectionBase``
+        This method provides the models that inherit ``CollectionBase``
         and would usually be used in a drop down menu.
 
         :param choose: If ``True`` includes a choice text as first item, else

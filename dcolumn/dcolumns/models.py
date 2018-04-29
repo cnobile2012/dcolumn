@@ -229,8 +229,8 @@ class ColumnCollectionManager(StatusModelManagerMixin):
                            collection yet.
         :type unassigned: bool
         :rtype: A queryset of objects that inherit ``CollectionBase``.
-        :raises DoesNotExist: If the collection name is not found and
-                              unassigned is False.
+        :raises ColumnCollection.DoesNotExist: If the collection name is not
+                                               found and unassigned is False.
         """
         log.debug("Collection name: %s, unassigned: %s", name, unassigned)
         queryset = self.none()
@@ -454,6 +454,8 @@ class CollectionBaseManager(models.Manager):
         :param field: The field of the choice the value is taken from.
         :type field: str
         :rtype: Value from the ``field`` on the object.
+        :raises CollectionBase.DoesNotExist: If the `Dcolumn` model object was
+                                             not found.
         """
         value = ''
 
@@ -567,6 +569,10 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         :param slug: The ``DynamicColumn`` slug value.
         :type slug: str
         :rtype: ``DynamicColumn`` model instance.
+        :raises DynamicColumn.DoesNotExist: If the `DynamicColumn` model
+                                            object was not found.
+        :raises KeyValue.DoesNotExist: If the `KeyValue` model object was not
+                                       found.
         """
         try:
             dc = self.column_collection.dynamic_column.get(slug=slug)
@@ -590,6 +596,10 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                       field on the CHOICE objects, but must be a valid
                       member object on the model.
         :type field: str or None
+        :param choice_raw: Only works with ``dc.CHOICE`` type. A ``False``
+                           indicates normal operation, whereas a ``True``
+                           will return the `pk`.
+        :type choice_raw: bool
         :rtype: String value from a ``KeyValue`` object.
         :raises ValueError: Invalid combination of parameters.
         :raises AttributeError: If a bad field is passed in.
@@ -715,6 +725,8 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                       when the ``dcolumn_manager.register_choice(choice,
                       relation_num, field)`` was configured.
         :type field: str or None
+        :param obj: A ``KeyValue`` object.
+        :type obj: ``KeyValue`` object
         :param force: Default is ``False``, do not save empty strings else
                       ``True`` save empty strings only.
         :type force: bool
@@ -722,6 +734,8 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                       default.
         :type defer: bool
         :raises ValueError: Invalid combination of parameters.
+        :raises KeyValue.DoesNotExist: If the `KeyValue` model object was
+                                       not found.
         """
         if (force and value == '') or value not in (None, ''):
             dc = self.get_dynamic_column(slug)

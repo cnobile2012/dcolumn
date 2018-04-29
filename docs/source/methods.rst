@@ -56,11 +56,11 @@ ColumnCollectionManager
 |                       +--------------+--------------------------------------+
 |                       | `obj`        | A keyword argument that defaults to  |
 |                       |              | `None` otherwise an instance of a    |
-|                       |              | ``CollectionBase`` inherited model.  |
+|                       |              | ``Dcolumn`` model.                   |
 |                       +--------------+--------------------------------------+
 |                       | `by_slug`    | A keyword argument that defaults to  |
 |                       |              | `False` causing keys to be a ``pk``  |
-|                       |              | else `True` causing keys to be a     |
+|                       |              | else `True` causing keys to be the   |
 |                       |              | ``slug``.                            |
 |                       +--------------+--------------------------------------+
 |                       |              | Returns a serialized version of the  |
@@ -124,13 +124,18 @@ CollectionBaseManagerBase
 |                          |           | ``True`` causes the choice list to be|
 |                          |           | prepended with a message.            |
 |                          +-----------+--------------------------------------+
+|                          | `sort`    | A keyword argument. This value if    |
+|                          |           | ``True`` (default) does an           |
+|                          |           | alpanumeric sort on the display      |
+|                          |           | field. Else ``False`` no sort is     |
+|                          |           | done.                                |
+|                          +-----------+--------------------------------------+
 |                          |           | Returns a list of tuples that can be |
 |                          |           | used for HTML select options.        |
 +--------------------------+-----------+--------------------------------------+
 | get_value_by_pk          | `pk`      | A positional argument. This value is |
-|                          |           | the ``pk`` of a represents any       |
-|                          |           | instance of a ``CollectionBase``     |
-|                          |           | inherited model.                     |
+|                          |           | the ``pk`` that represents any       |
+|                          |           | instance of a ``Dcolumn`` model.     |
 |                          +-----------+--------------------------------------+
 |                          | `field`   | A positional argument. This value is |
 |                          |           | the field on a model or pseudo model |
@@ -149,55 +154,73 @@ CollectionBaseManagerBase
 
 CollectionBase
 --------------
-+----------------------+-----------+------------------------------------------+
-| Method Name          | Arguments | Description                              |
-+======================+===========+==========================================+
-| serialize_key_values | `by_slug` | A keyword argument. This value if        |
-|                      |           | ``False`` a dict of items are keyed by   |
-|                      |           | the dynamic column's ``pk``, if ``True`` |
-|                      |           | the dynamic column's ``slug`` is used.   |
-|                      +-----------+------------------------------------------+
-|                      |           | Returns a dictionary of ``KeyValue``     |
-|                      |           | items.                                   |
-+----------------------+-----------+------------------------------------------+
-| get_dynamic_column   | `slug`    | A positional argument. This slug         |
-|                      |           | represents any instance of a             |
-|                      |           | ``CollectionBase`` inherited model.      |
-|                      +-----------+------------------------------------------+
-|                      |           | Returns the DynamicColumn instance       |
-|                      |           | relitive to this model instance.         |
-+----------------------+-----------+------------------------------------------+
-| get_key_value        | `slug`    | A positional argument. This value        |
-|                      |           | represents any ``DynamicColumn`` object. |
-|                      +-----------+------------------------------------------+
-|                      | `field`   | A keyword argument indicating the field  |
-|                      |           | to use in a model or pseudo model.       |
-|                      |           | Defaults to ``None``.                    |
-|                      +-----------+------------------------------------------+
-|                      |           | Returns the coersed value of a           |
-|                      |           | ``KeyValue`` object.                     |
-+----------------------+-----------+------------------------------------------+
-| set_key_value        | `slug`    | A positional argument. This value        |
-|                      |           | represents any ``DynamicColumn`` object. |
-|                      +-----------+------------------------------------------+
-|                      | `value`   | A positional argument. Can be the actual |
-|                      |           | value to set in a ``KeyValue`` object, or|
-|                      |           | a model that inherits ``CollectionBase`` |
-|                      |           | or ``BaseChoice``.                       |
-|                      +-----------+------------------------------------------+
-|                      | `field`   | A keyword argument, indication the field |
-|                      |           | used in a model or pseudo model. Defaults|
-|                      |           | to ``None``.                             |
-|                      +-----------+------------------------------------------+
-|                      | `force`   | A keyword argument. The default is       |
-|                      |           | ``False``, indicating that empty strings |
-|                      |           | or ``None`` objects are not saved else   |
-|                      |           | ``True`` causes empty strings only to be |
-|                      |           | saved.                                   |
-+----------------------+-----------+------------------------------------------+
-|                      |           | No Return value. Sets a value on a       |
-|                      |           | ``keyValue`` object.                     |
-+----------------------+-----------+------------------------------------------+
++----------------------+--------------+---------------------------------------+
+| Method Name          |  Arguments   | Description                           |
++======================+==============+=======================================+
+| serialize_key_values | `by_slug`    | A keyword argument. This value if     |
+|                      |              | ``False`` a dict of items are keyed   |
+|                      |              | by the dynamic column's ``pk``, if    |
+|                      |              | ``True`` the dynamic column's         |
+|                      |              | ``slug`` is used.                     |
+|                      +--------------+---------------------------------------+
+|                      |              | Returns a dictionary of ``KeyValue``  |
+|                      |              | items.                                |
++----------------------+--------------+---------------------------------------+
+| get_dynamic_column   | `slug`       | A positional argument. This slug      |
+|                      |              | represents any instance of a          |
+|                      |              | ``Dcolumn``  model.                   |
+|                      +--------------+---------------------------------------+
+|                      |              | Returns the DynamicColumn instance    |
+|                      |              | relitive to this model instance.      |
++----------------------+--------------+---------------------------------------+
+| get_key_value        | `slug`       | A positional argument. This value     |
+|                      |              | represents any ``DynamicColumn``      |
+|                      |              | object.                               |
+|                      +--------------+---------------------------------------+
+|                      | `field`      | A keyword argument indicating the     |
+|                      |              | field to use in a model or pseudo     |
+|                      |              | model. Defaults to ``None``.          |
+|                      +--------------+---------------------------------------+
+|                      | `choice_row` | Only works with ``dc.CHOICE`` type.   |
+|                      |              | A ``False`` indicates normal          |
+|                      |              | operation, whereas a ``True`` will    |
+|                      |              | return the `pk`.                      |
+|                      +--------------+---------------------------------------+
+|                      |              | Returns the coersed value of a        |
+|                      |              | ``KeyValue`` object.                  |
++----------------------+--------------+---------------------------------------+
+| save_deferred        | None         | Saves the ``KeyValue`` objects when   |
+|                      |              | ``set_key_value`` below is called     |
+|                      |              | with ``defer=True``.                  |
++----------------------+--------------+---------------------------------------+
+| set_key_value        | `slug`       | A positional argument. This value     |
+|                      |              | represents any ``DynamicColumn``      |
+|                      |              | object.                               |
+|                      +--------------+---------------------------------------+
+|                      | `value`      | A positional argument. Can be the     |
+|                      |              | actual value to set in a ``KeyValue`` |
+|                      |              | object, or a model that inherits      |
+|                      |              | ``CollectionBase`` or ``BaseChoice``. |
+|                      +--------------+---------------------------------------+
+|                      | `field`      | A keyword argument, indication the    |
+|                      |              | field used in a model or pseudo model.|
+|                      |              | Defaults to ``None``.                 |
+|                      +--------------+---------------------------------------+
+|                      | `obj`        | A ``KeyValue`` object to save the     |
+|                      |              | value to.                             |
+|                      +--------------+---------------------------------------+
+|                      | `force`      | A keyword argument. The default is    |
+|                      |              | ``False``, indicating that empty      |
+|                      |              | strings or ``None`` objects are not   |
+|                      |              | saved else ``True`` causes empty      |
+|                      |              | strings only to be saved.             |
+|                      +--------------+---------------------------------------+
+|                      | `defer`      | Defer saving the KeyValue record.     |
+|                      |              | ``False`` is default.                 |
++----------------------+--------------+---------------------------------------+
+|                      |              | No Return value. Sets a value on a    |
+|                      |              | ``keyValue`` object.                  |
++----------------------+--------------+---------------------------------------+
 
 KeyValueManager
 ---------------
@@ -209,9 +232,10 @@ There are no user methods on the `KeyValue` model at this time.
 
 DynamicColumnManager
 ====================
-This is not the model manager mentioned above. The `DynamicColumnManager` holds
-all the relevant states of the system and should be the first place you come
-when you need to know something about the system.
+This is not the same model manager that was mentioned above. The
+`DynamicColumnManager` holds all the relevant states of the system and
+should be the first place you come when you need to know something about
+the system.
 
 +--------------------------+------------------+-------------------------------+
 | Method Name              | Arguments        | Description                   |
@@ -268,6 +292,14 @@ when you need to know something about the system.
 |                          |                  | ``DYNAMIC_COLUMNS``           |
 |                          |                  | ``.INACTIVATE_API_AUTH``      |
 +--------------------------+------------------+-------------------------------+
+| get_related_object_names | `choose`         | If ``True`` includes a choice |
+|                          |                  | text as first item, else      |
+|                          |                  | ``False`` the choice item is  |
+|                          |                  | not included.                 |
+|                          +------------------+-------------------------------+
+|                          |                  | Returns values for a drop down|
+|                          |                  | menu.                         |
++--------------------------+------------------+-------------------------------+
 | get_relation_model_field | `relation`       | A positional argument and is  |
 |                          |                  | the value in the              |
 |                          |                  | ``DynamicColumn`` relation    |
@@ -284,41 +316,44 @@ displaying the proper type of fields in your templates.
 
 auto_display
 ------------
-The `auto_display` tag displays the dynamic columns in your template as either
-form elements or `span` elements. This tag takes one positional argument and
-three keyword arguments. Please look at the example code on
-:example-html:`GitHub <books/book_create_view.html>` for usage.
+The `auto_display` tag displays the dynamic columns in your template as
+either form elements or `span` elements. This tag takes one positional
+argument and three keyword arguments. Please see the example code in
+:example-html:`book_create_view.html <books/book_create_view.html#L43>` for
+usage. Also in the admin docs on your site.
 
  1. relation `dict`
 
-     A dictionary representing the meta data for a specific field. This data
-     is a single value dict that can be found in the context as `relations`.
+     A dictionary representing the meta data for a specific field. This
+     data is a single value dict that can be found in the context as
+     `relations`.
 
  2. prefix `str`
 
-     Defaults to an empty string, but can be used to put a common prefix on all
-     tag `id` and `name` attributes. Not often used.
+     Defaults to an empty string, but can be used to put a common prefix
+     on all tag `id` and `name` attributes. Not often used.
 
  3. option `(list, tuple)` or `dict`
 
-     Used only for Django model or pseudo model type fields, but can be passed
-     into the template tag for all types and will be ignored if not needed. The
-     entire ``dynamicColumns`` `dict` from the context can be passed in or just
-     the specific field's data `list` or `tuple`.
+     Used only for Django model or pseudo model type fields, but can be
+     passed into the template tag for all types and will be ignored if not
+     needed. The entire ``dynamicColumns`` `dict` from the context can be
+     passed in or just the specific field's data `list` or `tuple`.
 
  4. display `bool`
 
-     This keyword argument is either `True` or `False`. `False` is the default
-     and generates `input` or `select` tags for form data. If `True`  `span`
-     tags are generated for detail pages where no forms would generally be
-     used.
+     This keyword argument is either `True` or `False`. `False` is the
+     default and generates `input` or `select` tags for form data. If
+     `True`  `span` tags are generated for detail pages where no forms
+     would generally be used.
 
 single_display
 --------------
-The `single_display` tag displays a single slug based on a ``CollectionBase``
-derived model. This tag could often be used in list templates. Please look at
-the example code on :example-html:`GitHub <books/book_list_view.html>` for
-usage.
+The `single_display` tag displays a single slug based on a
+``CollectionBase`` derived model. This tag could often be used in list
+templates. Please look at the example code on
+:example-html:`book_list_view.html <books/book_list_view.html#L71>` for
+usage. Also in the admin docs on your site.
 
  1. obj `model instance`
 
@@ -334,17 +369,19 @@ usage.
 
  4. name `str`
 
-     The variable name created in the context that will hold the value of the
-     slug. ex. If the slug is ``first-name`` the context variable could be
-     ``first_name``.
+     The variable name created in the context that will hold the value of
+     the slug. ex. If the slug is ``first-name`` the context variable
+     could be ``first_name``. This difference is irrelevant now as all
+     slugs should not have hyphens (-) in them.
 
 combine_contexts
 ----------------
-The `combine_contexts` tag combines two context variables. This would often be
-used to get the template error from a form for a specific slug. ex. The
-combination of `form.error` and `relation.slug` would give you the error for a
-form `input` element. Please look at the example code on
-:example-html:`GitHub <books/book_create_view.html>` for usage.
+The `combine_contexts` tag combines two context variables. This would
+often be used to get the template error from a form for a specific slug.
+ex. The combination of `form.error` and `relation.slug` would give you the
+error for a form `input` element. Please see the example code on
+:example-html:`book_create_view.html <books/book_create_view.html#L44>`
+for usage.
 
  1. obj `instance object`
 

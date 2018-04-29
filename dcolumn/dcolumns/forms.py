@@ -51,8 +51,10 @@ class CollectionBaseFormMixin(forms.ModelForm):
         name.
 
         :rtype: Django model ``ColumnCollection`` object.
-        :raises DoesNotExist: If the record does not exist.
-        :raises MultipleObjectsReturned: If multiple objects were returned.
+        :raises ColumnCollection.DoesNotExist: If the record does not exist.
+                                               This usually means that a
+                                               ``ColumnCollection`` has not
+                                               been defined in the admin.
         """
         obj = None
 

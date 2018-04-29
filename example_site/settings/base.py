@@ -119,11 +119,6 @@ STATICFILES_DIRS = (
     )
 
 # DCOLUMN config
-DYNAMIC_COLUMNS = {
-    # To allow anybody to access the API set to True.
-    'INACTIVATE_API_AUTH': False,
-    }
-
 dcolumn_manager.register_css_containers(
     (('author_top', 'author-top'),
      ('author_center', 'author-center'),
@@ -138,6 +133,11 @@ dcolumn_manager.register_css_containers(
      ('publisher_center', 'publisher-center'),
      ('publisher_bottom', 'publisher-bottom'),
      ))
+
+DYNAMIC_COLUMNS = {
+    # To allow anybody to access the API set to True.
+    'INACTIVATE_API_AUTH': False,
+    }
 
 # Change the URL below to your login path.
 LOGIN_URL = '/admin/login/'
