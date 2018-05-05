@@ -77,6 +77,6 @@ admin to work properly::
 
     urlpatterns = [
         ...,
-	url(r'^dcolumns/', include('dcolumn.dcolumns.urls')),
+	re_path(r'^dcolumns/', include('dcolumn.dcolumns.urls')),
         ...,
 	]

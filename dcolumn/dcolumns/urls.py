@@ -5,16 +5,20 @@
 """
 URLs used in DColumns.
 
-url(r'api/collections/(?P<class_name>\w+)/$', collection_ajax_view,
+re_path(r'api/collections/(?P<class_name>\w+)/$', collection_ajax_view,
         name="api-collections")
 """
 __docformat__ = "restructuredtext en"
 
-from django.conf.urls import url
+try:
+    from django.urls import include, re_path
+except:
+    from django.conf.urls import include, url as re_path
+
 from .views import collection_ajax_view
 
 app_name = 'dcolumns'
 urlpatterns = [
-    url(r'api/collections/(?P<class_name>\w+)/$', collection_ajax_view,
-        name="api-collections"),
+    re_path(r'api/collections/(?P<class_name>\w+)/$', collection_ajax_view,
+            name="api-collections"),
     ]

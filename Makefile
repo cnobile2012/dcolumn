@@ -4,7 +4,8 @@
 include include.mk
 
 PREFIX		= $(shell pwd)
-PACKAGE_DIR	= $(shell echo $${PWD\#\#*/})
+BASE_DIR	= $(shell echo $${PWD\#\#*/})
+PACKAGE_DIR	= $(BASE_DIR)-$(VERSION)
 APACHE_DIR	= $(PREFIX)/server
 DOCS_DIR	= $(PREFIX)/docs
 TODAY		= $(shell date +"%Y-%m-%d_%H%M")
@@ -24,7 +25,7 @@ all	: tar
 .PHONY	: tar
 tar	: clean
 	@(cd ..; tar -czvf $(PACKAGE_DIR).tar.gz --exclude=".git" \
-          --exclude="example_site/static" $(PACKAGE_DIR))
+          --exclude="example_site/static" $(BASE_DIR))
 
 .PHONY	: tests
 tests	: clean
