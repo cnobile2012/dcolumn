@@ -8,6 +8,9 @@ python:
 
 sudo: false
 
+addons:
+  postgresql: "9.5"
+
 before_script:
   - psql -U postgres template1 -f db/create_schema.ddl
 
