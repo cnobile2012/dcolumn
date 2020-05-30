@@ -7,12 +7,12 @@
 #
 
 import datetime
+import io
 import pytz
 
 from django.test import TestCase
 from django.template import (
     Template, Context, TemplateSyntaxError, VariableDoesNotExist)
-from django.utils import six
 
 from example_site.books.models import Author, Book, Promotion, Publisher
 from dcolumn.dcolumns.models import DynamicColumn
@@ -109,7 +109,7 @@ class TestAutoDisplay(BaseDcolumns, TestCase):
         vmt.object = object
         context = Context(vmt.get_context_data(munge_slug=munge_slug))
         # Run the test.
-        buff = six.StringIO()
+        buff = io.StringIO()
         buff.write("{% load autodisplay %}")
         buff.write("{% for relation in relations.values %}")
         r = " {}".format(relation_name) if not except_test else ''
@@ -616,7 +616,7 @@ class TestSingleDisplay(BaseDcolumns, TestCase):
         vmt.object = object
         context = Context(vmt.get_context_data())
         # Run the test.
-        buff = six.StringIO()
+        buff = io.StringIO()
         buff.write("{% load autodisplay %}")
         o = " {}".format(object_name)
         s = " {}".format(slug)
@@ -876,7 +876,7 @@ class TestCombineContexts(BaseDcolumns, TestCase):
         vmt.object = object
         context = Context(vmt.get_context_data())
         # Run the test.
-        buff = six.StringIO()
+        buff = io.StringIO()
         buff.write("{% load autodisplay %}")
         o = " {}".format(obj)
         v = " {}".format(variable)

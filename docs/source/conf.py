@@ -62,12 +62,14 @@ def version_info():
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
-    'sphinx.ext.autodoc',
     'sphinx.ext.extlinks',
     ]
+
+autodoc_mock_imports = ['dcolumn.dcolumns',]
 
 # External links
 extlinks = {

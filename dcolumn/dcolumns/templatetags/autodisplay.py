@@ -8,14 +8,16 @@ Template tags used for displaying dynamic columns.
 """
 __docformat__ = "restructuredtext en"
 
-import os, logging, types
+import io
+import os
+import logging
+import types
 import datetime
 from dateutil import parser
 
 from django import template
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext, ugettext_lazy as _
-from django.utils import six
 
 from dcolumn.dcolumns.models import DynamicColumn, KeyValue
 from dcolumn.dcolumns.manager import dcolumn_manager
@@ -84,7 +86,7 @@ def auto_display(parser, token):
     tokens = token.split_contents()
     size = len(tokens)
     kwargs = {'prefix': '', 'options': None, 'display': 'False'}
-    keywords = list(six.viewkeys(kwargs))
+    keywords = list(kwargs.keys())
     keywords.sort()
 
     if size == 2:
@@ -265,7 +267,7 @@ class AutoDisplayNode(template.Node):
         :rtype: The populated HTML element.
         """
         elem = elem.format("id-" + attr, attr)
-        buff = six.StringIO(elem)
+        buff = io.StringIO(elem)
         buff.seek(0, os.SEEK_END)
         value = relation.get('value', '')
 
@@ -274,7 +276,7 @@ class AutoDisplayNode(template.Node):
             value = [k for k, v in options if v == value]
             value = value[0] if len(value) > 0 else 0
 
-        if (isinstance(value, six.string_types)
+        if (isinstance(value, str)
             and value.isdigit()): # pragma: no cover
             value = int(value)
 
@@ -321,14 +323,14 @@ class AutoDisplayNode(template.Node):
                 value = ''
         else:
             if value_type == DynamicColumn.BOOLEAN:
-                if isinstance(value, six.string_types): # pragma: no cover
+                if isinstance(value, str): # pragma: no cover
                     if value.isdigit():
                         key = 0 if int(value) == 0 else 1
                     elif value.lower() in ('true', 'false'):
                         key = 0 if value.lower() == 'false' else 1
                 else:
                     key = 0 if value == 0 else 1
-            elif (isinstance(value, six.string_types)
+            elif (isinstance(value, str)
                   and value.isdigit()): # pragma: no cover
                 key = int(value)
             else:

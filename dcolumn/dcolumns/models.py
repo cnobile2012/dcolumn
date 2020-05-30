@@ -15,8 +15,6 @@ from dateutil import parser
 from collections import OrderedDict
 
 from django.db import models
-from django.utils import six
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.html import format_html, format_html_join
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
@@ -58,7 +56,6 @@ class DynamicColumnManager(StatusModelManagerMixin):
         return result
 
 
-@python_2_unicode_compatible
 class DynamicColumn(TimeModelMixin, UserModelMixin, StatusModelMixin,
                     ValidateOnSaveMixin):
     """
@@ -333,7 +330,6 @@ class ColumnCollectionManager(StatusModelManagerMixin):
         return choices
 
 
-@python_2_unicode_compatible
 class ColumnCollection(TimeModelMixin, UserModelMixin, StatusModelMixin,
                        ValidateOnSaveMixin):
     """
@@ -755,7 +751,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                 elif dc.value_type == dc.NUMBER:
                     value = self._is_set_number(dc, value)
                 elif (dc.value_type in (dc.TEXT, dc.TEXT_BLOCK) and
-                      isinstance(value, six.string_types)):
+                      isinstance(value, str)):
                     pass
                 else: # pragma: no cover
                     # This should never happen. An invalid value_type
@@ -807,12 +803,12 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
             result = getattr(value, field)
         elif isinstance(value, (CollectionBase, BaseChoice)): # Normal mode
             result = getattr(value, 'pk')
-        elif isinstance(value, six.string_types):
+        elif isinstance(value, str):
             if value.isdigit() or value == '':
                 result = value
             else:
                 self._raise_exception(dc, value, field=field)
-        elif isinstance(value, six.integer_types):
+        elif isinstance(value, int):
             result = str(value)
         else: # pragma: no cover
             self._raise_exception(dc, value, field=field)
@@ -823,7 +819,7 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         if isinstance(value, (datetime.time, datetime.date,
                               datetime.datetime)):
             result = value.isoformat()
-        elif isinstance(value, six.string_types):
+        elif isinstance(value, str):
             try:
                 dt = parser.parse(value)
             except ValueError as e:
@@ -838,9 +834,9 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
     def _is_set_boolean(self, dc, value):
         if isinstance(value, bool):
             result = str(value)
-        elif isinstance(value, six.integer_types):
+        elif isinstance(value, int):
             result = str(0 if value == 0 else 1)
-        elif isinstance(value, six.string_types):
+        elif isinstance(value, str):
             if (value.lower() in self.TRUE_FALSE or
                 value.lower() in self.YES_NO):
                 result = value
@@ -856,10 +852,9 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
     def _is_set_float(self, dc, value):
         if isinstance(value, float):
             result = str(value)
-        elif isinstance(value, six.integer_types):
+        elif isinstance(value, int):
             result = str(float(value))
-        elif (isinstance(value, six.string_types) and
-              value.replace('.', '').isdigit()):
+        elif isinstance(value, str) and value.replace('.', '').isdigit():
             result = str(float(value))
         else:
             self._raise_exception(dc, value)
@@ -867,9 +862,9 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
         return result
 
     def _is_set_number(self, dc, value):
-        if isinstance(value, six.integer_types):
+        if isinstance(value, int):
             result = str(value)
-        elif isinstance(value, six.string_types) and value.isdigit():
+        elif isinstance(value, str) and value.isdigit():
             result = value
         else:
             self._raise_exception(dc, value)
@@ -892,7 +887,6 @@ class KeyValueManager(models.Manager):
     pass
 
 
-@python_2_unicode_compatible
 class KeyValue(ValidateOnSaveMixin):
     collection = models.ForeignKey(
         CollectionBase, on_delete=models.CASCADE,

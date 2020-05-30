@@ -5,7 +5,8 @@ include include.mk
 
 PREFIX		= $(shell pwd)
 BASE_DIR	= $(shell echo $${PWD\#\#*/})
-PACKAGE_DIR	= $(BASE_DIR)-$(VERSION)
+TEST_TAG	=
+PACKAGE_DIR	= $(BASE_DIR)-$(VERSION)$(TEST_TAG)
 APACHE_DIR	= $(PREFIX)/server
 DOCS_DIR	= $(PREFIX)/docs
 TODAY		= $(shell date +"%Y-%m-%d_%H%M")
@@ -48,7 +49,16 @@ sphinx	: clean
 gen-db-diagram:
 	@./manage.py graph_models -ago docs/realm_db.png
 
+# To add a pre-release candidate such as 'rc1' to a test package name an
+# environment variable needs to be set that the setup.py reads.
+#
+# make build TEST_TAG=rc1
+# make upload-test TEST_TAG=rc1
+#
+# The tagball would then be names dcolumn-2.0.0rc1.tar.gz
+#
 .PHONY	: build
+build	: export PR_TAG=$(TEST_TAG)
 build	: clean
 	python setup.py sdist
 
@@ -59,8 +69,7 @@ upload	: clobber
 	twine upload --repository pypi dist/*
 
 .PHONY	: upload-test
-upload-test: clobber
-	python setup.py sdist
+upload-test: clobber build
 	python setup.py bdist_wheel --universal
 	twine upload --repository testpypi dist/*
 

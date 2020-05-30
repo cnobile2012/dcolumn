@@ -4,13 +4,15 @@ Overview
 
 Django Support
 --------------
-At the time of this writing DColumn supports Django 2.x and probably back
-to 1.8.0. The biggest issue with supporting older versions of Django is with
-the new way urlpatterns is used.
+At the time of this writing DColumn supports Django 3.x and probably back
+to 2.0. The biggest issue with supporting older versions of Django is with
+the new way urlpatterns is used. However, **Django DColumns** presupposes that
+you are building an application from scratch, so you should use the latest
+versions of Django and Python also.
 
 Python Support
 --------------
-Python 2.7, 3.4, 3.5 and 3.6 are supported.
+Python 3.5 and 3.6 are supported.
 
 What is Django DColumn?
 -----------------------
@@ -30,13 +32,12 @@ model that will do conversion in and out of the data type you have set.
 Recursion
 ---------
 If you define a model as a *DColumn* model it can be included as a field in
-another model defined as a *DColumn* model.
+another model that is also defined as a *DColumn* model.
 
 .. warning::
 
-   Version 2.0 is a partial rewrite of **Django DColumns** and is NOT
-   backwards compatible with previous versions. It now needs to use fields
-   defined in user forms. The latest releases of Django would not work
-   with the old way Dcolumns had previously handled fields. This is
-   actually better as it is now more consistent with how Django does
-   things.
+   As of Version 2.0 **Django DColumns** is no longer backwards compatible
+   with previous versions. It now needs to use fields defined in user forms.
+   The more recent releases of Django would not work with the old way Dcolumns
+   had previously handled fields. The current implementation is actually
+   better as it is now more consistent with how Django does things.

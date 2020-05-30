@@ -7,7 +7,6 @@ import logging
 
 from django.db import models
 from django.urls import reverse, NoReverseMatch
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.html import format_html
 from django.utils.translation import ugettext_lazy as _
 
@@ -30,7 +29,6 @@ class PromotionManager(CollectionBaseManager, StatusModelManagerMixin):
     pass
 
 
-@python_2_unicode_compatible
 class Promotion(CollectionBase, ValidateOnSaveMixin):
     name = models.CharField(
         verbose_name=_("Promotion's Name"), max_length=250,
@@ -65,7 +63,6 @@ class AuthorManager(CollectionBaseManager, StatusModelManagerMixin):
     pass
 
 
-@python_2_unicode_compatible
 class Author(CollectionBase, ValidateOnSaveMixin):
     name = models.CharField(
         verbose_name=_("Author's Name"), max_length=250,
@@ -100,7 +97,6 @@ class PublisherManager(CollectionBaseManager, StatusModelManagerMixin):
     pass
 
 
-@python_2_unicode_compatible
 class Publisher(CollectionBase, ValidateOnSaveMixin):
     name = models.CharField(
         verbose_name=_("Publisher's Name"), max_length=250,
@@ -135,7 +131,6 @@ class BookManager(CollectionBaseManager, StatusModelManagerMixin):
     pass
 
 
-@python_2_unicode_compatible
 class Book(CollectionBase, ValidateOnSaveMixin):
     title = models.CharField(
         verbose_name=_("Title"), max_length=250,

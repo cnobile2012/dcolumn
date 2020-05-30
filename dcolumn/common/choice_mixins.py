@@ -10,10 +10,8 @@ __docformat__ = "restructuredtext en"
 
 import logging
 
-
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.utils.translation import ugettext, ugettext_lazy as _
-from django.utils import six
 
 from . import ChoiceManagerImplementation
 from .decorators import InspectChoice
@@ -111,8 +109,8 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
             found = all([
                 getattr(obj, field) == (
                     int(value)
-                    if isinstance(value, six.string_types) and value.isdigit()
-                    else value)
+                    if isinstance(value, str) and value.isdigit() else value
+                    )
                 for field, value in kwargs.items()])
             if found: result.append(obj)
 

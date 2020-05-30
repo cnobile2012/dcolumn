@@ -9,7 +9,6 @@
 import types
 
 from django.test import TestCase
-from django.utils import six
 
 from dcolumn.common.decorators import dcolumn_login_required, InspectChoice
 from django.conf import settings
