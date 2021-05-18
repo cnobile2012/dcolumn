@@ -31,10 +31,6 @@ The MIT License (MIT)
 Overview
 --------
 
-At the time of this writing **DColumn** supports Django 2.x and probably
-back to 1.8.0. The biggest issue with supporting older versions of Django
-is with the new way *urlpatterns* is used. Python 3.5 and 3.6 are supported.
-
 DColumn is a Django plugin that lets the developer add columns to a model
 dynamically. It does this in the same way that the admin uses an inline model.
 Matter-of-fact that is exactly how the additional columns are displayed in
@@ -44,6 +40,9 @@ converts the column type to the type you have previously set it to.
 This can be done, because any type of field can be represented as a string.
 There are two methods on any model you define as a **Dcolumn** model that
 does conversion in and out of the type you have set.
+
+DColumn now will only work with Django 3.2 and above and therefore only
+Python 3.6 and above.
 
 .. warning::
    Version 2.0 is a partial rewrite of **Django DColumns** and is NOT
