@@ -15,6 +15,9 @@ from dcolumn.dcolumns.manager import dcolumn_manager
 # Where is the 'website' directory with settings dir, apps, urls.py, etc. are.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Set the type of auto PK that is generated.
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 SITE_ID = 1
 
 # Quick-start development settings - unsuitable for production
