@@ -11,7 +11,7 @@ __docformat__ = "restructuredtext en"
 import logging
 
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 
 from . import ChoiceManagerImplementation
 from .decorators import InspectChoice
@@ -148,14 +148,14 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
                 obj = self.container_map[pk]
             except KeyError as e:
                 msg = _("Access to PK %s failed, %s")
-                log.error(ugettext(msg), pk, e)
+                log.error(gettext(msg), pk, e)
                 raise e
             else:
                 try:
                     value = getattr(obj, field)
                 except AttributeError as e:
                     msg = _("The field value '%s' is not on object '%s'")
-                    log.error(ugettext(msg), field, obj)
+                    log.error(gettext(msg), field, obj)
                     raise e
 
         return value
@@ -177,7 +177,7 @@ class BaseChoiceManager(InspectChoice, ChoiceManagerImplementation):
         :rtype: A list of tuples suitable for use in HTML select option
                 tags.
         """
-        choices = [(obj.pk, ugettext(getattr(obj, field)))
+        choices = [(obj.pk, gettext(getattr(obj, field)))
                    for obj in self.model_objects()]
 
         if sort:

@@ -17,7 +17,7 @@ from dateutil import parser
 
 from django import template
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 
 from dcolumn.dcolumns.models import DynamicColumn, KeyValue
 from dcolumn.dcolumns.manager import dcolumn_manager
@@ -165,7 +165,7 @@ class AutoDisplayNode(template.Node):
         except template.VariableDoesNotExist:
             relation = None
 
-        log.debug(ugettext("relation: %s, display: %s"),
+        log.debug(gettext("relation: %s, display: %s"),
                   relation, self.display)
 
         if relation:
@@ -241,10 +241,10 @@ class AutoDisplayNode(template.Node):
 
             if not slug or not options:
                 msg = _('Invalid key for relation, {}').format(relation)
-                log.error(ugettext(msg))
+                log.error(gettext(msg))
                 raise template.TemplateSyntaxError(msg)
 
-        log.debug(ugettext("relation: %s, fk_options: %s, options: %s"),
+        log.debug(gettext("relation: %s, fk_options: %s, options: %s"),
                   relation, fk_options, options)
         return options
 
@@ -291,7 +291,7 @@ class AutoDisplayNode(template.Node):
         buff.write('</select>\n')
         elem = buff.getvalue()
         buff.close()
-        log.debug(ugettext("elem: %s, attr: %s, options: %s, relation: %s, "
+        log.debug(gettext("elem: %s, attr: %s, options: %s, relation: %s, "
                            "value: %s"), elem, attr, options, relation, value)
         return elem
 
@@ -311,7 +311,7 @@ class AutoDisplayNode(template.Node):
         :type relation: dict
         :rtype: The populated HTML element.
         """
-        log.debug(ugettext("elem: %s, attr: %s, options: %s, relation: %s"),
+        log.debug(gettext("elem: %s, attr: %s, options: %s, relation: %s"),
                   elem, attr, options, relation)
         value_type = relation.get('value_type')
         value = relation.get('value', '')
@@ -409,7 +409,7 @@ class SingleDisplayNode(template.Node):
         except template.VariableDoesNotExist:
             msg = _("The model object does not exist in the context, "
                     "found '{}'").format(self.obj)
-            log.warning(ugettext(msg))
+            log.warning(gettext(msg))
             raise template.VariableDoesNotExist(msg)
 
         context[self.name] = obj.get_key_value(self.slug)

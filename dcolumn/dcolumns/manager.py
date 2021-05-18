@@ -12,7 +12,7 @@ import logging
 import warnings
 
 from django.conf import settings
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 from django.db.models.query import QuerySet
 
 log = logging.getLogger('dcolumns.dcolumns.manager')
@@ -249,7 +249,7 @@ class DynamicColumnManager(object):
         else:
             msg = _("The model '{}' must be in this list '{}' to be a valid "
                     "collection name.").format(name, relation_names)
-            log.error(ugettext(msg))
+            log.error(gettext(msg))
             raise ValueError(msg)
 
         return result
