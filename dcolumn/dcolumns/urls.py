@@ -10,11 +10,7 @@ re_path(r'api/collections/(?P<class_name>\w+)/$', collection_ajax_view,
 """
 __docformat__ = "restructuredtext en"
 
-try:
-    from django.urls import include, re_path
-except:
-    from django.conf.urls import include, url as re_path
-
+from django.urls import include, re_path, path
 from .views import collection_ajax_view
 
 app_name = 'dcolumns'

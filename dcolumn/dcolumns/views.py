@@ -11,8 +11,6 @@ import logging
 
 from django.db.transaction import atomic
 from django.forms import formset_factory
-from django.shortcuts import render
-from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 
@@ -67,8 +65,8 @@ class ContextDataMixin(object):
         if not name:
             name = dcolumn_manager.get_collection_name(self.model.__name__)
 
-        for model_name in ColumnCollection.objects.get_active_relation_items(
-            name):
+        for model_name in (ColumnCollection.objects.
+                           get_active_relation_items(name)):
             model, field = dcolumn_manager.choice_map.get(model_name)
             objects = context.setdefault('dynamicColumns', {})
             values = [(r.pk, getattr(r, field))

@@ -1,8 +1,4 @@
-try:
-    from django.urls import include, re_path
-except:
-    from django.conf.urls import include, url as re_path
-
+from django.urls import include, re_path
 from django.contrib import admin
 from django.views.generic.base import TemplateView
 from django.views.static import serve
