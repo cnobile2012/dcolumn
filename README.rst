@@ -26,6 +26,10 @@ Django Tool to Create Dynamic Fields
    :target: https://coveralls.io/r/cnobile2012/dcolumn
    :alt: Test Coverage
 
+.. image:: https://readthedocs.org/projects/django-dcolumns/badge/?version=latest
+    :target: https://django-dcolumns.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 The MIT License (MIT)
 
 Overview
