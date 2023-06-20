@@ -1,4 +1,4 @@
-from django.urls import include, re_path
+from django.urls import include, re_path, path
 from django.contrib import admin
 from django.views.generic.base import TemplateView
 from django.views.static import serve
@@ -10,7 +10,7 @@ admin.site.site_header = "Books Admin"
 
 urlpatterns = [
     re_path(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    re_path(r'^admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
     re_path(r'^book/', include('example_site.books.urls')),
     re_path(r'^dcolumns/', include('dcolumn.dcolumns.urls')),
     re_path(r'^$', TemplateView.as_view(template_name='home.html'),
