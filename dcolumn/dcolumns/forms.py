@@ -75,7 +75,6 @@ class CollectionBaseFormMixin(forms.ModelForm):
         :rtype: The Django ``cleaned_data`` dict.
         """
         cleaned_data = super(CollectionBaseFormMixin, self).clean()
-        request = self.initial.get('request')
 
         try:
             self.relations = ColumnCollection.objects.serialize_columns(
@@ -83,7 +82,8 @@ class CollectionBaseFormMixin(forms.ModelForm):
         except Exception as e: # pragma: no cover
             self.add_error(None, str(e))
 
-        log.debug("cleaned_data: %s", cleaned_data)
+        log.debug("cleaned_data: %s, relations: %s",
+                  cleaned_data, self.relations)
         return cleaned_data
 
     def save(self, commit=True):
@@ -105,22 +105,29 @@ class CollectionBaseFormMixin(forms.ModelForm):
                 inst.creator = request.user
                 inst.active = True
 
+        error_map = {}
+
         for slug, value in data.items():
-            relation = self.relations.get(slug)
             if value is None: continue
+            relation = self.relations.get(slug)
             force = False if value != '' else True
 
             if relation:
+                required = relation.get('required')
+
                 try:
                     inst.set_key_value(slug, value, force=force, defer=True)
                 except ValueError as e:
                     error = True
+                    error_map[slug] = [value, force, required, str(e)]
 
-                    if (relation.get('required')
-                        or (not relation.get('required') and value)):
+                    if required or (not required and value):
                         self.add_error(slug, e)
 
-        log.debug("Validations errors: %s", error)
+        if error_map or error:
+            log.error("Has Validations errors: %s, "
+                      "error_map--(slug: [value, force, required, "
+                      "exception): %s, data: %s", error, error_map, data)
 
         if commit and not error:
             inst.save()

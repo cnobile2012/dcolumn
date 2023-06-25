@@ -1,5 +1,5 @@
 #
-# dcolumn/dcolumns/tests/forms.py
+# dcolumn/test_app/forms.py
 #
 
 import logging
@@ -49,7 +49,7 @@ class TestBookForm(CollectionBaseFormMixin):
 
     def __init__(self, *args, **kwargs):
         super(TestBookForm, self).__init__(*args, **kwargs)
-        log.debug("BookForm args: %s, kwargs: %s", args, kwargs)
+        log.debug("TestBookForm args: %s, kwargs: %s", args, kwargs)
         self.fields['test_choice'].choices = (
             Author.objects.get_choices('name'))
         self.fields['test_pseudo_choice'].choices = (
@@ -58,6 +58,11 @@ class TestBookForm(CollectionBaseFormMixin):
             Promotion.objects.get_choices('name'))
         # Get rid of the annoying colon after every label.
         self.label_suffix = ''
+        log.debug("TestBookForm test_choice: %s, test_pseudo_choice: %s, "
+                  "test_store_relation: %s",
+                  self.fields['test_choice'].choices,
+                  self.fields['test_pseudo_choice'].choices,
+                  self.fields['test_store_relation'].choices)
 
     def clean_test_choice(self):
         return self._get_object(Author, 'test_choice')

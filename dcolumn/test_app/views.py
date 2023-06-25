@@ -1,5 +1,5 @@
 #
-# dcolumn/dcolumns/tests/views.py
+# dcolumn/test_app/views.py
 #
 
 from django.conf import settings

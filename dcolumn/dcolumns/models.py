@@ -222,8 +222,8 @@ class ColumnCollectionManager(StatusModelManagerMixin):
 
         :param name: Name of the column collection.
         :type name: str
-        :param unassigned: Also get items that are not assigned to a column
-                           collection yet.
+        :param unassigned: Also get items that have not been assigned to
+                           a column collection yet.
         :type unassigned: bool
         :rtype: A queryset of objects that inherit ``CollectionBase``.
         :raises ColumnCollection.DoesNotExist: If the collection name is not
@@ -511,6 +511,7 @@ class CollectionBaseManager(models.Manager):
 
 
 class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
+    # Some of these values can be a language other than English.
     YES = _("yes")
     NO = _("no")
     YES_NO = (YES, NO, "yes", "no")
@@ -765,15 +766,13 @@ class CollectionBase(TimeModelMixin, UserModelMixin, StatusModelMixin):
                     try:
                         obj = self.keyvalues.get(collection=self,
                                                  dynamic_column=dc)
-                    except KeyValue.DoesNotExist:
+                    except (ValueError, KeyValue.DoesNotExist):
                         obj = KeyValue(collection=self, dynamic_column=dc)
-                        created = True
-
-                if not created:
-                    if 'increment' == value and obj.value.isdigit():
-                        value = str(int(obj.value) + 1)
-                    elif 'decrement' == value and obj.value.isdigit():
-                        value = str(int(obj.value) - 1)
+                    else:
+                        if 'increment' == value and obj.value.isdigit():
+                            value = str(int(obj.value) + 1)
+                        elif 'decrement' == value and obj.value.isdigit():
+                            value = str(int(obj.value) - 1)
 
                 obj.value = value
 
