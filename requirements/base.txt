@@ -3,8 +3,8 @@
 
 # All versions of Django from 4.0 and up now forbade using a relationship without a PK.
 # This means an object needs to be created without knowing if the related objects are correct.
-#django==3.2.19
-django
+django==3.2.19
+#django
 
 # Provides Django admin documentation support.
 docutils
