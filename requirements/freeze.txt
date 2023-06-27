@@ -11,7 +11,7 @@ coverage==7.2.7
 cryptography==41.0.1
 dateutils==0.6.12
 decorator==5.1.1
-Django==4.2.2
+Django==3.2.19
 django-debug-toolbar==4.1.0
 django-extensions==3.2.3
 docutils==0.18.1
