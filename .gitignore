@@ -4,6 +4,7 @@
 *#*#
 .DS_Store
 *.txt
+!requirements/*.txt
 !LICENSE.txt
 *.pdf
 .~lock.*
