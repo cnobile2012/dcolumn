@@ -45,8 +45,9 @@ This can be done, because any type of field can be represented as a string.
 There are two methods on any model you define as a **Dcolumn** model that
 does conversion in and out of the type you have set.
 
-DColumn now will only work with Django 3.2 and above and therefore only
-Python 3.6 and above.
+The highest version of Django that DColumn will work with Django 3.2.19 and 
+Python 3.6 and above. The current code was tested with Django 3.2.19 and
+Python 3.11.
 
 .. warning::
    Version 2.0 is a partial rewrite of **Django DColumns** and is NOT
